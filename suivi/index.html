@@ -3,122 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <title>Suivi Léman Courses</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#0B2A44;
-  margin:0;
-  padding:40px;
-}
-.card{
-  max-width:520px;
-  margin:auto;
-  background:#fff;
-  padding:30px;
-  border-radius:14px;
-  box-shadow:0 10px 30px rgba(0,0,0,.2);
-}
-h1{margin-top:0;color:#0B2A44}
-input,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-button{
-  background:#FDB913;
-  border:none;
-  font-weight:bold;
-  cursor:pointer;
-}
-.result{
-  margin-top:20px;
-  background:#f4f7fa;
-  padding:15px;
-  border-radius:10px;
-}
-.error{
-  color:red;
-  font-weight:bold;
-}
-.ok{color:green;font-weight:bold}
+body{font-family:Arial;background:#0B2A44;padding:30px}
+.card{max-width:600px;margin:auto;background:#fff;padding:25px;border-radius:14px}
+input,button{width:100%;padding:12px;margin-top:10px;border-radius:8px;border:1px solid #ccc}
+button{background:#FDB913;border:none;font-weight:bold}
+#map{height:300px;margin-top:20px;border-radius:10px}
 </style>
 </head>
 
 <body>
-
 <div class="card">
-<h1>📦 Suivi Léman Courses</h1>
-
-<p>Entrez votre numéro de suivi :</p>
+<h2>📦 Suivi Léman Courses</h2>
 <input id="code" placeholder="LC-001">
-<button onclick="suivre()">Suivre mon colis</button>
-
-<div id="res" class="result"></div>
+<button onclick="go()">Suivre</button>
+<div id="res"></div>
+<div id="map"></div>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbz7HGYl6o3RxkTG7CLs2cCZu0McRlF8LeabNwdcH3LriRz6HPPKkchW9LcnOXwA2_U9/exec";
+const API = "COLLE_ICI_TON_URL_EXEC";
 
-async function suivre(){
-  const code = document.getElementById("code").value.trim();
+async function go(){
+  const code = document.getElementById("code").value;
   const res = document.getElementById("res");
 
-  if(!code){
-    res.innerHTML = "<div class='error'>Veuillez entrer un code.</div>";
-    return;
-  }
+  const r = await fetch(API+"?code="+encodeURIComponent(code));
+  const d = await r.json();
 
-  res.innerHTML = "Recherche…";
+  if(d.error){res.innerHTML=d.error;return;}
 
-  try{
-    const r = await fetch(API + "?code=" + encodeURIComponent(code));
-    const d = await r.json();
+  res.innerHTML = `
+  <b>${d.statut}</b><br>
+  ${d.prise.ville} → ${d.livraison.ville}<br>
+  ${d.client.nom}
+  `;
 
-    if(d.error){
-      res.innerHTML = "<div class='error'>"+d.error+"</div>";
-      return;
-    }
+  const a=[d.prise.lat,d.prise.lng];
+  const b=[d.livraison.lat,d.livraison.lng];
 
-    res.innerHTML = `
-      <div class="ok">✔ Colis trouvé</div>
-      <p><b>Statut :</b> ${d.statut}</p>
-      <p><b>Étape :</b> ${d.etape}</p>
-      <p><b>Dernière mise à jour :</b> ${d.date}</p>
-
-      <hr>
-
-      <b>Client</b><br>
-      ${d.client.nom || ""}<br>
-      📞 ${d.client.tel || ""}<br>
-      ✉️ ${d.client.email || ""}
-
-      <hr>
-
-      <b>📍 Prise en charge</b><br>
-      ${d.prise.adresse || ""}<br>
-      ${d.prise.npa || ""} ${d.prise.ville || ""}<br>
-      ⏰ ${d.prise.heure || ""}
-
-      <hr>
-
-      <b>🏁 Livraison</b><br>
-      ${d.livraison.adresse || ""}<br>
-      ${d.livraison.npa || ""} ${d.livraison.ville || ""}<br>
-      ⏰ ${d.livraison.heure || ""}
-
-      <hr>
-      ${d.commentaire || ""}
-    `;
-
-  }catch(e){
-    res.innerHTML = "<div class='error'>Erreur de connexion au service.</div>";
-  }
+  const map=L.map("map").setView(a,10);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+  L.marker(a).addTo(map).bindPopup("Prise");
+  L.marker(b).addTo(map).bindPopup("Livraison");
+  L.polyline([a,b],{color:"red"}).addTo(map);
 }
 </script>
-
 </body>
 </html>
