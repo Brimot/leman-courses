@@ -9,124 +9,94 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-body{
-  font-family:Arial,sans-serif;
-  background:#0B2A44;
-  padding:30px;
-}
-.card{
-  max-width:600px;
-  margin:auto;
-  background:#fff;
-  padding:25px;
-  border-radius:14px;
-}
-input,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-button{
-  background:#FDB913;
-  border:none;
-  font-weight:bold;
-  cursor:pointer;
-}
-#map{
-  height:300px;
-  margin-top:15px;
-  border-radius:10px;
-}
-#error{
-  color:red;
-  font-weight:bold;
-  margin-top:10px;
-}
+body{font-family:Arial;background:#0B2A44;padding:30px}
+.card{max-width:650px;margin:auto;background:#fff;padding:25px;border-radius:14px}
+input,button{width:100%;padding:12px;margin-top:10px;border-radius:8px;border:1px solid #ccc}
+button{background:#FDB913;border:none;font-weight:bold;cursor:pointer}
+#map{height:320px;margin-top:15px;border-radius:10px}
+.status{font-size:20px;font-weight:bold;margin-top:10px}
+.error{color:red;font-weight:bold}
+hr{margin:15px 0}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h2>📦 Suivi Léman Courses</h2>
+<h2>📦 Suivi Léman Courses</h2>
 
-  <input id="code" placeholder="LC-001">
-  <button onclick="go()">Suivre mon colis</button>
+<input id="code" placeholder="LC-001">
+<button onclick="go()">Suivre mon colis</button>
 
-  <div id="error"></div>
-  <div id="result"></div>
-  <div id="map"></div>
+<div id="error" class="error"></div>
+
+<div id="result"></div>
+<div id="map"></div>
+
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbzbKAYbfHZTfu-Wwde8ruPw7y-9zpBg6zqUfXUlriIKDGVr_CTqKyborO2DLHUkRYE/exec";
+const API="https://script.google.com/macros/s/AKfycbzbKAYbfHZTfu-Wwde8ruPw7y-9zpBg6zqUfXUlriIKDGVr_CTqKyborO2DLHUkRYE/exec";
+let map, routeLayer;
 
-let map;
+function mapStatus(s){
+  s=s.toLowerCase();
+  if(s.includes("livré")) return "✅ Livré";
+  if(s.includes("livraison")) return "🚚 En livraison";
+  return "📦 En cours";
+}
 
 async function go(){
-  const code = document.getElementById("code").value.trim();
-  const result = document.getElementById("result");
-  const error = document.getElementById("error");
+  const code=document.getElementById("code").value.trim();
+  const result=document.getElementById("result");
+  const error=document.getElementById("error");
+  result.innerHTML=""; error.innerHTML="";
 
-  result.innerHTML = "";
-  error.innerHTML = "";
-
-  if(!code){
-    error.textContent = "Veuillez entrer un numéro de suivi.";
-    return;
-  }
+  if(!code){error.textContent="Entrez un numéro de suivi.";return;}
 
   try{
-    const r = await fetch(API + "?code=" + encodeURIComponent(code));
-    const d = await r.json();
+    const r=await fetch(API+"?code="+encodeURIComponent(code));
+    const d=await r.json();
+    if(d.error){error.textContent=d.error;return;}
 
-    if(d.error){
-      error.textContent = d.error;
-      return;
-    }
-
-    result.innerHTML = `
-      <p><b>Statut :</b> ${d.statut}</p>
-      <p><b>Étape :</b> ${d.etape}</p>
-      <p><b>Dernière mise à jour :</b> ${d.date}</p>
-
+    result.innerHTML=`
+      <div class="status">${mapStatus(d.statut)}</div>
+      <b>${code}</b> — ${d.etape}
       <hr>
-      <p><b>Client</b><br>
-      ${d.client.nom}<br>
-      📞 ${d.client.tel}<br>
-      ✉️ ${d.client.email}</p>
-
+      <b>Client</b><br>${d.client.nom}<br>${d.client.tel}<br>${d.client.email}
       <hr>
-      <p><b>Prise en charge</b><br>
-      ${d.prise.adresse}<br>
-      ${d.prise.npa} ${d.prise.ville}<br>
-      ⏰ ${d.prise.heure}</p>
-
-      <p><b>Livraison</b><br>
-      ${d.livraison.adresse}<br>
-      ${d.livraison.npa} ${d.livraison.ville}<br>
-      ⏰ ${d.livraison.heure}</p>
+      <b>Prise en charge</b><br>
+      ${d.prise.adresse}<br>${d.prise.npa} ${d.prise.ville}<br>${d.prise.heure}
+      <hr>
+      <b>Livraison</b><br>
+      ${d.livraison.adresse}<br>${d.livraison.npa} ${d.livraison.ville}<br>${d.livraison.heure}
     `;
 
-    if(d.prise.lat && d.livraison.lat){
-      if(!map){
-        map = L.map("map");
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-      }
+    if(!d.prise.lat||!d.livraison.lat) return;
 
-      const A = [d.prise.lat, d.prise.lng];
-      const B = [d.livraison.lat, d.livraison.lng];
+    const A=[d.prise.lat,d.prise.lng];
+    const B=[d.livraison.lat,d.livraison.lng];
 
-      map.setView(A, 10);
-      L.marker(A).addTo(map).bindPopup("Prise en charge");
-      L.marker(B).addTo(map).bindPopup("Livraison");
-      L.polyline([A,B], {color:"red"}).addTo(map);
+    if(!map){
+      map=L.map("map");
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
     }
 
+    if(routeLayer) map.removeLayer(routeLayer);
+    map.eachLayer(l=>{ if(l instanceof L.Marker) map.removeLayer(l); });
+
+    // Route OSRM
+    const r2=await fetch(`https://router.project-osrm.org/route/v1/driving/${A[1]},${A[0]};${B[1]},${B[0]}?overview=full&geometries=geojson`);
+    const d2=await r2.json();
+    routeLayer=L.geoJSON(d2.routes[0].geometry,{style:{color:"red",weight:4}}).addTo(map);
+
+    L.marker(A).addTo(map).bindPopup("Prise en charge");
+    L.marker(B).addTo(map).bindPopup("Livraison");
+
+    map.fitBounds(routeLayer.getBounds(),{padding:[30,30]});
+
   }catch(e){
-    error.textContent = "Erreur de connexion au service.";
+    error.textContent="Erreur de connexion au service.";
   }
 }
 </script>
