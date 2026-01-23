@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Suivi – Léman Courses</title>
+<title>Suivi Léman Courses</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -10,26 +10,23 @@ body{
   font-family: Arial, sans-serif;
   background:#0B2A44;
   margin:0;
-  padding:30px;
-  color:#fff;
+  padding:40px;
 }
 .card{
-  max-width:600px;
+  max-width:520px;
   margin:auto;
   background:#fff;
-  color:#0B2A44;
-  padding:25px;
+  padding:30px;
   border-radius:14px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
 }
-h1{text-align:center;margin-top:0}
+h1{margin-top:0;color:#0B2A44}
 input,button{
   width:100%;
-  padding:14px;
+  padding:12px;
   margin-top:10px;
   border-radius:8px;
   border:1px solid #ccc;
-  font-size:16px;
 }
 button{
   background:#FDB913;
@@ -37,89 +34,88 @@ button{
   font-weight:bold;
   cursor:pointer;
 }
-#result{
+.result{
   margin-top:20px;
+  background:#f4f7fa;
   padding:15px;
   border-radius:10px;
-  background:#f5f5f5;
-  display:none;
 }
-.err{
+.error{
   color:red;
   font-weight:bold;
-  text-align:center;
 }
-.ok{
-  color:green;
-  font-weight:bold;
-}
+.ok{color:green;font-weight:bold}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h1>📦 Suivi Léman Courses</h1>
+<h1>📦 Suivi Léman Courses</h1>
 
-  <p>Entrez votre numéro de suivi :</p>
-  <input id="code" placeholder="Ex : LC-001">
-  <button onclick="rechercher()">Suivre mon colis</button>
+<p>Entrez votre numéro de suivi :</p>
+<input id="code" placeholder="LC-001">
+<button onclick="suivre()">Suivre mon colis</button>
 
-  <div id="result"></div>
+<div id="res" class="result"></div>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbwlaIlLhCq0Xdoa93DCDUg8XVOK35rdkuzvMD2P87p9c096EcVno0eRCht6-M4o0reV/exec";
+const API = "https://script.google.com/macros/s/AKfycbzbKAYbfHZTfu-Wwde8ruPw7y-9zpBg6zqUfXUlriIKDGVr_CTqKyborO2DLHUkRYE/exec";
 
-async function rechercher(){
+async function suivre(){
   const code = document.getElementById("code").value.trim();
-  const res = document.getElementById("result");
+  const res = document.getElementById("res");
 
   if(!code){
-    res.style.display="block";
-    res.innerHTML="<p class='err'>Veuillez entrer un code.</p>";
+    res.innerHTML = "<div class='error'>Veuillez entrer un code.</div>";
     return;
   }
 
-  res.style.display="block";
-  res.innerHTML="⏳ Recherche en cours...";
+  res.innerHTML = "Recherche…";
 
   try{
     const r = await fetch(API + "?code=" + encodeURIComponent(code));
-    const data = await r.json();
+    const d = await r.json();
 
-    if(data.error){
-      res.innerHTML = "<p class='err'>❌ " + data.error + "</p>";
+    if(d.error){
+      res.innerHTML = "<div class='error'>"+d.error+"</div>";
       return;
     }
 
     res.innerHTML = `
-      <p class="ok">✅ Colis trouvé</p>
+      <div class="ok">✔ Colis trouvé</div>
+      <p><b>Statut :</b> ${d.statut}</p>
+      <p><b>Étape :</b> ${d.etape}</p>
+      <p><b>Dernière mise à jour :</b> ${d.date}</p>
 
-      <b>Statut :</b> ${data.statut}<br>
-      <b>Étape :</b> ${data.etape}<br>
-      <b>Dernière mise à jour :</b> ${data.date}<br><br>
+      <hr>
 
-      <b>Client :</b><br>
-      ${data.client.nom}<br>
-      📞 ${data.client.tel}<br>
-      ✉️ ${data.client.email}<br><br>
+      <b>Client</b><br>
+      ${d.client.nom || ""}<br>
+      📞 ${d.client.tel || ""}<br>
+      ✉️ ${d.client.email || ""}
 
-      <b>📍 Prise en charge :</b><br>
-      ${data.prise.adresse}<br>
-      ${data.prise.npa} ${data.prise.ville}<br>
-      🕒 ${data.prise.heure}<br><br>
+      <hr>
 
-      <b>🏁 Livraison :</b><br>
-      ${data.livraison.adresse}<br>
-      ${data.livraison.npa} ${data.livraison.ville}<br>
-      🕒 ${data.livraison.heure}<br><br>
+      <b>📍 Prise en charge</b><br>
+      ${d.prise.adresse || ""}<br>
+      ${d.prise.npa || ""} ${d.prise.ville || ""}<br>
+      ⏰ ${d.prise.heure || ""}
 
-      ${data.commentaire || ""}
+      <hr>
+
+      <b>🏁 Livraison</b><br>
+      ${d.livraison.adresse || ""}<br>
+      ${d.livraison.npa || ""} ${d.livraison.ville || ""}<br>
+      ⏰ ${d.livraison.heure || ""}
+
+      <hr>
+      ${d.commentaire || ""}
     `;
-  }
-  catch(e){
-    res.innerHTML = "<p class='err'>⚠️ Erreur de connexion au service.</p>";
+
+  }catch(e){
+    res.innerHTML = "<div class='error'>Erreur de connexion au service.</div>";
   }
 }
 </script>
