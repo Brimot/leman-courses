@@ -1,43 +1,116 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Suivi Léman Courses</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Suivi colis – Léman Courses</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0B2A44;
-      margin: 0;
-      padding: 40px;
-      text-align: center;
-    }
-
-    .card {
-      max-width: 520px;
-      margin: auto;
-      background: #ffffff;
-      color: #0B2A44;
-      padding: 30px;
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.2);
-    }
-
-    h1 {
-      margin-top: 0;
-    }
-  </style>
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#0B2A44;
+  margin:0;
+  padding:40px;
+  text-align:center;
+}
+.card{
+  max-width:520px;
+  margin:auto;
+  background:#ffffff;
+  color:#0B2A44;
+  padding:30px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+h1{margin-top:0}
+input{
+  width:100%;
+  padding:14px;
+  font-size:16px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  margin-top:10px;
+}
+button{
+  width:100%;
+  margin-top:15px;
+  padding:14px;
+  background:#FDB813;
+  color:#0B2A44;
+  font-weight:bold;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+button:hover{opacity:.9}
+#resultat{
+  margin-top:20px;
+  text-align:left;
+  font-size:15px;
+}
+.ok{color:green;font-weight:bold}
+.err{color:red;font-weight:bold}
+.small{font-size:12px;color:#666;margin-top:20px;text-align:center}
+</style>
 </head>
 
 <body>
 
-  <div class="card">
-    <h1>Suivi Léman Courses</h1>
-    <p>✅ La page fonctionne.</p>
-    <p>Le système de suivi sera disponible prochainement.</p>
+<div class="card">
+  <h1>📦 Suivi Léman Courses</h1>
+
+  <p>Entrez votre code de suivi :</p>
+
+  <input id="codeSuivi" placeholder="Ex : LC-001">
+
+  <button onclick="verifierSuivi()">🔍 Suivre mon colis</button>
+
+  <div id="resultat"></div>
+
+  <div class="small">
+    Informations données à titre indicatif selon l’avancement réel.
   </div>
+</div>
+
+<script>
+async function verifierSuivi(){
+  const code = document.getElementById("codeSuivi").value.trim();
+  const res = document.getElementById("resultat");
+
+  if(!code){
+    res.innerHTML = "<p class='err'>❌ Veuillez entrer un code de suivi.</p>";
+    return;
+  }
+
+  res.innerHTML = "⏳ Recherche en cours...";
+
+  try{
+    const url =
+      "https://script.google.com/macros/s/AKfycbzDdqVKZhzfHIW2V3IO7jbHwS_WoLcshwR_4Dhdzz1-qX0vBhzHhYljX5D5dFwwC6Id/exec"
+      + "?code=" + encodeURIComponent(code);
+
+    const r = await fetch(url);
+    const d = await r.json();
+
+    if(d.error){
+      res.innerHTML = "<p class='err'>❌ " + d.error + "</p>";
+      return;
+    }
+
+    res.innerHTML = `
+      <p class="ok">✅ Colis trouvé</p>
+      <p><strong>Code :</strong> ${d.code}</p>
+      <p><strong>Statut :</strong> ${d.statut}</p>
+      <p><strong>Étape :</strong> ${d.etape}</p>
+      <p><strong>Dernière mise à jour :</strong> ${d.date}</p>
+      <p><em>${d.commentaire || ""}</em></p>
+    `;
+  }
+  catch(e){
+    res.innerHTML = "<p class='err'>⚠️ Erreur de connexion au service.</p>";
+  }
+}
+</script>
 
 </body>
 </html>
-
