@@ -9,50 +9,127 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-body{font-family:Arial;background:#0B2A44;padding:30px}
-.card{max-width:600px;margin:auto;background:#fff;padding:25px;border-radius:14px}
-input,button{width:100%;padding:12px;margin-top:10px;border-radius:8px;border:1px solid #ccc}
-button{background:#FDB913;border:none;font-weight:bold}
-#map{height:300px;margin-top:20px;border-radius:10px}
+body{
+  font-family:Arial,sans-serif;
+  background:#0B2A44;
+  padding:30px;
+}
+.card{
+  max-width:600px;
+  margin:auto;
+  background:#fff;
+  padding:25px;
+  border-radius:14px;
+}
+input,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+button{
+  background:#FDB913;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+}
+#map{
+  height:300px;
+  margin-top:15px;
+  border-radius:10px;
+}
+#error{
+  color:red;
+  font-weight:bold;
+  margin-top:10px;
+}
 </style>
 </head>
 
 <body>
+
 <div class="card">
-<h2>📦 Suivi Léman Courses</h2>
-<input id="code" placeholder="LC-001">
-<button onclick="go()">Suivre</button>
-<div id="res"></div>
-<div id="map"></div>
+  <h2>📦 Suivi Léman Courses</h2>
+
+  <input id="code" placeholder="LC-001">
+  <button onclick="go()">Suivre mon colis</button>
+
+  <div id="error"></div>
+  <div id="result"></div>
+  <div id="map"></div>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbyj8dN3F_huMqbA2latlCcSnRDvt--6QLkcjg5IVFiaY19_A95oenPOUEeQhl-jqIWZ/exec";
+const API = "https://script.google.com/macros/s/AKfycbzbKAYbfHZTfu-Wwde8ruPw7y-9zpBg6zqUfXUlriIKDGVr_CTqKyborO2DLHUkRYE/exec";
+
+let map;
 
 async function go(){
-  const code = document.getElementById("code").value;
-  const res = document.getElementById("res");
+  const code = document.getElementById("code").value.trim();
+  const result = document.getElementById("result");
+  const error = document.getElementById("error");
 
-  const r = await fetch(API+"?code="+encodeURIComponent(code));
-  const d = await r.json();
+  result.innerHTML = "";
+  error.innerHTML = "";
 
-  if(d.error){res.innerHTML=d.error;return;}
+  if(!code){
+    error.textContent = "Veuillez entrer un numéro de suivi.";
+    return;
+  }
 
-  res.innerHTML = `
-  <b>${d.statut}</b><br>
-  ${d.prise.ville} → ${d.livraison.ville}<br>
-  ${d.client.nom}
-  `;
+  try{
+    const r = await fetch(API + "?code=" + encodeURIComponent(code));
+    const d = await r.json();
 
-  const a=[d.prise.lat,d.prise.lng];
-  const b=[d.livraison.lat,d.livraison.lng];
+    if(d.error){
+      error.textContent = d.error;
+      return;
+    }
 
-  const map=L.map("map").setView(a,10);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-  L.marker(a).addTo(map).bindPopup("Prise");
-  L.marker(b).addTo(map).bindPopup("Livraison");
-  L.polyline([a,b],{color:"red"}).addTo(map);
+    result.innerHTML = `
+      <p><b>Statut :</b> ${d.statut}</p>
+      <p><b>Étape :</b> ${d.etape}</p>
+      <p><b>Dernière mise à jour :</b> ${d.date}</p>
+
+      <hr>
+      <p><b>Client</b><br>
+      ${d.client.nom}<br>
+      📞 ${d.client.tel}<br>
+      ✉️ ${d.client.email}</p>
+
+      <hr>
+      <p><b>Prise en charge</b><br>
+      ${d.prise.adresse}<br>
+      ${d.prise.npa} ${d.prise.ville}<br>
+      ⏰ ${d.prise.heure}</p>
+
+      <p><b>Livraison</b><br>
+      ${d.livraison.adresse}<br>
+      ${d.livraison.npa} ${d.livraison.ville}<br>
+      ⏰ ${d.livraison.heure}</p>
+    `;
+
+    if(d.prise.lat && d.livraison.lat){
+      if(!map){
+        map = L.map("map");
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+      }
+
+      const A = [d.prise.lat, d.prise.lng];
+      const B = [d.livraison.lat, d.livraison.lng];
+
+      map.setView(A, 10);
+      L.marker(A).addTo(map).bindPopup("Prise en charge");
+      L.marker(B).addTo(map).bindPopup("Livraison");
+      L.polyline([A,B], {color:"red"}).addTo(map);
+    }
+
+  }catch(e){
+    error.textContent = "Erreur de connexion au service.";
+  }
 }
 </script>
+
 </body>
 </html>
