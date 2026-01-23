@@ -3,138 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <title>Suivi Léman Courses</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
-  font-family: Arial, sans-serif;
+  font-family:Arial;
   background:#0B2A44;
-  margin:0;
-  padding:30px;
-  color:#0B2A44;
+  padding:40px;
+  color:#fff;
 }
-.card{
-  max-width:600px;
+.box{
+  max-width:520px;
   margin:auto;
   background:#fff;
+  color:#0B2A44;
   padding:30px;
   border-radius:14px;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
 }
-h1{
-  margin-top:0;
-  text-align:center;
-}
-input,button{
+input{
   width:100%;
-  padding:14px;
-  margin-top:10px;
-  border-radius:10px;
+  padding:12px;
+  margin:10px 0;
+  border-radius:8px;
   border:1px solid #ccc;
-  font-size:16px;
 }
 button{
-  background:#F6B000;
+  width:100%;
+  padding:14px;
+  background:#F6B400;
+  color:#0B2A44;
   border:none;
+  border-radius:8px;
   font-weight:bold;
   cursor:pointer;
 }
-button:hover{
-  background:#e0a200;
-}
-hr{
-  margin:20px 0;
-}
-.ok{
-  color:green;
-  font-weight:bold;
-}
-.error{
-  color:red;
-  font-weight:bold;
-}
-.small{
-  font-size:13px;
-  color:#666;
-  text-align:center;
+.result{
+  margin-top:20px;
+  padding-top:20px;
+  border-top:1px solid #ddd;
 }
 </style>
 </head>
 
 <body>
+<div class="box">
+<h2>📦 Suivi Léman Courses</h2>
 
-<div class="card">
-  <h1>📦 Suivi Léman Courses</h1>
+<input id="code" placeholder="Ex: LC-001">
+<button onclick="search()">🔍 Suivre mon colis</button>
 
-  <p class="small">
-    Entrez votre code de suivi pour connaître l’état de votre colis.
-  </p>
-
-  <input id="code" placeholder="Ex : LC-001">
-  <button onclick="rechercher()">🔍 Suivre mon colis</button>
-
-  <div id="res" style="margin-top:20px"></div>
+<div id="res" class="result"></div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzDdqVKZhzfHIW2V3IO7jbHwS_WoLcshwR_4Dhdzz1-qX0vBhzHhYljX5D5dFwwC6Id/exec";
+const API = "https://script.google.com/macros/s/AKfycbzbKAYbfHZTfu-Wwde8ruPw7y-9zpBg6zqUfXUlriIKDGVr_CTqKyborO2DLHUkRYE/exec";
 
-async function rechercher(){
-  const code = document.getElementById("code").value.trim();
-  const res = document.getElementById("res");
+function search(){
+  const c = document.getElementById("code").value.trim();
+  if(!c) return alert("Entrez un code");
 
-  if(!code){
-    res.innerHTML = "<p class='error'>❌ Veuillez entrer un code de suivi.</p>";
-    return;
-  }
+  fetch(API + "?code=" + encodeURIComponent(c))
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.error){
+        res.innerHTML = "❌ " + d.error;
+        return;
+      }
 
-  res.innerHTML = "<p>⏳ Recherche en cours…</p>";
+      res.innerHTML = `
+      <b>Statut :</b> ${d.statut}<br>
+      <b>Étape :</b> ${d.etape}<br>
+      <b>Dernière mise à jour :</b> ${d.maj}<br><br>
 
-  try{
-    const response = await fetch(API_URL + "?code=" + encodeURIComponent(code));
-    const d = await response.json();
-
-    if(d.error){
-      res.innerHTML = "<p class='error'>❌ Code inconnu</p>";
-      return;
-    }
-
-    res.innerHTML = `
-      <p class="ok">✅ <strong>Colis trouvé</strong></p>
-
-      <p><strong>Statut :</strong> ${d.statut}</p>
-      <p><strong>Étape :</strong> ${d.etape}</p>
-      <p><strong>Dernière mise à jour :</strong> ${d.date}</p>
-
-      <hr>
-
-      <p><strong>👤 Client :</strong><br>
+      <b>Client :</b><br>
       ${d.client.nom}<br>
       📞 ${d.client.tel}<br>
-      ✉️ ${d.client.email}</p>
+      ✉️ ${d.client.email}<br><br>
 
-      <hr>
-
-      <p><strong>📍 Prise en charge :</strong><br>
+      <b>📍 Prise en charge :</b><br>
       ${d.prise.adresse}<br>
       ${d.prise.npa} ${d.prise.ville}<br>
-      ⏰ ${d.prise.heure}</p>
+      ⏰ ${d.prise.heure}<br><br>
 
-      <hr>
-
-      <p><strong>🏁 Livraison :</strong><br>
+      <b>🏁 Livraison :</b><br>
       ${d.livraison.adresse}<br>
       ${d.livraison.npa} ${d.livraison.ville}<br>
-      ⏰ ${d.livraison.heure}</p>
+      ⏰ ${d.livraison.heure}<br><br>
 
-      ${d.commentaire ? `<hr><p><em>${d.commentaire}</em></p>` : ""}
-    `;
-  }
-  catch(e){
-    res.innerHTML = "<p class='error'>⚠️ Erreur de connexion au service.</p>";
-  }
+      ${d.commentaire ? "<i>"+d.commentaire+"</i>" : ""}
+      `;
+    })
+    .catch(()=>{
+      res.innerHTML = "⚠️ Erreur de connexion au service.";
+    });
 }
 </script>
-
 </body>
 </html>
