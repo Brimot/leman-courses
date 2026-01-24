@@ -10,135 +10,163 @@
 
 <style>
 body{
-  font-family:Arial;
-  background:#0B2A44;
-  padding:40px;
+    font-family:Arial;
+    background:#0B2A44;
+    padding:40px;
 }
 .card{
-  max-width:520px;
-  margin:auto;
-  background:#fff;
-  padding:30px;
-  border-radius:14px;
+    max-width:600px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
 }
+h2{text-align:center;color:#0B2A44;}
 input{
-  width:100%;
-  padding:12px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  margin-bottom:10px;
+    width:100%;
+    padding:14px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    margin-top:10px;
 }
 button{
-  width:100%;
-  background:#FDB913;
-  border:none;
-  padding:14px;
-  font-weight:bold;
-  border-radius:10px;
-  cursor:pointer;
+    width:100%;
+    margin-top:15px;
+    padding:14px;
+    background:#FFB913;
+    border:none;
+    font-weight:bold;
+    border-radius:10px;
+    cursor:pointer;
 }
-#result{
-  margin-top:20px;
+#res{
+    margin-top:20px;
+    line-height:1.6;
 }
-#mapModal{
-  position:fixed;
-  top:0;left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.6);
-  display:none;
+.badge{
+    background:#0B2A44;
+    color:white;
+    padding:6px 10px;
+    border-radius:8px;
+    display:inline-block;
 }
-#mapBox{
-  background:#fff;
-  width:90%;
-  max-width:600px;
-  height:80%;
-  margin:5% auto;
-  padding:10px;
-  border-radius:10px;
+#mapBtn{
+    display:none;
+    margin-top:15px;
 }
-#map{width:100%;height:100%;}
+#mapPopup{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#000000cc;
+    z-index:9999;
+}
+#mapHeader{
+    background:white;
+    padding:14px;
+    font-weight:bold;
+    cursor:pointer;
+}
+#map{
+    width:100%;
+    height:calc(100% - 50px);
+}
 </style>
 </head>
 
 <body>
-
 <div class="card">
-  <h2>📦 Suivi Léman Courses</h2>
-  <input id="code" placeholder="LC-001">
-  <button onclick="track()">Suivre mon colis</button>
+    <h2>📦 Suivi Léman Courses</h2>
+    <input id="code" placeholder="Ex : LC-001">
+    <button onclick="suivre()">Suivre mon colis</button>
 
-  <div id="result"></div>
-  <button id="mapBtn" style="display:none" onclick="openMap()">Voir la carte</button>
+    <div id="res"></div>
+
+    <button id="mapBtn" onclick="openMap()">🗺️ Voir le trajet</button>
 </div>
 
-<div id="mapModal" onclick="closeMap()">
-  <div id="mapBox" onclick="event.stopPropagation()">
+<div id="mapPopup">
+    <div id="mapHeader" onclick="closeMap()">← Retour</div>
     <div id="map"></div>
-  </div>
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbxufFMX9YLpkHOC1OkcfrkIZHSp97lj3iVsOXYCkwbsUEB7Av-9LxTrXaqnFNvg8eUc/exec";
+const API = "https://script.google.com/macros/s/AKfycbw8327wSkRWjKLy6D-UcI2qHq4GIPoDEaH6BCXuaMFVTa7A8daVCGTnTCIXcgxI2GZR/exec";
+let dataGlobal, map, route;
 
-let dataGlobal,map;
+async function suivre(){
+    const code = document.getElementById("code").value.trim();
+    const res = document.getElementById("res");
+    res.innerHTML="⏳ Recherche...";
+    document.getElementById("mapBtn").style.display="none";
 
-function track(){
-  const code=document.getElementById("code").value;
-  const cb="cb"+Math.random().toString().replace(".","");
-  window[cb]=function(d){
-    delete window[cb];
-    document.body.removeChild(s);
+    try{
+        const r = await fetch(API+"?code="+encodeURIComponent(code));
+        const d = await r.json();
 
-    if(d.error){
-      result.innerHTML="❌ "+d.error;
-      return;
+        if(d.error){
+            res.innerHTML="❌ "+d.error;
+            return;
+        }
+
+        dataGlobal = d;
+
+        res.innerHTML = `
+        <span class="badge">${d.statut}</span><br><br>
+
+        <b>Étape :</b> ${d.etape}<br>
+        <b>Dernière mise à jour :</b> ${new Date(d.date).toLocaleString()}<br>
+        <b>Commentaire :</b> ${d.commentaire || "-"}<br><br>
+
+        <b>Client</b><br>
+        ${d.client.nom}<br>
+        📞 ${d.client.tel}<br>
+        ✉️ ${d.client.email}<br><br>
+
+        <b>Prise en charge</b><br>
+        ${d.prise.adresse}<br>
+        ${d.prise.npa} ${d.prise.ville}<br>
+        🕒 ${new Date(d.prise.heure).toLocaleString()}<br><br>
+
+        <b>Livraison</b><br>
+        ${d.livraison.adresse}<br>
+        ${d.livraison.npa} ${d.livraison.ville}<br>
+        🕒 ${new Date(d.livraison.heure).toLocaleString()}
+        `;
+
+        if(d.prise.lat && d.livraison.lat){
+            document.getElementById("mapBtn").style.display="block";
+        }
+
+    }catch(e){
+        res.innerHTML="⚠️ Erreur de connexion au service";
     }
-
-    result.innerHTML=`
-    <b>Statut:</b> ${d.statut}<br>
-    <b>Étape:</b> ${d.etape}<br>
-    <b>Client:</b> ${d.client.nom}<br><br>
-    📍 ${d.prise.adresse}, ${d.prise.ville}<br>
-    📦 ${d.livraison.adresse}, ${d.livraison.ville}
-    `;
-  };
-
-  const s=document.createElement("script");
-  s.src=API+"?code="+encodeURIComponent(code)+"&callback="+cb;
-  document.body.appendChild(s);
-
-  result.innerHTML="⏳ Recherche...";
-}
-
 }
 
 function openMap(){
-  document.getElementById("mapModal").style.display="block";
+    document.getElementById("mapPopup").style.display="block";
 
-  if(!map){
-    map=L.map("map");
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    setTimeout(()=>{
+        if(!map){
+            map = L.map("map");
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+        }
+        if(route) map.removeLayer(route);
 
-    fetch("https://nominatim.openstreetmap.org/search?format=json&q="+
-      dataGlobal.prise.adresse+" "+dataGlobal.prise.ville)
-    .then(r=>r.json()).then(p=>{
-      fetch("https://nominatim.openstreetmap.org/search?format=json&q="+
-        dataGlobal.livraison.adresse+" "+dataGlobal.livraison.ville)
-      .then(r=>r.json()).then(l=>{
-        const A=[p[0].lat,p[0].lon];
-        const B=[l[0].lat,l[0].lon];
-        map.setView(A,9);
-        L.marker(A).addTo(map).bindPopup("Prise en charge");
-        L.marker(B).addTo(map).bindPopup("Livraison");
-        L.polyline([A,B],{color:"blue"}).addTo(map);
-      });
-    });
-  }
+        const a=[dataGlobal.prise.lat,dataGlobal.prise.lng];
+        const b=[dataGlobal.livraison.lat,dataGlobal.livraison.lng];
+
+        L.marker(a).addTo(map).bindPopup("Prise en charge");
+        L.marker(b).addTo(map).bindPopup("Livraison");
+
+        route = L.polyline([a,b],{color:"red"}).addTo(map);
+        map.fitBounds(route.getBounds(),{padding:[40,40]});
+    },200);
 }
 
 function closeMap(){
-  document.getElementById("mapModal").style.display="none";
+    document.getElementById("mapPopup").style.display="none";
 }
 </script>
 
