@@ -129,23 +129,32 @@ async function openMap(){
     const A = [prisePos[0], prisePos[1]];
     const B = [livPos[0], livPos[1]];
 
-    // 🔥 Appel OSRM pour obtenir le vrai trajet routier
-    const r = await fetch(
-      `https://router.project-osrm.org/route/v1/driving/${A[1]},${A[0]};${B[1]},${B[0]}?overview=full&geometries=geojson`
-    );
-    const d = await r.json();
+    try{
+      const r = await fetch(
+        "https://api.allorigins.win/raw?url=" +
+        encodeURIComponent(
+          `https://router.project-osrm.org/route/v1/driving/${A[1]},${A[0]};${B[1]},${B[0]}?overview=full&geometries=geojson`
+        )
+      );
 
-    route = L.geoJSON(d.routes[0].geometry, {
-      style: { color: "red", weight: 4 }
-    }).addTo(map);
+      const d = await r.json();
 
-    L.marker(A).addTo(map).bindPopup("Prise en charge");
-    L.marker(B).addTo(map).bindPopup("Livraison");
+      route = L.geoJSON(d.routes[0].geometry, {
+        style: { color: "red", weight: 4 }
+      }).addTo(map);
 
-    map.fitBounds(route.getBounds(), { padding:[40,40] });
+      L.marker(A).addTo(map).bindPopup("Prise en charge");
+      L.marker(B).addTo(map).bindPopup("Livraison");
+
+      map.fitBounds(route.getBounds(), { padding:[40,40] });
+
+    }catch(e){
+      alert("Impossible de calculer le trajet");
+    }
 
   }, 200);
 }
+
 
 
 function closeMap(){
