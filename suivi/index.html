@@ -2,167 +2,143 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Suivi – Léman Courses</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi Léman Courses</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
 body{
-  font-family:Arial,sans-serif;
+  font-family:Arial;
   background:#0B2A44;
-  padding:30px;
+  padding:40px;
 }
 .card{
-  max-width:650px;
+  max-width:520px;
   margin:auto;
   background:#fff;
-  padding:25px;
+  padding:30px;
   border-radius:14px;
 }
-input,button{
+input{
   width:100%;
   padding:12px;
-  margin-top:10px;
   border-radius:8px;
   border:1px solid #ccc;
+  margin-bottom:10px;
 }
 button{
+  width:100%;
   background:#FDB913;
   border:none;
-  font-weight:bold;
-  cursor:pointer;
-}
-.status{
-  font-size:20px;
-  font-weight:bold;
-  margin-top:15px;
-}
-.error{
-  color:red;
-  font-weight:bold;
-}
-#mapPopup{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:#000000cc;
-  z-index:9999;
-}
-#mapHeader{
-  background:#fff;
   padding:14px;
   font-weight:bold;
+  border-radius:10px;
   cursor:pointer;
 }
-#map{
+#result{
+  margin-top:20px;
+}
+#mapModal{
+  position:fixed;
+  top:0;left:0;
   width:100%;
   height:100%;
+  background:rgba(0,0,0,0.6);
+  display:none;
 }
-.mapInfo{
-  position:absolute;
-  top:60px;
-  left:50%;
-  transform:translateX(-50%);
+#mapBox{
   background:#fff;
-  padding:10px 16px;
+  width:90%;
+  max-width:600px;
+  height:80%;
+  margin:5% auto;
+  padding:10px;
   border-radius:10px;
-  font-weight:bold;
 }
+#map{width:100%;height:100%;}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-<h2>📦 Suivi Léman Courses</h2>
+  <h2>📦 Suivi Léman Courses</h2>
+  <input id="code" placeholder="LC-001">
+  <button onclick="track()">Suivre mon colis</button>
 
-<input id="code" placeholder="LC-001">
-<button onclick="go()">Suivre mon colis</button>
-
-<div id="error" class="error"></div>
-<div id="result"></div>
-
-<button id="btnMap" style="display:none" onclick="openMap()">🗺️ Voir le trajet</button>
+  <div id="result"></div>
+  <button id="mapBtn" style="display:none" onclick="openMap()">Voir la carte</button>
 </div>
 
-<div id="mapPopup">
-  <div id="mapHeader" onclick="closeMap()">← Retour au suivi</div>
-  <div id="map"></div>
-  <div class="mapInfo" id="mapInfo"></div>
+<div id="mapModal" onclick="closeMap()">
+  <div id="mapBox" onclick="event.stopPropagation()">
+    <div id="map"></div>
+  </div>
 </div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbz1JimDNK9DfaLOUjup5d6e4W5DdZnQyTx6qF6XsBe7ENa-l--HP6Ssz3gsKrL6gYRL/exec";
-let map, routeLayer, A, B, dureeMin=0;
 
-function mapStatus(s){
-  s=s.toLowerCase();
-  if(s.includes("livré")) return "✅ Livré";
-  if(s.includes("livraison")) return "🚚 En livraison";
-  return "📦 En cours";
-}
+let dataGlobal,map;
 
-async function go(){
+async function track(){
   const code=document.getElementById("code").value.trim();
-  const result=document.getElementById("result");
-  const error=document.getElementById("error");
-  error.textContent=""; result.innerHTML="";
-  if(!code){error.textContent="Entrez un numéro de suivi.";return;}
-
-  try{
-    const r=await fetch(API+"?code="+encodeURIComponent(code));
-    const d=await r.json();
-    if(d.error){error.textContent=d.error;return;}
-
-    result.innerHTML=`
-      <div class="status">${mapStatus(d.statut)}</div>
-      <b>${code}</b> — ${d.etape}
-      <hr>
-      <b>Client</b><br>${d.client.nom}<br>${d.client.tel}<br>${d.client.email}
-      <hr>
-      <b>Prise en charge</b><br>${d.prise.adresse}<br>${d.prise.npa} ${d.prise.ville}<br>${d.prise.heure}
-      <hr>
-      <b>Livraison</b><br>${d.livraison.adresse}<br>${d.livraison.npa} ${d.livraison.ville}<br>${d.livraison.heure}
-    `;
-
-    if(d.prise.lat && d.livraison.lat){
-      A=[d.prise.lat,d.prise.lng];
-      B=[d.livraison.lat,d.livraison.lng];
-      btnMap.style.display="block";
-
-      const r2=await fetch(`https://router.project-osrm.org/route/v1/driving/${A[1]},${A[0]};${B[1]},${B[0]}?overview=false`);
-      const d2=await r2.json();
-      dureeMin=Math.round(d2.routes[0].duration/60);
-    }
-  }catch(e){
-    error.textContent="Erreur de connexion au service.";
+  const resDiv=document.getElementById("result");
+  resDiv.innerHTML="⏳ Recherche...";
+  
+  const r=await fetch(API+"?code="+encodeURIComponent(code));
+  const d=await r.json();
+  
+  if(d.error){
+    resDiv.innerHTML="❌ "+d.error;
+    return;
   }
+  
+  dataGlobal=d;
+  document.getElementById("mapBtn").style.display="block";
+
+  resDiv.innerHTML=`
+  <b>Statut:</b> ${d.statut}<br>
+  <b>Étape:</b> ${d.etape}<br>
+  <b>Client:</b> ${d.client.nom}<br><br>
+
+  📍 <b>Prise en charge</b><br>
+  ${d.prise.adresse}, ${d.prise.npa} ${d.prise.ville}<br>
+
+  📦 <b>Livraison</b><br>
+  ${d.livraison.adresse}, ${d.livraison.npa} ${d.livraison.ville}
+  `;
 }
 
 function openMap(){
-  mapPopup.style.display="block";
-  setTimeout(async ()=>{
-    if(!map){
-      map=L.map("map");
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-    }
-    if(routeLayer) map.removeLayer(routeLayer);
-    map.eachLayer(l=>{if(l instanceof L.Marker) map.removeLayer(l);});
+  document.getElementById("mapModal").style.display="block";
 
-    const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${A[1]},${A[0]};${B[1]},${B[0]}?overview=full&geometries=geojson`);
-    const d=await r.json();
-    routeLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"red",weight:4}}).addTo(map);
+  if(!map){
+    map=L.map("map");
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 
-    L.marker(A).addTo(map).bindPopup("Prise en charge");
-    L.marker(B).addTo(map).bindPopup("Livraison");
-
-    map.fitBounds(routeLayer.getBounds(),{padding:[40,40]});
-    mapInfo.textContent=`⏱️ ${Math.floor(dureeMin/60)}h${dureeMin%60} – trajet indicatif`;
-  },200);
+    fetch("https://nominatim.openstreetmap.org/search?format=json&q="+
+      dataGlobal.prise.adresse+" "+dataGlobal.prise.ville)
+    .then(r=>r.json()).then(p=>{
+      fetch("https://nominatim.openstreetmap.org/search?format=json&q="+
+        dataGlobal.livraison.adresse+" "+dataGlobal.livraison.ville)
+      .then(r=>r.json()).then(l=>{
+        const A=[p[0].lat,p[0].lon];
+        const B=[l[0].lat,l[0].lon];
+        map.setView(A,9);
+        L.marker(A).addTo(map).bindPopup("Prise en charge");
+        L.marker(B).addTo(map).bindPopup("Livraison");
+        L.polyline([A,B],{color:"blue"}).addTo(map);
+      });
+    });
+  }
 }
-function closeMap(){mapPopup.style.display="none";}
+
+function closeMap(){
+  document.getElementById("mapModal").style.display="none";
+}
 </script>
 
 </body>
