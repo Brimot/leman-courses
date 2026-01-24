@@ -9,164 +9,135 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-body{
-    font-family:Arial;
-    background:#0B2A44;
-    padding:40px;
-}
-.card{
-    max-width:600px;
-    margin:auto;
-    background:white;
-    padding:25px;
-    border-radius:14px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.3);
-}
-h2{text-align:center;color:#0B2A44;}
-input{
-    width:100%;
-    padding:14px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    margin-top:10px;
-}
-button{
-    width:100%;
-    margin-top:15px;
-    padding:14px;
-    background:#FFB913;
-    border:none;
-    font-weight:bold;
-    border-radius:10px;
-    cursor:pointer;
-}
-#res{
-    margin-top:20px;
-    line-height:1.6;
-}
-.badge{
-    background:#0B2A44;
-    color:white;
-    padding:6px 10px;
-    border-radius:8px;
-    display:inline-block;
-}
-#mapBtn{
-    display:none;
-    margin-top:15px;
-}
+body{font-family:Arial;background:#0B2A44;margin:0;padding:30px}
+.card{max-width:700px;margin:auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+h2{text-align:center;color:#0B2A44}
+input,button{width:100%;padding:14px;margin-top:10px;border-radius:10px;border:1px solid #ccc;font-size:16px}
+button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer}
+button:hover{opacity:.9}
+.section{margin-top:20px;padding-top:10px;border-top:1px solid #ddd}
+.label{font-weight:bold;color:#0B2A44}
+#error{color:red;font-weight:bold;text-align:center;margin-top:15px}
+
 #mapPopup{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:#000000cc;
-    z-index:9999;
+ position:fixed;inset:0;background:#000000cc;display:none;z-index:9999
 }
 #mapHeader{
-    background:white;
-    padding:14px;
-    font-weight:bold;
-    cursor:pointer;
+ background:#fff;padding:15px;font-weight:bold;cursor:pointer
 }
-#map{
-    width:100%;
-    height:calc(100% - 50px);
-}
+#map{width:100%;height:100%}
 </style>
 </head>
 
 <body>
 <div class="card">
-    <h2>📦 Suivi Léman Courses</h2>
-    <input id="code" placeholder="Ex : LC-001">
-    <button onclick="suivre()">Suivre mon colis</button>
+<h2>📦 Suivi Léman Courses</h2>
 
-    <div id="res"></div>
+<input id="code" placeholder="LC-001">
+<button onclick="rechercher()">Suivre mon colis</button>
 
-    <button id="mapBtn" onclick="openMap()">🗺️ Voir le trajet</button>
+<div id="error"></div>
+
+<div id="resultat" style="display:none">
+  <div class="section">
+    <div class="label">Statut</div>
+    <div id="statut"></div>
+    <div id="etape"></div>
+    <div id="date"></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Client</div>
+    <div id="client"></div>
+  </div>
+
+  <div class="section">
+    <div class="label">📍 Prise en charge</div>
+    <div id="prise"></div>
+  </div>
+
+  <div class="section">
+    <div class="label">🚚 Livraison</div>
+    <div id="livraison"></div>
+  </div>
+
+  <button onclick="openMap()">Voir le trajet</button>
+</div>
 </div>
 
+<!-- MAP POPUP -->
 <div id="mapPopup">
-    <div id="mapHeader" onclick="closeMap()">← Retour</div>
-    <div id="map"></div>
+  <div id="mapHeader" onclick="closeMap()">← Retour</div>
+  <div id="map"></div>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbw8327wSkRWjKLy6D-UcI2qHq4GIPoDEaH6BCXuaMFVTa7A8daVCGTnTCIXcgxI2GZR/exec";
-let dataGlobal, map, route;
+const API = "https://script.google.com/macros/s/AKfycbwsGrTYx8BAB9BxWY9EyKYAywfdAPOjLiCxRm5lZHmFx5bVIb-bVgM4Ue97K74QDZBc/exec";
 
-async function suivre(){
-    const code = document.getElementById("code").value.trim();
-    const res = document.getElementById("res");
-    res.innerHTML="⏳ Recherche...";
-    document.getElementById("mapBtn").style.display="none";
+let prisePos, livPos, map, route;
 
-    try{
-        const r = await fetch(API+"?code="+encodeURIComponent(code));
-        const d = await r.json();
+async function rechercher(){
+  const code = document.getElementById("code").value.trim();
+  const err = document.getElementById("error");
+  const res = document.getElementById("resultat");
 
-        if(d.error){
-            res.innerHTML="❌ "+d.error;
-            return;
-        }
+  err.textContent="";
+  res.style.display="none";
 
-        dataGlobal = d;
+  if(!code){err.textContent="Veuillez entrer un code";return;}
 
-        res.innerHTML = `
-        <span class="badge">${d.statut}</span><br><br>
+  try{
+    const r = await fetch(API+"?code="+encodeURIComponent(code));
+    const d = await r.json();
 
-        <b>Étape :</b> ${d.etape}<br>
-        <b>Dernière mise à jour :</b> ${new Date(d.date).toLocaleString()}<br>
-        <b>Commentaire :</b> ${d.commentaire || "-"}<br><br>
+    if(d.error){err.textContent=d.error;return;}
 
-        <b>Client</b><br>
-        ${d.client.nom}<br>
-        📞 ${d.client.tel}<br>
-        ✉️ ${d.client.email}<br><br>
+    document.getElementById("statut").textContent = d.statut;
+    document.getElementById("etape").textContent = d.etape;
+    document.getElementById("date").textContent = new Date(d.date).toLocaleString();
 
-        <b>Prise en charge</b><br>
-        ${d.prise.adresse}<br>
-        ${d.prise.npa} ${d.prise.ville}<br>
-        🕒 ${new Date(d.prise.heure).toLocaleString()}<br><br>
+    document.getElementById("client").innerHTML =
+      `${d.client.nom}<br>${d.client.tel}<br>${d.client.email}`;
 
-        <b>Livraison</b><br>
-        ${d.livraison.adresse}<br>
-        ${d.livraison.npa} ${d.livraison.ville}<br>
-        🕒 ${new Date(d.livraison.heure).toLocaleString()}
-        `;
+    document.getElementById("prise").innerHTML =
+      `${d.prise.adresse}<br>${d.prise.npa} ${d.prise.ville}<br>${new Date(d.prise.heure).toLocaleTimeString()}`;
 
-        if(d.prise.lat && d.livraison.lat){
-            document.getElementById("mapBtn").style.display="block";
-        }
+    document.getElementById("livraison").innerHTML =
+      `${d.livraison.adresse}<br>${d.livraison.npa} ${d.livraison.ville}<br>${new Date(d.livraison.heure).toLocaleTimeString()}`;
 
-    }catch(e){
-        res.innerHTML="⚠️ Erreur de connexion au service";
-    }
+    prisePos=[d.prise.lat,d.prise.lng];
+    livPos=[d.livraison.lat,d.livraison.lng];
+
+    res.style.display="block";
+  }
+  catch(e){
+    err.textContent="Erreur de connexion au service";
+  }
 }
 
 function openMap(){
-    document.getElementById("mapPopup").style.display="block";
+  document.getElementById("mapPopup").style.display="block";
 
-    setTimeout(()=>{
-        if(!map){
-            map = L.map("map");
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-        }
-        if(route) map.removeLayer(route);
+  setTimeout(()=>{
+    if(!map){
+      map=L.map("map");
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    }
 
-        const a=[dataGlobal.prise.lat,dataGlobal.prise.lng];
-        const b=[dataGlobal.livraison.lat,dataGlobal.livraison.lng];
+    if(route) map.removeLayer(route);
 
-        L.marker(a).addTo(map).bindPopup("Prise en charge");
-        L.marker(b).addTo(map).bindPopup("Livraison");
+    const line=[prisePos,livPos];
+    route=L.polyline(line,{color:"red",weight:4}).addTo(map);
 
-        route = L.polyline([a,b],{color:"red"}).addTo(map);
-        map.fitBounds(route.getBounds(),{padding:[40,40]});
-    },200);
+    L.marker(prisePos).addTo(map).bindPopup("Prise en charge");
+    L.marker(livPos).addTo(map).bindPopup("Livraison");
+
+    map.fitBounds(route.getBounds(),{padding:[40,40]});
+  },200);
 }
 
 function closeMap(){
-    document.getElementById("mapPopup").style.display="none";
+  document.getElementById("mapPopup").style.display="none";
 }
 </script>
 
