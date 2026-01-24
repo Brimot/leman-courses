@@ -83,33 +83,34 @@ const API="https://script.google.com/macros/s/AKfycbz1JimDNK9DfaLOUjup5d6e4W5DdZ
 
 let dataGlobal,map;
 
-async function track(){
-  const code=document.getElementById("code").value.trim();
-  const resDiv=document.getElementById("result");
-  resDiv.innerHTML="⏳ Recherche...";
-  
-  const r=await fetch(API+"?code="+encodeURIComponent(code));
-  const d=await r.json();
-  
-  if(d.error){
-    resDiv.innerHTML="❌ "+d.error;
-    return;
-  }
-  
-  dataGlobal=d;
-  document.getElementById("mapBtn").style.display="block";
+function track(){
+  const code=document.getElementById("code").value;
+  const cb="cb"+Math.random().toString().replace(".","");
+  window[cb]=function(d){
+    delete window[cb];
+    document.body.removeChild(s);
 
-  resDiv.innerHTML=`
-  <b>Statut:</b> ${d.statut}<br>
-  <b>Étape:</b> ${d.etape}<br>
-  <b>Client:</b> ${d.client.nom}<br><br>
+    if(d.error){
+      result.innerHTML="❌ "+d.error;
+      return;
+    }
 
-  📍 <b>Prise en charge</b><br>
-  ${d.prise.adresse}, ${d.prise.npa} ${d.prise.ville}<br>
+    result.innerHTML=`
+    <b>Statut:</b> ${d.statut}<br>
+    <b>Étape:</b> ${d.etape}<br>
+    <b>Client:</b> ${d.client.nom}<br><br>
+    📍 ${d.prise.adresse}, ${d.prise.ville}<br>
+    📦 ${d.livraison.adresse}, ${d.livraison.ville}
+    `;
+  };
 
-  📦 <b>Livraison</b><br>
-  ${d.livraison.adresse}, ${d.livraison.npa} ${d.livraison.ville}
-  `;
+  const s=document.createElement("script");
+  s.src=API+"?code="+encodeURIComponent(code)+"&callback="+cb;
+  document.body.appendChild(s);
+
+  result.innerHTML="⏳ Recherche...";
+}
+
 }
 
 function openMap(){
