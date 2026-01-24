@@ -125,35 +125,40 @@ async function openMap(){
     }
 
     if(route) map.removeLayer(route);
+    map.eachLayer(l => { if(l instanceof L.Marker) map.removeLayer(l); });
 
-    const A = [prisePos[0], prisePos[1]];
-    const B = [livPos[0], livPos[1]];
+    const A = prisePos;
+    const B = livPos;
 
-    try{
-      const r = await fetch(
-        "https://api.allorigins.win/raw?url=" +
-        encodeURIComponent(
-          `https://router.project-osrm.org/route/v1/driving/${A[1]},${A[0]};${B[1]},${B[0]}?overview=full&geometries=geojson`
-        )
-      );
-
-      const d = await r.json();
-
-      route = L.geoJSON(d.routes[0].geometry, {
-        style: { color: "red", weight: 4 }
-      }).addTo(map);
-
-      L.marker(A).addTo(map).bindPopup("Prise en charge");
-      L.marker(B).addTo(map).bindPopup("Livraison");
-
-      map.fitBounds(route.getBounds(), { padding:[40,40] });
-
-    }catch(e){
-      alert("Impossible de calculer le trajet");
+    if(!A || !B || !A[0] || !A[1] || !B[0] || !B[1]){
+      alert("Coordonnées GPS manquantes pour ce colis");
+      return;
     }
 
-  }, 200);
+    // Marqueurs
+    L.marker(A).addTo(map).bindPopup("📍 Prise en charge").openPopup();
+    L.marker(B).addTo(map).bindPopup("🚚 Livraison");
+
+    // Appel route OSRM
+    const url = `https://router.project-osrm.org/route/v1/driving/${A[1]},${A[0]};${B[1]},${B[0]}?overview=full&geometries=geojson`;
+
+    const r = await fetch(url);
+    const d = await r.json();
+
+    if(!d.routes || !d.routes.length){
+      alert("Impossible de calculer le trajet routier");
+      map.fitBounds([A,B],{padding:[50,50]});
+      return;
+    }
+
+    route = L.geoJSON(d.routes[0].geometry,{
+      style:{color:"#ff0000",weight:5}
+    }).addTo(map);
+
+    map.fitBounds(route.getBounds(),{padding:[50,50]});
+  },200);
 }
+
 
 
 
