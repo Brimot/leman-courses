@@ -4,10 +4,6 @@
 <meta charset="UTF-8">
 <title>Suivi Léman Courses</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <style>
 body{font-family:Arial;background:#0B2A44;margin:0;padding:30px}
 .card{max-width:700px;margin:auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
@@ -18,14 +14,6 @@ button:hover{opacity:.9}
 .section{margin-top:20px;padding-top:10px;border-top:1px solid #ddd}
 .label{font-weight:bold;color:#0B2A44}
 #error{color:red;font-weight:bold;text-align:center;margin-top:15px}
-
-#mapPopup{
- position:fixed;inset:0;background:#000000cc;display:none;z-index:9999
-}
-#mapHeader{
- background:#fff;padding:15px;font-weight:bold;cursor:pointer
-}
-#map{width:100%;height:100%}
 </style>
 </head>
 
@@ -60,21 +48,11 @@ button:hover{opacity:.9}
     <div class="label">🚚 Livraison</div>
     <div id="livraison"></div>
   </div>
-
-  <button onclick="openMap()">Voir le trajet</button>
 </div>
-</div>
-
-<!-- MAP POPUP -->
-<div id="mapPopup">
-  <div id="mapHeader" onclick="closeMap()">← Retour</div>
-  <div id="map"></div>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbzYkv1YrB94_MmKVPNJVEJoBelKQcgw13XObSkkYqlvakv3VGZ0PpgfXCRJlkZUueSW/exec";
-
-let prisePos, livPos, map, route;
+const API = "https://script.google.com/macros/s/AKfycbxsspdSUfWFfigE9TW50am1uhu4CRRY9eichy2MOdn1ylWqak7kfc9gvXP2v__9c-ec/exec";
 
 async function rechercher(){
   const code = document.getElementById("code").value.trim();
@@ -105,65 +83,11 @@ async function rechercher(){
     document.getElementById("livraison").innerHTML =
       `${d.livraison.adresse}<br>${d.livraison.npa} ${d.livraison.ville}<br>${new Date(d.livraison.heure).toLocaleTimeString()}`;
 
-    prisePos=[d.prise.lat,d.prise.lng];
-    livPos=[d.livraison.lat,d.livraison.lng];
-
     res.style.display="block";
   }
   catch(e){
     err.textContent="Erreur de connexion au service";
   }
-}
-
-async function openMap(){
-  document.getElementById("mapPopup").style.display="block";
-
-  setTimeout(async ()=>{
-    if(!map){
-      map = L.map("map");
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-    }
-
-    if(route) map.removeLayer(route);
-    map.eachLayer(l => { if(l instanceof L.Marker) map.removeLayer(l); });
-
-    const A = prisePos;
-    const B = livPos;
-
-    if(!A || !B || !A[0] || !A[1] || !B[0] || !B[1]){
-      alert("Coordonnées GPS manquantes pour ce colis");
-      return;
-    }
-
-    // Marqueurs
-    L.marker(A).addTo(map).bindPopup("📍 Prise en charge").openPopup();
-    L.marker(B).addTo(map).bindPopup("🚚 Livraison");
-
-    // Appel route OSRM
-    const url = `"https://script.google.com/macros/s/AKfycbxsspdSUfWFfigE9TW50am1uhu4CRRY9eichy2MOdn1ylWqak7kfc9gvXP2v__9c-ec/exec"`;
-
-    const r = await fetch(url);
-    const d = await r.json();
-
-    if(!d.routes || !d.routes.length){
-      alert("Impossible de calculer le trajet routier");
-      map.fitBounds([A,B],{padding:[50,50]});
-      return;
-    }
-
-    route = L.geoJSON(d.routes[0].geometry,{
-      style:{color:"#ff0000",weight:5}
-    }).addTo(map);
-
-    map.fitBounds(route.getBounds(),{padding:[50,50]});
-  },200);
-}
-
-
-
-
-function closeMap(){
-  document.getElementById("mapPopup").style.display="none";
 }
 </script>
 
