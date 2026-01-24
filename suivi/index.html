@@ -140,7 +140,7 @@ async function openMap(){
     L.marker(B).addTo(map).bindPopup("🚚 Livraison");
 
     // Appel route OSRM
-    const url = `https://router.project-osrm.org/route/v1/driving/${A[1]},${A[0]};${B[1]},${B[0]}?overview=full&geometries=geojson`;
+    const url = `"https://script.google.com/macros/s/AKfycbyiPRkQKlk4oCb8m1ZRTNvzn--ikXwjkUqa2E5hPL3KK4wATW149NV9SbTgfZogrKCp/exec"`;
 
     const r = await fetch(url);
     const d = await r.json();
