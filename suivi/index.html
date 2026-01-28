@@ -2,39 +2,43 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Estimation Léman Courses</title>
+<title>Estimation – Léman Courses</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{font-family:Arial;background:#0B2A44;margin:0;padding:30px}
-.card{max-width:700px;margin:auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.card{max-width:800px;margin:auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 h2{text-align:center;color:#0B2A44}
-input,select,button{width:100%;padding:14px;margin-top:10px;border-radius:10px;border:1px solid #ccc;font-size:16px}
+
+input,select,button{
+  width:100%;padding:12px;margin-top:8px;
+  border-radius:8px;border:1px solid #ccc;font-size:15px
+}
+
 button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer}
 button:hover{opacity:.9}
-.section{margin-top:20px;padding-top:10px;border-top:1px solid #ddd}
+
+.section{margin-top:22px;padding-top:12px;border-top:1px solid #ddd}
 .label{font-weight:bold;color:#0B2A44;margin-top:10px}
-#map{width:100%;height:260px;margin-top:12px;border-radius:12px;border:1px solid #ccc}
-.price{text-align:center;font-size:22px;font-weight:bold;color:#0B2A44;margin-top:20px}
-.note{text-align:center;font-size:13px;color:#666}
 
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:700px){.grid-2{grid-template-columns:1fr}}
 
-.badge{
-  background:#f5f7fa;
-  border:1px solid #ccc;
-  border-radius:12px;
-  padding:12px;
-  text-align:center;
-  font-size:14px;
-  color:#0B2A44
-}
-.badge strong{display:block;margin-top:6px;font-size:17px}
-.badge span{display:block;font-size:13px;color:#555}
-.badge.active{
-  border:2px solid #FDB913;
-  background:#fffbe6
+#map{width:100%;height:260px;margin-top:12px;border-radius:12px;border:1px solid #ccc}
+
+.price{font-size:18px;text-align:center;margin-top:15px}
+.price strong{font-size:22px}
+
+.note{font-size:13px;color:#555;text-align:center}
+
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #ccc;padding:6px;text-align:center}
+th{background:#f5f7fa}
+
+.smallbtn{
+  background:#e6eef8;color:#0B2A44;
+  border:1px solid #ccc;font-weight:bold;
+  padding:6px;border-radius:6px
 }
 </style>
 
@@ -51,11 +55,6 @@ button:hover{opacity:.9}
   <input id="client_nom" placeholder="Nom / Entreprise">
   <input id="client_tel" placeholder="Téléphone">
   <input id="client_email" placeholder="E-mail">
-</div>
-
-<div class="section">
-  <div class="label">🕒 Heure souhaitée</div>
-  <input type="datetime-local" id="heure_souhaitee">
 </div>
 
 <div class="section">
@@ -83,156 +82,182 @@ button:hover{opacity:.9}
 
 <div class="section">
   <div class="label">🚀 Type de livraison</div>
-  <select id="service" onchange="choisirService()">
+  <select id="service" onchange="recalculer()">
     <option value="">— Choisir —</option>
-    <option value="urgent">Urgente – 4h</option>
-    <option value="express">Express – 12h</option>
-    <option value="priority">Priority – 24h</option>
-    <option value="eco">Eco – 48h</option>
+    <option value="urgent">Urgente 4h</option>
+    <option value="express">Express 12h</option>
+    <option value="priority">Priority 24h</option>
+    <option value="eco">Eco 48h</option>
   </select>
 </div>
 
 <div class="section">
-  <div class="label">💰 Estimation par service</div>
-  <div class="grid-2">
-    <div class="badge" id="b_urgent">Urgente 4h
-      <strong>—</strong>
-      <span id="d_urgent">—</span>
-    </div>
-    <div class="badge" id="b_express">Express 12h
-      <strong>—</strong>
-      <span id="d_express">—</span>
-    </div>
-    <div class="badge" id="b_priority">Priority 24h
-      <strong>—</strong>
-      <span id="d_priority">—</span>
-    </div>
-    <div class="badge" id="b_eco">Eco 48h
-      <strong>—</strong>
-      <span id="d_eco">—</span>
-    </div>
-  </div>
+  <div class="label">📦 Colis (max 5 – même destination)</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Colis</th>
+        <th>Poids (kg)</th>
+        <th>Dimensions (cm)</th>
+        <th>Type</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="colis_table"></tbody>
+  </table>
+
+  <button class="smallbtn" type="button" onclick="ajouterColis()">➕ Ajouter un colis (+5 CHF)</button>
 </div>
 
 <div class="price">
   Distance : <span id="distance_txt">–</span> km<br>
-  Durée réelle : <span id="duree_reelle">–</span><br><br>
-  Prix estimé : CHF <span id="prix">25.00</span>
+  Durée : <span id="duree_txt">–</span> min<br><br>
+
+  HT : CHF <span id="prix_ht">–</span><br>
+  TVA 8.1 % : CHF <span id="prix_tva">–</span><br>
+  <strong>TTC : CHF <span id="prix_ttc">–</span></strong>
 </div>
 
-<div class="note">Prix et délais indicatifs</div>
+<div class="note">Prix indicatif – confirmé après validation</div>
 
-<button onclick="envoyerServeur()">Envoyer la demande</button>
+<button onclick="envoyer()">Envoyer la demande</button>
 </div>
 
 <script>
-let map, directionsService, directionsRenderer;
-let kmReels = 0;
-let dureeReelleMin = 0;
+/* ================= CONFIG ================= */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsspdSUfWFfigE9TW50am1uhu4CRRY9eichy2MOdn1ylWqak7kfc9gvXP2v__9c-ec/exec";
+const TVA = 0.081;
+const MAX_COLIS = 5;
+const BASE_65 = { urgent:65, express:50, priority:35, eco:27 };
+const SECOND_COLIS = 5;
+
+/* ================= MAP ================= */
+let map, ds, dr, km = 0, duree = 0;
 
 function initMap(){
-  map = new google.maps.Map(document.getElementById("map"), {
-    center:{lat:46.8,lng:8.3}, zoom:7
-  });
-  directionsService = new google.maps.DirectionsService();
-  directionsRenderer = new google.maps.DirectionsRenderer({map});
+  map = new google.maps.Map(document.getElementById("map"), {center:{lat:46.8,lng:8.3},zoom:7});
+  ds = new google.maps.DirectionsService();
+  dr = new google.maps.DirectionsRenderer({map});
 }
+window.onload = initMap;
 
 function adresse(p){
-  const npa=document.getElementById(p+"_npa").value.trim();
-  const ville=document.getElementById(p+"_ville").value.trim();
-  const rue=document.getElementById(p+"_rue").value.trim();
-  const no=document.getElementById(p+"_no").value.trim();
-  if(!/^\d{4}$/.test(npa)||!ville) return null;
-  return `${rue} ${no}, ${npa} ${ville}, Suisse`.replace(/\s+/g," ").trim();
+  const npa=document.getElementById(p+"_npa").value;
+  const ville=document.getElementById(p+"_ville").value;
+  const rue=document.getElementById(p+"_rue").value;
+  const no=document.getElementById(p+"_no").value;
+  if(!npa||!ville) return null;
+  return `${rue} ${no}, ${npa} ${ville}, Suisse`;
 }
 
 function calculerDistance(){
   const d=adresse("pc"), a=adresse("lv");
-  if(!d||!a){alert("NPA + Ville requis");return;}
+  if(!d||!a){alert("Adresse incomplète");return;}
 
-  directionsService.route({origin:d,destination:a,travelMode:"DRIVING"},(r,s)=>{
+  ds.route({origin:d,destination:a,travelMode:"DRIVING"},(r,s)=>{
     if(s==="OK"){
-      directionsRenderer.setDirections(r);
+      dr.setDirections(r);
       const leg=r.routes[0].legs[0];
-      kmReels=leg.distance.value/1000;
-      dureeReelleMin=Math.max(15,Math.ceil(leg.duration.value/60));
-
-      distance_txt.innerText=kmReels.toFixed(1);
-      duree_reelle.innerText=dureeReelleMin+" min";
-
-      majBadges();
+      km = leg.distance.value/1000;
+      duree = Math.max(15,Math.ceil(leg.duration.value/60));
+      distance_txt.innerText=km.toFixed(1);
+      duree_txt.innerText=duree;
+      recalculer();
     }
   });
 }
 
-function prixService(type){
-  if(kmReels <= 0) return 0;
+/* ================= COLIS ================= */
+let colis=[];
 
-  // Prix de base pour 65 km / 0-15 kg
-  const base = {
-    urgent:   65,
-    express:  50,
-    priority: 35,
-    eco:      27
-  };
-
-  let prix = base[type] || 0;
-  const poids = parseFloat(document.getElementById("poids").value) || 0;
-
-  // Supplément poids
-  if(poids > 15 && poids <= 25){
-    prix += (poids - 15) * 2;
-  }
-
-  if(poids > 25){
-    prix += (10 * 2); // 15→25 kg
-    prix += (poids - 25) * 5;
-  }
-
-  return prix;
+function ajouterColis(){
+  if(colis.length>=MAX_COLIS){alert("Maximum 5 colis");return;}
+  colis.push({id:Date.now(),poids:1,L:30,l:20,h:10,type:"Colis standard"});
+  renderColis();
+  recalculer();
 }
 
+function supprimerColis(id){
+  colis=colis.filter(c=>c.id!==id);
+  renderColis();recalculer();
+}
 
-function majBadges(){
-  ["urgent","express","priority","eco"].forEach(t=>{
-    document.querySelector("#b_"+t+" strong").innerText =
-      "CHF "+prixService(t).toFixed(2);
-    document.getElementById("d_"+t).innerText =
-      "Délai : "+dureeService(t);
+function maj(id,f,v){
+  const c=colis.find(c=>c.id===id);
+  if(c){c[f]=v;recalculer();}
+}
+
+function renderColis(){
+  colis_table.innerHTML="";
+  colis.forEach((c,i)=>{
+    colis_table.innerHTML+=`
+<tr>
+<td>Colis ${i+1}</td>
+<td><input type="number" value="${c.poids}" oninput="maj(${c.id},'poids',this.value)"></td>
+<td>
+<input style="width:40px" value="${c.L}" oninput="maj(${c.id},'L',this.value)">×
+<input style="width:40px" value="${c.l}" oninput="maj(${c.id},'l',this.value)">×
+<input style="width:40px" value="${c.h}" oninput="maj(${c.id},'h',this.value)">
+</td>
+<td>
+<select onchange="maj(${c.id},'type',this.value)">
+<option>Documents</option><option selected>Colis standard</option>
+<option>Matériel médical</option><option>Alimentaire</option>
+<option>Fragile</option><option>Autre</option>
+</select>
+</td>
+<td>${i?`<button class="smallbtn" onclick="supprimerColis(${c.id})">❌</button>`:"—"}</td>
+</tr>`;
   });
 }
 
-function choisirService(){
-  const s=service.value;
-  if(!s)return;
+ajouterColis();
 
-  document.querySelectorAll(".badge").forEach(b=>b.classList.remove("active"));
-  document.getElementById("b_"+s).classList.add("active");
-
-  prix.innerText=prixService(s).toFixed(2);
+/* ================= PRIX ================= */
+function surchargePoids(p){
+  if(p<=15) return 0;
+  if(p<=25) return (p-15)*2;
+  return 20+(p-25)*5;
 }
 
-function envoyerServeur(){
-  fetch("https://script.google.com/macros/s/AKfycbyn7re1v9UPX59oxKqLWIC3-chmuZHsc38E72g9AfQ17R2jsjtGAMX_fjg3wurtAp5H/exec",{
+function recalculer(){
+  if(!service.value||!km||!colis.length) return;
+
+  let ht = BASE_65[service.value];
+
+  colis.forEach((c,i)=>{
+    ht += surchargePoids(c.poids);
+    if(i>0) ht+=SECOND_COLIS;
+  });
+
+  const tva = ht*TVA;
+  prix_ht.innerText=ht.toFixed(2);
+  prix_tva.innerText=tva.toFixed(2);
+  prix_ttc.innerText=(ht+tva).toFixed(2);
+}
+
+/* ================= ENVOI ================= */
+function envoyer(){
+  fetch(SCRIPT_URL,{
     method:"POST",
     body:JSON.stringify({
-      nom:client_nom.value,
+      client:client_nom.value,
       tel:client_tel.value,
       email:client_email.value,
-      heure:heure_souhaitee.value,
       depart:adresse("pc"),
       arrivee:adresse("lv"),
-      distance:kmReels,
-      duree:dureeReelleMin,
+      km:km,
+      duree:duree,
       service:service.value,
-      prix:prix.innerText
+      colis:colis,
+      prixHT:prix_ht.innerText,
+      tva:prix_tva.innerText,
+      prixTTC:prix_ttc.innerText
     }),
     headers:{"Content-Type":"application/json"}
-  }).then(()=>alert("Demande envoyée"));
+  }).then(()=>alert("✅ Demande envoyée"));
 }
-
-window.onload=initMap;
 </script>
 
 </body>
