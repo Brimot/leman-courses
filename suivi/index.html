@@ -18,30 +18,32 @@ button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer
 .price{text-align:center;margin-top:15px}
 </style>
 
-<!-- Google Maps -->
+<!-- Google Maps avec callback -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1XwMisUcFm6UwQseU1sUU-n_55uI9AWQ&callback=initMap" async defer></script>
-</head>
 
+</head>
 <body>
 
-<form action="https://script.google.com/macros/s/AKfycbzWLYy70HgJVUNbBxpFmGPlU81S5UoAKNtpNCS_B-nOLVbm5ovSmARRMmVbr_KgoSsN/exec"
+<form action="https://script.google.com/macros/s/AKfycbzvPN6yV5wVT7mJGQgo6-YMGHlBdD_mveHTwmbFaKSpsIpbQ52gmaCk5m0zogtmKVZn/exec"
       method="POST"
       target="_blank">
 
 <div class="card">
+
 <h2>🚚 Estimation Léman Courses</h2>
 
 <div class="section">
   <div class="label">👤 Coordonnées client</div>
   <input name="client" id="client_nom" placeholder="Nom / Entreprise" required>
   <input name="email" id="client_email" placeholder="E-mail" required>
+  <input name="tel" id="client_tel" placeholder="Téléphone">
 </div>
 
 <div class="section">
   <div class="label">📍 Prise en charge</div>
   <div class="grid-2">
-    <input id="pc_npa" placeholder="NPA">
-    <input id="pc_ville" placeholder="Ville">
+    <input id="pc_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'pc_ville')">
+    <input id="pc_ville" name="ville_pc" placeholder="Ville">
     <input id="pc_rue" placeholder="Rue">
     <input id="pc_no" placeholder="N°">
   </div>
@@ -50,14 +52,15 @@ button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer
 <div class="section">
   <div class="label">🚚 Livraison</div>
   <div class="grid-2">
-    <input id="lv_npa" placeholder="NPA">
-    <input id="lv_ville" placeholder="Ville">
+    <input id="lv_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'lv_ville')">
+    <input id="lv_ville" name="ville_lv" placeholder="Ville">
     <input id="lv_rue" placeholder="Rue">
     <input id="lv_no" placeholder="N°">
   </div>
 </div>
 
 <button type="button" onclick="calculerDistance()">Calculer la distance</button>
+
 <div id="map"></div>
 
 <div class="price">
@@ -65,7 +68,7 @@ button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer
   Durée : <span id="duree_txt">–</span> min
 </div>
 
-<!-- Champs envoyés au script -->
+<!-- Champs cachés envoyés au script -->
 <input type="hidden" name="depart" id="f_depart">
 <input type="hidden" name="arrivee" id="f_arrivee">
 <input type="hidden" name="km" id="f_km">
@@ -77,30 +80,58 @@ button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer
 </form>
 
 <script>
-let map, ds, dr, km=0, duree=0;
+// === CONFIG MAP ===
+let map, ds, dr, km = 0, duree = 0;
 
 function initMap(){
-  map=new google.maps.Map(document.getElementById("map"),{center:{lat:46.8,lng:8.3},zoom:7});
-  ds=new google.maps.DirectionsService();
-  dr=new google.maps.DirectionsRenderer({map});
+  map = new google.maps.Map(document.getElementById("map"), {
+    center:{lat:46.8,lng:8.3},
+    zoom:7
+  });
+  ds = new google.maps.DirectionsService();
+  dr = new google.maps.DirectionsRenderer({ map });
+}
+
+function autoVilleGoogle(npa, villeId){
+  if(!/^\d{4}$/.test(npa)) return;
+  new google.maps.Geocoder().geocode({
+    address:npa,
+    componentRestrictions:{country:"CH"}
+  }, (res, status) => {
+    if(status === "OK" && res[0]){
+      res[0].address_components.forEach(c => {
+        if(c.types.includes("locality") || c.types.includes("postal_town")){
+          document.getElementById(villeId).value = c.long_name;
+        }
+      });
+    }
+  });
 }
 
 function adresse(p){
-  return document.getElementById(p+"_rue").value+" "+
-         document.getElementById(p+"_no").value+", "+
-         document.getElementById(p+"_npa").value+" "+
-         document.getElementById(p+"_ville").value+", Suisse";
+  return `${document.getElementById(p+"_rue").value} ${document.getElementById(p+"_no").value}, ${document.getElementById(p+"_npa").value} ${document.getElementById(p+"_ville").value}, Suisse`;
 }
 
 function calculerDistance(){
-  ds.route({origin:adresse("pc"),destination:adresse("lv"),travelMode:"DRIVING"},(r,s)=>{
-    if(s==="OK"){
+  const d = adresse("pc");
+  const a = adresse("lv");
+  if(!d || !a){
+    alert("Adresse incomplète");
+    return;
+  }
+
+  ds.route({
+    origin: d,
+    destination: a,
+    travelMode:"DRIVING"
+  }, (r, s) => {
+    if(s === "OK"){
       dr.setDirections(r);
-      const leg=r.routes[0].legs[0];
-      km=leg.distance.value/1000;
-      duree=Math.ceil(leg.duration.value/60);
-      distance_txt.innerText=km.toFixed(1);
-      duree_txt.innerText=duree;
+      const leg = r.routes[0].legs[0];
+      km = leg.distance.value / 1000;
+      duree = Math.max(15, Math.ceil(leg.duration.value / 60));
+      document.getElementById("distance_txt").innerText = km.toFixed(1);
+      document.getElementById("duree_txt").innerText = duree;
     }
   });
 }
