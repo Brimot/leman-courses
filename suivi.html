@@ -174,7 +174,8 @@ async function rechercher(){
 
     // Formatage km / durée
     setText("f_km", data.km ? Number(data.km).toFixed(1) + " km" : "—");
-    setText("f_duree", data.duree ? Math.round(data.duree) + " min" : "—");
+    setText("f_duree", data.duree || "—");
+
 
     setText("f_statut", data.statut);
     setText("f_etape", data.etape);
