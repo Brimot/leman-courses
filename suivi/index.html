@@ -1,951 +1,184 @@
-Ignorer et passer au contenu
-Historique de chat
-
-
-
-
-Vous avez dit :
-je vous refaire le formulaire de leman-course.ch en calculation de prix selon se modéle, 
-ChatGPT a dit :
-Parfait, j’ai bien compris 👍
-Tu veux refaire le formulaire de léman-courses.ch en t’inspirant exactement de ce modèle (SpediFux), avec un calcul de prix automatique.
-
-Je te propose une réponse claire en 3 niveaux :
-1️⃣ structure du formulaire
-2️⃣ logique de calcul du prix (simple + pro)
-3️⃣ ce que je peux te livrer concrètement (HTML / Google Sheets / WordPress)
-
-1️⃣ Structure du formulaire (adaptée à Léman-Courses)
-👉 Même ergonomie que ton exemple, mais pensée transport urgent / coursier.
-
-🟦 Bloc 1 — Expéditeur
-Nom / Entreprise
-
-Adresse de départ
-
-Code postal + ville
-
-Téléphone
-
-Date de prise en charge
-
-Heure souhaitée
-
-☐ Aviser avant enlèvement
-
-🟦 Bloc 2 — Destinataire
-Nom / Entreprise
-
-Adresse de livraison
-
-Code postal + ville
-
-Téléphone
-
-Date de livraison
-
-☐ Aviser avant livraison
-
-🟦 Bloc 3 — Envoi (Fret → Courses)
-Nombre de colis
-
-Type :
-
-Document
-
-Petit colis
-
-Colis standard
-
-Urgent médical
-
-Contenu (texte libre)
-
-Dimensions (optionnel mais pro) :
-
-Longueur (cm)
-
-Largeur (cm)
-
-Hauteur (cm)
-
-Poids (kg)
-
-➕ bouton Ajouter un colis (comme sur l’exemple)
-
-🟦 Bloc 4 — Options
-☐ Urgence immédiate (< 60 min)
-
-☐ Livraison express directe (sans groupage)
-
-☐ Assurance transport
-
-☐ Livraison hors horaires (soir / nuit / week-end)
-
-☐ Passage frontière (UE)
-
-🟨 Bloc 5 — Prix estimé
-💰 Prix estimé : CHF XX.–
-
-Texte :
-« Prix indicatif, confirmé après validation »
-
-Boutons :
-
-🔄 Réinitialiser
-
-👉 Demande de course / Continuer
-
-2️⃣ Logique de calcul du prix (simple et efficace)
-🔢 Base Léman-Courses (exemple réaliste)
-A. Tarif de base
-Prix minimum : 35 CHF
-
-Inclus : 10 km + 15 min d’attente
-
-B. Distance
-2.20 CHF / km supplémentaire
-
-C. Urgence
-Standard : +0 CHF
-
-Express (< 2h) : +15 CHF
-
-Immédiat (< 60 min) : +30 CHF
-
-D. Poids
-0–5 kg : inclus
-
-5–20 kg : +10 CHF
-
-20 kg : +20 CHF
-
-E. Horaires
-Nuit / week-end : +25 %
-
-F. Frontière UE
-Supplément fixe : +40 CHF
-
-🧮 Formule simplifiée
-Prix =
-Base
-+ (km supplémentaires × 2.20)
-+ Supplément urgence
-+ Supplément poids
-+ Options
-👉 Résultat affiché en temps réel, comme sur ton modèle.
-
-3️⃣ Ce que je peux te livrer concrètement
-Dis-moi ce que tu veux en priorité 👇
-
-✅ Option A — Formulaire HTML clé en main
-Responsive
-
-Calcul JS en direct
-
-Prêt à intégrer sur léman-courses.ch
-
-Style clean / pro (fond clair, boutons jaunes)
-
-👉 Idéal pour Google Sites / site vitrine
-
-✅ Option B — Google Sheets (calculateur interne)
-Même logique de calcul
-
-Utilisable au téléphone
-
-Base pour devis rapides
-
-✅ Option C — WordPress (plugin ou shortcode)
-Formulaire public
-
-Envoi automatique par e-mail
-
-Prix estimatif dans le mail client
-
-✅ Option D — Version “MVP App”
-Même formulaire
-
-Pensé pour future app livreur / client
-
-Prochaine étape 🚀
-👉 Dis-moi simplement :
-1️⃣ HTML / Google Sheets / WordPress ?
-2️⃣ Tu veux prix visibles au client ou seulement estimation ?
-3️⃣ Tarifs : je garde ceux ci-dessus ou tu veux les ajuster ?
-
-Je te le construis propre, pro et prêt à l’emploi 💪
-
-Vous avez dit :
-1 Htlm 2 estimation 3 tarif min 25 frs est le calcule est juste 
-ChatGPT a dit :
-Parfait 👍
-Je te fais donc directement le formulaire HTML complet, avec :
-
-✅ HTML + CSS + JavaScript
-
-✅ prix en estimation
-
-✅ tarif minimum 25 CHF
-
-✅ calcul juste, clair et pro
-
-✅ prêt à intégrer sur leman-courses.ch
-
-🔢 Logique de calcul (confirmée)
-Prix minimum : 25 CHF
-
-Distance : 2.20 CHF / km
-
-Urgence :
-
-Standard : +0 CHF
-
-Express (<2h) : +15 CHF
-
-Immédiat (<60 min) : +30 CHF
-
-Poids :
-
-≤ 5 kg : inclus
-
-5–20 kg : +10 CHF
-
-20 kg : +20 CHF
-
-Options :
-
-Nuit / week-end : +25 %
-
-Passage frontière UE : +40 CHF
-
-➡️ Le prix ne peut jamais descendre sous 25 CHF
-
-✅ FORMULAIRE HTML – prêt à l’emploi
-👉 Tu peux copier-coller tel quel dans un fichier index.html ou dans Google Sites (bloc HTML).
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Léman-Courses – Estimation transport urgent</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f7fa;
-  padding: 20px;
-}
-.container {
-  max-width: 900px;
-  margin: auto;
-  background: #fff;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
-h2 {
-  margin-top: 30px;
-  color: #003366;
-}
-label {
-  display: block;
-  margin-top: 15px;
-  font-weight: bold;
-}
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-}
-.options label {
-  font-weight: normal;
-}
-.price {
-  margin-top: 30px;
-  font-size: 26px;
-  font-weight: bold;
-  color: #e69500;
-}
-.note {
-  font-size: 13px;
-  color: #666;
-}
-button {
-  margin-top: 20px;
-  padding: 12px 20px;
-  font-size: 16px;
-  background: #f5a623;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-</style>
-</head>
-
-<body>
-<div class="container">
-<h1>Estimation transport – Léman-Courses</h1>
-
-<h2>Envoi</h2>
-
-<label>Distance estimée (km)</label>
-<input type="number" id="km" value="10" min="0">
-
-<label>Poids du colis (kg)</label>
-<input type="number" id="poids" value="2" min="0">
-
-<label>Urgence</label>
-<select id="urgence">
-  <option value="0">Standard</option>
-  <option value="15">Express (&lt; 2h)</option>
-  <option value="30">Immédiat (&lt; 60 min)</option>
-</select>
-
-<h2>Options</h2>
-<div class="options">
-  <label><input type="checkbox" id="nuit"> Nuit / Week-end (+25%)</label>
-  <label><input type="checkbox" id="ue"> Passage frontière UE (+40 CHF)</label>
-</div>
-
-<div class="price">
-  Prix estimé : CHF <span id="prix">25.00</span>
-</div>
-<div class="note">
-  Prix indicatif, confirmé après validation de la course.
-</div>
-
-<button onclick="calculer()">Mettre à jour l’estimation</button>
-</div>
-
-<script>
-function calculer() {
-  let base = 25;
-  let km = parseFloat(document.getElementById("km").value) || 0;
-  let poids = parseFloat(document.getElementById("poids").value) || 0;
-  let urgence = parseFloat(document.getElementById("urgence").value);
-  let nuit = document.getElementById("nuit").checked;
-  let ue = document.getElementById("ue").checked;
-
-  let prix = base;
-
-  // Distance
-  prix += km * 2.20;
-
-  // Urgence
-  prix += urgence;
-
-  // Poids
-  if (poids > 5 && poids <= 20) prix += 10;
-  if (poids > 20) prix += 20;
-
-  // Frontière UE
-  if (ue) prix += 40;
-
-  // Nuit / week-end
-  if (nuit) prix *= 1.25;
-
-  // Minimum garanti
-  if (prix < 25) prix = 25;
-
-  document.getElementById("prix").innerText = prix.toFixed(2);
-}
-
-calculer();
-</script>
-</body>
-</html>
-🔜 Étapes suivantes possibles
-Si tu veux, je peux maintenant :
-
-✅ adapter exactement aux couleurs Léman-Courses
-
-✅ ajouter calcul automatique Google Maps (km réels)
-
-✅ connecter à WhatsApp / e-mail
-
-✅ préparer la version future app mobile
-
-👉 Dis-moi la prochaine brique et on enchaîne 💪
-
-Vous avez dit :
-✅ adapter exactement aux couleurs Léman-Courses
-
-✅ ajouter calcul automatique Google Maps (km réels)
-
-✅ connecter à WhatsApp / e-mail
-ChatGPT a dit :
-Parfait ✅
-On passe niveau pro, exactement comme demandé.
-Je te livre UN formulaire HTML complet, avec :
-
-🎨 Couleurs Léman-Courses (bleu + blanc + accent pro)
-
-🗺 Calcul automatique des km réels via Google Maps
-
-📲 Envoi direct vers WhatsApp
-
-✉️ Envoi par e-mail
-
-💰 Prix estimatif, minimum 25 CHF, calcul juste
-
-🔑 AVANT DE COMMENCER (important)
-Pour Google Maps, il te faut UNE clé API Google (gratuite au départ).
-
-👉 Tu la mets ici :
-
-const GOOGLE_MAPS_API_KEY = "TA_CLE_API_ICI";
-(Si tu veux, je t’explique comment la créer en 5 minutes.)
-
-✅ FORMULAIRE HTML COMPLET – LÉMAN-COURSES
-👉 Copie / colle tel quel dans un fichier
-leman-courses-calculateur.html
-
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Léman-Courses – Estimation transport express</title>
+<title>Estimation Léman Courses</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f8fc;
-  padding: 20px;
+body{
+  font-family:Arial;
+  background:#0B2A44;
+  margin:0;
+  padding:30px
 }
-.container {
-  max-width: 950px;
-  margin: auto;
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+.card{
+  max-width:700px;
+  margin:auto;
+  background:#fff;
+  padding:25px;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25)
 }
-h1 {
-  color: #003a8f;
+h2{text-align:center;color:#0B2A44}
+input,select,button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:16px
 }
-h2 {
-  margin-top: 30px;
-  color: #003a8f;
+button{
+  background:#FDB913;
+  color:#000;
+  font-weight:bold;
+  border:none;
+  cursor:pointer
 }
-label {
-  display: block;
-  margin-top: 15px;
-  font-weight: bold;
+button:hover{opacity:.9}
+.section{
+  margin-top:20px;
+  padding-top:10px;
+  border-top:1px solid #ddd
 }
-input, select {
-  width: 100%;
-  padding: 12px;
-  margin-top: 6px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+.label{
+  font-weight:bold;
+  color:#0B2A44;
+  margin-top:10px
 }
-.options label {
-  font-weight: normal;
+#map{
+  width:100%;
+  height:250px;
+  margin-top:10px;
+  border-radius:12px;
+  border:1px solid #ccc
 }
-.price {
-  margin-top: 30px;
-  font-size: 28px;
-  font-weight: bold;
-  color: #0057b7;
+.price{
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
+  color:#0B2A44;
+  margin-top:20px
 }
-.note {
-  font-size: 13px;
-  color: #666;
-}
-.buttons {
-  display: flex;
-  gap: 15px;
-  margin-top: 25px;
-}
-button {
-  padding: 14px 20px;
-  font-size: 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.btn-primary {
-  background: #0057b7;
-  color: #fff;
-}
-.btn-secondary {
-  background: #e6eef8;
-  color: #003a8f;
+.note{
+  text-align:center;
+  font-size:13px;
+  color:#666
 }
 </style>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=TA_CLE_API_ICI"></script>
 </head>
 
 <body>
 
-<div class="container">
-<h1>Estimation transport express – Léman-Courses</h1>
+<div class="card">
+<h2>🚚 Estimation Léman Courses</h2>
 
-<h2>Trajet</h2>
+<div class="section">
+  <div class="label">Adresse de départ</div>
+  <input id="depart" placeholder="Rue, NPA, ville">
 
-<label>Adresse de départ</label>
-<input type="text" id="depart" placeholder="Rue, code postal, ville">
+  <div class="label">Adresse de livraison</div>
+  <input id="arrivee" placeholder="Rue, NPA, ville">
 
-<label>Adresse de livraison</label>
-<input type="text" id="arrivee" placeholder="Rue, code postal, ville">
+  <button onclick="calculerDistance()">Calculer la distance</button>
 
-<button class="btn-secondary" onclick="calculerDistance()">Calculer la distance</button>
-
-<p>Distance réelle : <strong><span id="distance">0</span> km</strong></p>
-
-<h2>Envoi</h2>
-
-<label>Poids du colis (kg)</label>
-<input type="number" id="poids" value="2" min="0">
-
-<label>Urgence</label>
-<select id="urgence">
-  <option value="0">Standard</option>
-  <option value="15">Express (&lt; 2h)</option>
-  <option value="30">Immédiat (&lt; 60 min)</option>
-</select>
-
-<h2>Options</h2>
-<div class="options">
-  <label><input type="checkbox" id="nuit"> Nuit / week-end (+25%)</label>
-  <label><input type="checkbox" id="ue"> Passage frontière UE (+40 CHF)</label>
+  <div id="map"></div>
 </div>
 
-<div class="price">
-  Prix estimé : CHF <span id="prix">25.00</span>
-</div>
-
-<div class="note">
-  Prix indicatif. Confirmation finale après validation de la course.
-</div>
-
-<div class="buttons">
-  <button class="btn-primary" onclick="envoyerWhatsApp()">WhatsApp</button>
-  <button class="btn-secondary" onclick="envoyerEmail()">E-mail</button>
-</div>
-</div>
-
-<script>
-const GOOGLE_MAPS_API_KEY = "TA_CLE_API_ICI";
-let kmReels = 0;
-
-function calculerDistance() {
-  const depart = document.getElementById("depart").value;
-  const arrivee = document.getElementById("arrivee").value;
-
-  fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(depart)}&destinations=${encodeURIComponent(arrivee)}&key=${GOOGLE_MAPS_API_KEY}`)
-    .then(response => response.json())
-    .then(data => {
-      kmReels = data.rows[0].elements[0].distance.value / 1000;
-      document.getElementById("distance").innerText = kmReels.toFixed(1);
-      calculerPrix();
-    })
-    .catch(() => alert("Erreur de calcul de distance"));
-}
-
-function calculerPrix() {
-  let prix = 25;
-  let poids = parseFloat(document.getElementById("poids").value) || 0;
-  let urgence = parseFloat(document.getElementById("urgence").value);
-  let nuit = document.getElementById("nuit").checked;
-  let ue = document.getElementById("ue").checked;
-
-  prix += kmReels * 2.20;
-  prix += urgence;
-
-  if (poids > 5 && poids <= 20) prix += 10;
-  if (poids > 20) prix += 20;
-
-  if (ue) prix += 40;
-  if (nuit) prix *= 1.25;
-
-  if (prix < 25) prix = 25;
-
-  document.getElementById("prix").innerText = prix.toFixed(2);
-}
-
-function envoyerWhatsApp() {
-  const message = `Bonjour,%0AJe souhaite une course Léman-Courses.%0A%0ADépart : ${depart.value}%0AArrivée : ${arrivee.value}%0ADistance : ${kmReels.toFixed(1)} km%0APrix estimé : CHF ${prix.innerText}`;
-  window.open(`https://wa.me/41798700488?text=${message}`, "_blank");
-}
-
-function envoyerEmail() {
-  const sujet = "Demande de course – Léman-Courses";
-  const corps = `Départ : ${depart.value}\nArrivée : ${arrivee.value}\nDistance : ${kmReels.toFixed(1)} km\nPrix estimé : CHF ${prix.innerText}`;
-  window.location.href = `mailto:info@leman-courses.ch?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
-}
-</script>
-
-</body>
-</html>
-🔜 PROCHAINES AMÉLIORATIONS POSSIBLES
-Je peux encore :
-
-✅ intégrer logo Léman-Courses
-
-✅ ajouter choix véhicule (vélo / voiture / utilitaire)
-
-✅ enregistrer les demandes dans Google Sheets
-
-✅ préparer la version app mobile (MVP)
-
-👉 Dis-moi ce que tu veux en priorité, on continue sans perdre de temps 🚀
-
-Vous avez dit :
-intégrer logo Léman-Courses
-ChatGPT a dit :
-Parfait 👍
-On intègre le logo Léman-Courses proprement, sans casser le design.
-
-Je te donne :
-1️⃣ le code HTML/CSS prêt
-2️⃣ où mettre ton logo
-3️⃣ 2 variantes (classique ou header pro)
-
-1️⃣ Où placer le logo (simple et propre)
-👉 Mets ton logo en PNG ou SVG (fond transparent de préférence)
-Exemple de nom de fichier :
-
-logo-leman-courses.png
-👉 Place-le dans le même dossier que le fichier HTML
-OU remplace l’URL par celle de ton site.
-
-2️⃣ AJOUT DU LOGO – CODE À INSÉRER
-🔹 A. Ajoute ce bloc juste après <div class="container">
-<div class="header">
-  <img src="logo-leman-courses.png" alt="Léman-Courses" class="logo">
-</div>
-🔹 B. Ajoute ce CSS dans la balise <style>
-.header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.logo {
-  height: 60px;
-  max-width: 220px;
-}
-✔️ Résultat :
-
-logo visible
-
-aligné proprement
-
-responsive
-
-fond blanc / bleu OK
-
-3️⃣ Variante “header PRO” (logo + titre alignés)
-Si tu veux un rendu encore plus premium, remplace le <h1> par ceci 👇
-
-🔹 HTML
-<div class="header">
-  <img src="logo-leman-courses.png" alt="Léman-Courses" class="logo">
-  <div class="title">
-    <h1>Estimation transport express</h1>
-    <p>Service de courses urgentes – Suisse & Europe</p>
-  </div>
-</div>
-🔹 CSS (à ajouter)
-.header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 25px;
-}
-
-.title h1 {
-  margin: 0;
-  color: #003a8f;
-}
-
-.title p {
-  margin: 4px 0 0;
-  color: #666;
-  font-size: 14px;
-}
-🔥 Là on est clairement au niveau boîte de transport pro / startup sérieuse.
-
-4️⃣ Si tu veux, je peux aussi
-✅ optimiser le logo pour fond clair / fond sombre
-
-✅ faire une version mobile ultra clean
-
-✅ intégrer le logo dans le message WhatsApp & e-mail
-
-✅ préparer la charte couleur exacte Léman-Courses
-
-👉 Envoie-moi simplement :
-
-le fichier du logo ou
-
-l’URL du logo
-
-et je t’ajuste tout au pixel près 💪
-
-Vous avez dit :
-https://drive.google.com/file/d/1apbooNhYrbKDKmAPPZ1RkdxuSzqqnkAo/view?usp=drive_link.     mon lien de logo refaire le code 
-ChatGPT a dit :
-Parfait 👍 merci pour le lien.
-👉 Important : un lien Google Drive “/view” ne fonctionne pas directement dans une balise <img>.
-
-Il faut utiliser le lien direct exploitable.
-
-1️⃣ Conversion de ton lien Google Drive (OBLIGATOIRE)
-🔴 Ton lien actuel (ne marche pas en HTML)
-https://drive.google.com/file/d/1apbooNhYrbKDKmAPPZ1RkdxuSzqqnkAo/view?usp=drive_link
-✅ Lien direct correct pour le code HTML
-https://drive.google.com/uc?export=view&id=1apbooNhYrbKDKmAPPZ1RkdxuSzqqnkAo
-👉 C’est CE lien-là qu’on va utiliser.
-
-2️⃣ CODE HTML MIS À JOUR (logo intégré)
-Voici le code corrigé, prêt à l’emploi, avec ton logo Léman-Courses intégré 👇
-(remplace simplement ton ancien fichier par celui-ci)
-
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Léman-Courses – Estimation transport express</title>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f8fc;
-  padding: 20px;
-}
-
-.container {
-  max-width: 950px;
-  margin: auto;
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-}
-
-/* HEADER + LOGO */
-.header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 25px;
-}
-
-.logo {
-  height: 60px;
-  max-width: 220px;
-}
-
-.title h1 {
-  margin: 0;
-  color: #003a8f;
-}
-
-.title p {
-  margin: 4px 0 0;
-  color: #666;
-  font-size: 14px;
-}
-
-h2 {
-  margin-top: 30px;
-  color: #003a8f;
-}
-
-label {
-  display: block;
-  margin-top: 15px;
-  font-weight: bold;
-}
-
-input, select {
-  width: 100%;
-  padding: 12px;
-  margin-top: 6px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.options label {
-  font-weight: normal;
-}
-
-.price {
-  margin-top: 30px;
-  font-size: 28px;
-  font-weight: bold;
-  color: #0057b7;
-}
-
-.note {
-  font-size: 13px;
-  color: #666;
-}
-
-.buttons {
-  display: flex;
-  gap: 15px;
-  margin-top: 25px;
-}
-
-button {
-  padding: 14px 20px;
-  font-size: 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background: #0057b7;
-  color: #fff;
-}
-
-.btn-secondary {
-  background: #e6eef8;
-  color: #003a8f;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-  <!-- HEADER AVEC LOGO -->
-  <div class="header">
-    <img 
-      src="https://drive.google.com/uc?export=view&id=1apbooNhYrbKDKmAPPZ1RkdxuSzqqnkAo" 
-      alt="Léman-Courses"
-      class="logo"
-    >
-    <div class="title">
-      <h1>Estimation transport express</h1>
-      <p>Courses urgentes · Livraison express · Suisse & Europe</p>
-    </div>
-  </div>
-
-  <h2>Trajet</h2>
-
-  <label>Adresse de départ</label>
-  <input type="text" id="depart" placeholder="Rue, code postal, ville">
-
-  <label>Adresse de livraison</label>
-  <input type="text" id="arrivee" placeholder="Rue, code postal, ville">
-
-  <button class="btn-secondary" onclick="calculerDistance()">Calculer la distance</button>
-
-  <p>Distance réelle : <strong><span id="distance">0</span> km</strong></p>
-
-  <h2>Envoi</h2>
-
-  <label>Poids du colis (kg)</label>
+<div class="section">
+  <div class="label">Poids du colis (kg)</div>
   <input type="number" id="poids" value="2" min="0">
 
-  <label>Urgence</label>
+  <div class="label">Urgence</div>
   <select id="urgence">
     <option value="0">Standard</option>
     <option value="15">Express (&lt; 2h)</option>
     <option value="30">Immédiat (&lt; 60 min)</option>
   </select>
+</div>
 
-  <h2>Options</h2>
-  <div class="options">
-    <label><input type="checkbox" id="nuit"> Nuit / week-end (+25%)</label>
-    <label><input type="checkbox" id="ue"> Passage frontière UE (+40 CHF)</label>
-  </div>
+<div class="section">
+  <label><input type="checkbox" id="nuit"> Nuit / week-end (+25 %)</label><br>
+  <label><input type="checkbox" id="ue"> Passage frontière UE (+40 CHF)</label>
+</div>
 
-  <div class="price">
-    Prix estimé : CHF <span id="prix">25.00</span>
-  </div>
+<div class="price">
+  Prix estimé : CHF <span id="prix">25.00</span>
+</div>
 
-  <div class="note">
-    Prix indicatif, confirmé après validation de la course.
-  </div>
+<div class="note">
+  Prix indicatif, confirmé après validation
+</div>
 
-  <div class="buttons">
-    <button class="btn-primary" onclick="envoyerWhatsApp()">WhatsApp</button>
-    <button class="btn-secondary" onclick="envoyerEmail()">E-mail</button>
-  </div>
-
+<button onclick="envoyerWhatsApp()">Demander la course</button>
 </div>
 
 <script>
-const GOOGLE_MAPS_API_KEY = "TA_CLE_API_ICI";
+let map, directionsService, directionsRenderer;
 let kmReels = 0;
 
-function calculerDistance() {
-  const depart = document.getElementById("depart").value;
-  const arrivee = document.getElementById("arrivee").value;
-
-  fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(depart)}&destinations=${encodeURIComponent(arrivee)}&key=${GOOGLE_MAPS_API_KEY}`)
-    .then(res => res.json())
-    .then(data => {
-      kmReels = data.rows[0].elements[0].distance.value / 1000;
-      document.getElementById("distance").innerText = kmReels.toFixed(1);
-      calculerPrix();
-    })
-    .catch(() => alert("Erreur de calcul de distance"));
+function initMap(){
+  map = new google.maps.Map(document.getElementById("map"), {
+    center:{lat:46.8,lng:8.3},
+    zoom:7
+  });
+  directionsService = new google.maps.DirectionsService();
+  directionsRenderer = new google.maps.DirectionsRenderer({map:map});
 }
 
-function calculerPrix() {
-  let prix = 25;
-  let poids = parseFloat(document.getElementById("poids").value) || 0;
-  let urgence = parseFloat(document.getElementById("urgence").value);
-  let nuit = document.getElementById("nuit").checked;
-  let ue = document.getElementById("ue").checked;
+function calculerDistance(){
+  const depart = document.getElementById("depart").value;
+  const arrivee = document.getElementById("arrivee").value;
+  if(!depart || !arrivee){alert("Veuillez entrer les deux adresses");return;}
 
-  prix += kmReels * 2.20;
+  directionsService.route({
+    origin:depart,
+    destination:arrivee,
+    travelMode:"DRIVING"
+  },(result,status)=>{
+    if(status==="OK"){
+      directionsRenderer.setDirections(result);
+      kmReels = result.routes[0].legs[0].distance.value/1000;
+      calculerPrix();
+    }else{
+      alert("Erreur de calcul du trajet");
+    }
+  });
+}
+
+function calculerPrix(){
+  let prix = 25;
+  const poids = +document.getElementById("poids").value;
+  const urgence = +document.getElementById("urgence").value;
+  const nuit = document.getElementById("nuit").checked;
+  const ue = document.getElementById("ue").checked;
+
+  prix += kmReels * 2.2;
   prix += urgence;
 
-  if (poids > 5 && poids <= 20) prix += 10;
-  if (poids > 20) prix += 20;
-
-  if (ue) prix += 40;
-  if (nuit) prix *= 1.25;
-
-  if (prix < 25) prix = 25;
+  if(poids>5 && poids<=20) prix+=10;
+  if(poids>20) prix+=20;
+  if(ue) prix+=40;
+  if(nuit) prix*=1.25;
+  if(prix<25) prix=25;
 
   document.getElementById("prix").innerText = prix.toFixed(2);
 }
 
-function envoyerWhatsApp() {
-  const msg = `Bonjour,%0AJe souhaite une course Léman-Courses.%0A%0ADépart : ${depart.value}%0AArrivée : ${arrivee.value}%0ADistance : ${kmReels.toFixed(1)} km%0APrix estimé : CHF ${prix.innerText}`;
-  window.open(`https://wa.me/41798700488?text=${msg}`, "_blank");
+function envoyerWhatsApp(){
+  const msg = `Bonjour, je souhaite une course Léman Courses.%0A
+Départ : ${depart.value}%0A
+Arrivée : ${arrivee.value}%0A
+Distance : ${kmReels.toFixed(1)} km%0A
+Prix estimé : CHF ${prix.innerText}`;
+  window.open("https://wa.me/41798700488?text="+msg,"_blank");
 }
 
-function envoyerEmail() {
-  const sujet = "Demande de course – Léman-Courses";
-  const corps = `Départ : ${depart.value}\nArrivée : ${arrivee.value}\nDistance : ${kmReels.toFixed(1)} km\nPrix estimé : CHF ${prix.innerText}`;
-  window.location.href = `mailto:info@leman-courses.ch?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
-}
+window.onload = initMap;
 </script>
 
 </body>
 </html>
-3️⃣ Ce que je te conseille maintenant (très important)
-⚠️ Google Drive n’est pas idéal pour un site pro
-À moyen terme, mieux vaut :
-
-héberger le logo sur leman-courses.ch
-
-ou sur un hébergement web classique
-
-Je peux :
-
-✅ t’optimiser le logo (poids / netteté)
-
-✅ te donner la version SVG
-
-✅ finaliser la version mobile
-
-✅ brancher le formulaire vers Google Sheets
-
-👉 Dis-moi la prochaine étape et on continue 🔥
-
-
-
-
-Aucun fichier n’a été sélectionnéAucun fichier n’a été sélectionné
-ChatGPT peut commettre des erreurs. Il est recommandé de vérifier les informations importantes. Voir les préférences en matière de cookies.
