@@ -167,19 +167,32 @@ function calculerDistance(){
 }
 
 function prixService(type){
-  let base=Math.max(25,kmReels*1.20);
-  if(type==="urgent")return base+30;
-  if(type==="express")return base+15;
-  if(type==="priority")return base;
-  if(type==="eco")return Math.max(25,base*0.9);
+  if(kmReels <= 0) return 0;
+
+  // Prix de base pour 65 km / 0-15 kg
+  const base = {
+    urgent:   65,
+    express:  50,
+    priority: 35,
+    eco:      27
+  };
+
+  let prix = base[type] || 0;
+  const poids = parseFloat(document.getElementById("poids").value) || 0;
+
+  // Supplément poids
+  if(poids > 15 && poids <= 25){
+    prix += (poids - 15) * 2;
+  }
+
+  if(poids > 25){
+    prix += (10 * 2); // 15→25 kg
+    prix += (poids - 25) * 5;
+  }
+
+  return prix;
 }
 
-function dureeService(type){
-  if(type==="urgent")return "≤ 4 h";
-  if(type==="express")return "≤ 12 h";
-  if(type==="priority")return "≤ 24 h";
-  if(type==="eco")return "≤ 48 h";
-}
 
 function majBadges(){
   ["urgent","express","priority","eco"].forEach(t=>{
