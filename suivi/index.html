@@ -249,7 +249,6 @@ function recalculer(){
   prix_ttc.innerText = (ht + tva).toFixed(2);
 }
 
-/* ===== ENVOI ===== */
 function envoyer(){
 
   if(!km || !service.value){
@@ -262,7 +261,7 @@ function envoyer(){
     return;
   }
 
-  const data = {
+  const params = new URLSearchParams({
     client: client_nom.value,
     tel: client_tel.value,
     email: client_email.value,
@@ -271,18 +270,24 @@ function envoyer(){
     km: km,
     duree: duree,
     service: service.value,
-    colis: colis,
+    colis: JSON.stringify(colis),
     prixHT: prix_ht.innerText,
     tva: prix_tva.innerText,
     prixTTC: prix_ttc.innerText
-  };
-
-  fetch(SCRIPT_URL,{
-    method:"POST",
-    mode:"no-cors",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify(data)
   });
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: params.toString()
+  });
+
+  alert("✅ Demande envoyée");
+}
+
 
   alert("✅ Demande envoyée");
 }
