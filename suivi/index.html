@@ -214,7 +214,7 @@ function choisirService(){
 }
 
 function envoyerServeur(){
-  fetch("URL_SCRIPT_GOOGLE_APPS",{
+  fetch("https://script.google.com/macros/s/AKfycbxsspdSUfWFfigE9TW50am1uhu4CRRY9eichy2MOdn1ylWqak7kfc9gvXP2v__9c-ec/exec",{
     method:"POST",
     body:JSON.stringify({
       nom:client_nom.value,
