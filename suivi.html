@@ -1,1 +1,89 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Suivi – Léman Courses</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{font-family:Arial;background:#0B2A44;margin:0;padding:30px}
+.card{max-width:700px;margin:auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+h2{text-align:center;color:#0B2A44}
+input,button{width:100%;padding:14px;margin-top:10px;border-radius:10px;border:1px solid #ccc;font-size:16px}
+button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer}
+.section{margin-top:20px;padding-top:10px;border-top:1px solid #ddd}
+.label{font-weight:bold;color:#0B2A44}
+.status{font-size:18px;font-weight:bold;margin-top:5px}
+#error{color:#b00020;font-weight:bold;text-align:center;margin-top:15px}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+<h2>📦 Suivi Léman-Courses</h2>
+
+<input id="code" placeholder="Ex: LC-2026-000123">
+<button onclick="suivre()">Suivre mon envoi</button>
+
+<div id="error"></div>
+
+<div id="resultat" style="display:none">
+  <div class="section">
+    <div class="label">Statut</div>
+    <div class="status" id="statut"></div>
+    <div id="etape"></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Transport</div>
+    <div id="trajet"></div>
+    <div id="distance"></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Dernière mise à jour</div>
+    <div id="updated"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbzvPN6yV5wVT7mJGQgo6-YMGHlBdD_mveHTwmbFaKSpsIpbQ52gmaCk5m0zogtmKVZn/exec";
+
+async function suivre(){
+  const id = document.getElementById("code").value.trim();
+  const err = document.getElementById("error");
+  const res = document.getElementById("resultat");
+
+  err.textContent = "";
+  res.style.display = "none";
+
+  if(!id){ err.textContent="Veuillez entrer un numéro de suivi"; return; }
+
+  try{
+    const r = await fetch(API + "?id=" + encodeURIComponent(id));
+    const d = await r.json();
+
+    if(d.error){ err.textContent=d.error; return; }
+
+    document.getElementById("statut").textContent = d.statut;
+    document.getElementById("etape").textContent = d.etape || "";
+    document.getElementById("trajet").textContent =
+      d.depart + " → " + d.arrivee;
+    document.getElementById("distance").textContent =
+      d.km + " km – " + d.duree + " min";
+    document.getElementById("updated").textContent =
+      d.updated ? new Date(d.updated).toLocaleString() : "";
+
+    res.style.display = "block";
+  }
+  catch(e){
+    err.textContent="Erreur de connexion au service de suivi";
+  }
+}
+</script>
+
+</body>
+</html>
