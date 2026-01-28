@@ -161,15 +161,17 @@ function recalculer(){
   prix_tva.innerText=(ht*TVA).toFixed(2);
   prix_ttc.innerText=(ht*(1+TVA)).toFixed(2);
 }
+<form action="https://script.google.com/macros/s/AKfycbwCDBdKKVgfU0jnT2-tVpHQA6czHNHLdKw-Y1wP0v5Te7lWkckcVnkSyCW348zXFOTZ/exec"
+      method="POST"
+      target="_blank">
 
-/* ENVOI */
-function envoyer(){
-  fetch(SCRIPT_URL,{
-    method:"POST",
-    mode:"no-cors",
-    headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:"client="+encodeURIComponent(client_nom.value)
-  });
+  <input name="client" placeholder="Nom client" required>
+  <input name="email" placeholder="E-mail" required>
+
+  <button type="submit">Envoyer la demande</button>
+</form>
+
+
   alert("✅ Demande envoyée");
 }
 </script>
