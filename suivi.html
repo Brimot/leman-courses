@@ -48,46 +48,75 @@ button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbzvPN6yV5wVT7mJGQgo6-YMGHlBdD_mveHTwmbFaKSpsIpbQ52gmaCk5m0zogtmKVZn/exec";
+/* =========================
+   CONFIG
+========================= */
+const API_URL = "https://script.google.com/macros/s/AKfycbyd0bruIwHFeQkRlh9eOP_w9ch7F3UXmuFLY6VLEwpRQDflvcDabYNR7tDYCqgCd2c/exec";
 
-async function suivre(){
-  const id = document.getElementById("code").value.trim();
-  const err = document.getElementById("error");
-  const res = document.getElementById("resultat");
+/* =========================
+   UTILS
+========================= */
+function qs(name){
+  return new URLSearchParams(window.location.search).get(name);
+}
 
-  err.textContent = "";
-  res.style.display = "none";
+function showError(msg){
+  document.getElementById("error").textContent = msg;
+  document.getElementById("result").style.display = "none";
+}
 
-  if(!id){
-    err.textContent = "Veuillez entrer un numéro de suivi";
+function showResult(){
+  document.getElementById("error").textContent = "";
+  document.getElementById("result").style.display = "block";
+}
+
+/* =========================
+   AUTO-REMPLISSAGE VIA URL
+   ex: suivi.html?id=LC-2026-000123
+========================= */
+window.addEventListener("DOMContentLoaded", () => {
+  const id = qs("id");
+  if (id) {
+    document.getElementById("code").value = id;
+    rechercher();
+  }
+});
+
+/* =========================
+   FETCH SUIVI
+========================= */
+async function rechercher(){
+  const code = document.getElementById("code").value.trim();
+  if(!code){
+    showError("Veuillez entrer un numéro de suivi.");
     return;
   }
 
   try {
-    const response = await fetch(API + "?id=" + encodeURIComponent(id));
-    const data = await response.json();
+    const res = await fetch(API_URL + "?id=" + encodeURIComponent(code));
+    const data = await res.json();
 
-    if(data.error){
-      err.textContent = data.error;
+    if (data.error){
+      showError(data.error);
       return;
     }
 
-    document.getElementById("statut").textContent = data.statut || "—";
-    document.getElementById("etape").textContent = data.etape || "";
-    document.getElementById("trajet").textContent =
-      (data.depart || "") + " → " + (data.arrivee || "");
-    document.getElementById("distance").textContent =
-      (data.km || "") + " km – " + (data.duree || "") + " min";
-    document.getElementById("updated").textContent =
-      data.updated ? new Date(data.updated).toLocaleString() : "";
+    // Remplissage
+    document.getElementById("f_id").textContent = data.id || "—";
+    document.getElementById("f_client").textContent = data.client || "—";
+    document.getElementById("f_service").textContent = data.service || "—";
+    document.getElementById("f_depart").textContent = data.depart || "—";
+    document.getElementById("f_arrivee").textContent = data.arrivee || "—";
+    document.getElementById("f_km").textContent = data.km ? data.km + " km" : "—";
+    document.getElementById("f_duree").textContent = data.duree ? data.duree + " min" : "—";
+    document.getElementById("f_statut").textContent = data.statut || "—";
+    document.getElementById("f_etape").textContent = data.etape || "—";
+    document.getElementById("f_update").textContent = data.updated || "—";
 
-    res.style.display = "block";
+    showResult();
 
-  } catch(e){
-    err.textContent = "Erreur de connexion au service de suivi";
+  } catch (err) {
+    showError("Erreur de connexion au service de suivi.");
   }
 }
 </script>
-
-</body>
-</html>
