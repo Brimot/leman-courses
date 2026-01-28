@@ -235,26 +235,35 @@ function recalculer(){
   prix_ttc.innerText=(ht+tva).toFixed(2);
 }
 
-/* ===== ENVOI ===== */
-function envoyer(){
-  fetch(SCRIPT_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      client:client_nom.value,
-      tel:client_tel.value,
-      email:client_email.value,
-      depart:adresse("pc"),
-      arrivee:adresse("lv"),
-      km:km,duree:duree,
-      service:service.value,
-      colis:colis,
-      prixHT:prix_ht.innerText,
-      tva:prix_tva.innerText,
-      prixTTC:prix_ttc.innerText
-    })
-  }).then(()=>alert("✅ Demande envoyée"));
+function envoyer() {
+
+  const data = {
+    client: document.getElementById("client_nom").value,
+    tel: document.getElementById("client_tel").value,
+    email: document.getElementById("client_email").value,
+    depart: adresse("pc"),
+    arrivee: adresse("lv"),
+    km: km,
+    duree: duree,
+    service: service.value,
+    colis: colis,
+    prixHT: prix_ht.innerText,
+    tva: prix_tva.innerText,
+    prixTTC: prix_ttc.innerText
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbyeQW41UWt4lXzMLIld4RYW-ZX0OMj25J5vy-aj7WaC5hCAeI5Le5J1GBsr5fb8eH_c/exec", {
+    method: "POST",
+    mode: "no-cors",   // ⚠️ CRUCIAL
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  alert("✅ Demande envoyée");
 }
+
 </script>
 
 </body>
