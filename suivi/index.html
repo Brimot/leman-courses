@@ -6,66 +6,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{
-  font-family:Arial;
-  background:#0B2A44;
-  margin:0;
-  padding:30px
-}
-.card{
-  max-width:700px;
-  margin:auto;
-  background:#fff;
-  padding:25px;
-  border-radius:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.25)
-}
+body{font-family:Arial;background:#0B2A44;margin:0;padding:30px}
+.card{max-width:700px;margin:auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 h2{text-align:center;color:#0B2A44}
-input,select,button{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  font-size:16px
-}
-button{
-  background:#FDB913;
-  color:#000;
-  font-weight:bold;
-  border:none;
-  cursor:pointer
-}
+input,select,button{width:100%;padding:14px;margin-top:10px;border-radius:10px;border:1px solid #ccc;font-size:16px}
+button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer}
 button:hover{opacity:.9}
-.section{
-  margin-top:20px;
-  padding-top:10px;
-  border-top:1px solid #ddd
-}
-.label{
-  font-weight:bold;
-  color:#0B2A44;
-  margin-top:10px
-}
-#map{
-  width:100%;
-  height:260px;
-  margin-top:12px;
-  border-radius:12px;
-  border:1px solid #ccc
-}
-.price{
-  text-align:center;
-  font-size:24px;
-  font-weight:bold;
-  color:#0B2A44;
-  margin-top:20px
-}
-.note{
-  text-align:center;
-  font-size:13px;
-  color:#666
-}
+.section{margin-top:20px;padding-top:10px;border-top:1px solid #ddd}
+.label{font-weight:bold;color:#0B2A44;margin-top:10px}
+#map{width:100%;height:260px;margin-top:12px;border-radius:12px;border:1px solid #ccc}
+.price{text-align:center;font-size:22px;font-weight:bold;color:#0B2A44;margin-top:20px}
+.note{text-align:center;font-size:13px;color:#666}
 </style>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1XwMisUcFm6UwQseU1sUU-n_55uI9AWQ"></script>
@@ -77,23 +28,34 @@ button:hover{opacity:.9}
 <h2>🚚 Estimation Léman Courses</h2>
 
 <div class="section">
+  <div class="label">👤 Coordonnées client</div>
+  <input id="client_nom" placeholder="Nom / Entreprise">
+  <input id="client_tel" placeholder="Téléphone">
+  <input id="client_email" placeholder="E-mail">
+</div>
+
+<div class="section">
+  <div class="label">🕒 Heure souhaitée de prise en charge</div>
+  <input type="datetime-local" id="heure_souhaitee">
+</div>
+
+<div class="section">
   <div class="label">📍 Prise en charge</div>
-  <input id="pc_npa" placeholder="NPA (ex: 1462)">
-  <input id="pc_ville" placeholder="Ville (ex: Yvonand)">
-  <input id="pc_rue" placeholder="Rue / adresse">
-  <input id="pc_no" placeholder="N° de voie">
+  <input id="pc_npa" placeholder="NPA">
+  <input id="pc_ville" placeholder="Ville">
+  <input id="pc_rue" placeholder="Rue">
+  <input id="pc_no" placeholder="N°">
 </div>
 
 <div class="section">
   <div class="label">🚚 Livraison</div>
-  <input id="lv_npa" placeholder="NPA (ex: 1003)">
-  <input id="lv_ville" placeholder="Ville (ex: Lausanne)">
-  <input id="lv_rue" placeholder="Rue / adresse">
-  <input id="lv_no" placeholder="N° de voie">
+  <input id="lv_npa" placeholder="NPA">
+  <input id="lv_ville" placeholder="Ville">
+  <input id="lv_rue" placeholder="Rue">
+  <input id="lv_no" placeholder="N°">
 </div>
 
 <button onclick="calculerDistance()">Calculer la distance</button>
-
 <div id="map"></div>
 
 <div class="section">
@@ -114,98 +76,93 @@ button:hover{opacity:.9}
 </div>
 
 <div class="price">
+  Distance : <span id="distance_txt">–</span> km<br>
+  Durée : <span id="duree_txt">–</span><br><br>
   Prix estimé : CHF <span id="prix">25.00</span>
 </div>
 
-<div class="note">
-  Prix indicatif, confirmé après validation
-</div>
+<div class="note">Prix indicatif, confirmé après validation</div>
 
-<button onclick="envoyerWhatsApp()">Demander la course</button>
+<button onclick="envoyerServeur()">Envoyer la demande</button>
 </div>
 
 <script>
 let map, directionsService, directionsRenderer;
 let kmReels = 0;
+let dureeMinutes = 0;
 
 function initMap(){
   map = new google.maps.Map(document.getElementById("map"), {
-    center:{lat:46.8,lng:8.3},
-    zoom:7
+    center:{lat:46.8,lng:8.3}, zoom:7
   });
   directionsService = new google.maps.DirectionsService();
   directionsRenderer = new google.maps.DirectionsRenderer({map});
 }
 
-function adresse(prefix){
-  const npa   = document.getElementById(prefix+"_npa").value.trim();
-  const ville = document.getElementById(prefix+"_ville").value.trim();
-  const rue   = document.getElementById(prefix+"_rue").value.trim();
-  const no    = document.getElementById(prefix+"_no").value.trim();
-
-  if(!/^\d{4}$/.test(npa) || !ville) return null;
-
-  const rueNo = (rue+" "+no).trim();
-  return `${rueNo}, ${npa} ${ville}, Suisse`.replace(/\s+/g," ").trim();
+function adresse(p){
+  const npa=document.getElementById(p+"_npa").value.trim();
+  const ville=document.getElementById(p+"_ville").value.trim();
+  const rue=document.getElementById(p+"_rue").value.trim();
+  const no=document.getElementById(p+"_no").value.trim();
+  if(!/^\d{4}$/.test(npa)||!ville) return null;
+  return `${rue} ${no}, ${npa} ${ville}, Suisse`.replace(/\s+/g," ").trim();
 }
 
 function calculerDistance(){
-  const depart = adresse("pc");
-  const arrivee = adresse("lv");
-
-  if(!depart || !arrivee){
-    alert("Merci de renseigner au minimum NPA (4 chiffres) et Ville.");
-    return;
-  }
-
-  directionsService.route({
-    origin:depart,
-    destination:arrivee,
-    travelMode:"DRIVING"
-  },(result,status)=>{
-    if(status==="OK"){
-      directionsRenderer.setDirections(result);
-      kmReels = result.routes[0].legs[0].distance.value / 1000;
+  const d=adresse("pc"), a=adresse("lv");
+  if(!d||!a){alert("NPA et ville requis");return;}
+  directionsService.route({origin:d,destination:a,travelMode:"DRIVING"},(r,s)=>{
+    if(s==="OK"){
+      directionsRenderer.setDirections(r);
+      const leg=r.routes[0].legs[0];
+      kmReels=leg.distance.value/1000;
+      dureeMinutes=Math.max(15,Math.ceil(leg.duration.value/60));
+      document.getElementById("distance_txt").innerText=kmReels.toFixed(1);
+      document.getElementById("duree_txt").innerText=dureeMinutes+" min";
       calculerPrix();
-    }else{
-      alert("Impossible de calculer l’itinéraire");
     }
   });
 }
 
 function calculerPrix(){
-  let prix = 25;
-  const poids = +document.getElementById("poids").value;
-  const urgence = +document.getElementById("urgence").value;
-  const nuit = document.getElementById("nuit").checked;
-  const ue = document.getElementById("ue").checked;
-
-  prix += kmReels * 2.2;
-  prix += urgence;
-  if(poids>5 && poids<=20) prix+=10;
-  if(poids>20) prix+=20;
-  if(ue) prix+=40;
-  if(nuit) prix*=1.25;
-  if(prix<25) prix=25;
-
-  document.getElementById("prix").innerText = prix.toFixed(2);
+  let prix=25;
+  const p=+poids.value,u=+urgence.value;
+  if(p>5&&p<=20)prix+=10;
+  if(p>20)prix+=20;
+  prix+=kmReels*2.2+u;
+  if(nuit.checked)prix*=1.25;
+  if(ue.checked)prix+=40;
+  prix=Math.max(25,prix);
+  document.getElementById("prix").innerText=prix.toFixed(2);
 }
 
-function envoyerWhatsApp(){
-  const msg =
-`Bonjour, je souhaite une course Léman Courses.
-Prise en charge : ${adresse("pc")}
-Livraison : ${adresse("lv")}
-Distance : ${kmReels.toFixed(1)} km
-Prix estimé : CHF ${prix.innerText}`;
+function envoyerServeur(){
+  const data={
+    nom:client_nom.value,
+    tel:client_tel.value,
+    email:client_email.value,
+    heure:heure_souhaitee.value,
+    depart:adresse("pc"),
+    arrivee:adresse("lv"),
+    distance:kmReels,
+    duree:dureeMinutes,
+    poids:poids.value,
+    urgence:urgence.options[urgence.selectedIndex].text,
+    nuit:nuit.checked,
+    ue:ue.checked,
+    prix:prix.innerText
+  };
 
-  window.open(
-    "https://wa.me/41798700488?text="+encodeURIComponent(msg),
-    "_blank"
-  );
+  fetch("URL_SCRIPT_GOOGLE_APPS",{
+    method:"POST",
+    body:JSON.stringify(data),
+    headers:{"Content-Type":"application/json"}
+  })
+  .then(()=>alert("Demande envoyée"))
+  .catch(()=>alert("Erreur d’envoi"));
 }
 
-window.onload = initMap;
+window.onload=initMap;
 </script>
 
 </body>
