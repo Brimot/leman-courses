@@ -20,32 +20,27 @@ button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer
 <body>
 
 <div class="card">
-  <h2>📦 Suivi Léman-Courses</h2>
 
-  <input id="code" placeholder="Ex : LC-2026-xxxxxx">
-  <button onclick="suivre()">Suivre mon envoi</button>
+  <input id="code" placeholder="LC-2026-000123">
+  <button onclick="rechercher()">Suivre mon envoi</button>
 
   <div id="error"></div>
 
-  <div id="resultat" style="display:none">
-    <div class="section">
-      <div class="label">Statut</div>
-      <div id="statut"></div>
-      <div id="etape"></div>
-    </div>
-
-    <div class="section">
-      <div class="label">Trajet</div>
-      <div id="trajet"></div>
-      <div id="distance"></div>
-    </div>
-
-    <div class="section">
-      <div class="label">Dernière mise à jour</div>
-      <div id="updated"></div>
-    </div>
+  <div id="result" style="display:none">
+    <span id="f_id"></span>
+    <span id="f_client"></span>
+    <span id="f_service"></span>
+    <span id="f_depart"></span>
+    <span id="f_arrivee"></span>
+    <span id="f_km"></span>
+    <span id="f_duree"></span>
+    <span id="f_statut"></span>
+    <span id="f_etape"></span>
+    <span id="f_update"></span>
   </div>
+
 </div>
+
 
 <script>
 /* =========================
