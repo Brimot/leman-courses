@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,141 +8,348 @@
 
 <style>
 body{font-family:Arial;background:#0B2A44;margin:0;padding:30px}
-.card{max-width:900px;margin:auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-h2{text-align:center;color:#0B2A44}
-input,select,button{width:100%;padding:12px;margin-top:8px;border-radius:8px;border:1px solid #ccc;font-size:15px}
+.card{max-width:980px;margin:auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+h2{text-align:center;color:#0B2A44;margin:0 0 10px}
+.sub{text-align:center;color:#38556e;margin-top:0}
+input,select,button{width:100%;padding:12px;margin-top:8px;border-radius:8px;border:1px solid #ccc;font-size:15px;box-sizing:border-box}
 button{background:#FDB913;color:#000;font-weight:bold;border:none;cursor:pointer}
+button:hover{opacity:.92}
 .section{margin-top:22px;padding-top:12px;border-top:1px solid #ddd}
-.label{font-weight:bold;color:#0B2A44}
+.label{font-weight:bold;color:#0B2A44;margin-bottom:6px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-#map{width:100%;height:260px;margin-top:12px;border-radius:12px;border:1px solid #ccc}
-.price{text-align:center;margin-top:15px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:820px){.grid-2,.grid-3{grid-template-columns:1fr}}
+#map{width:100%;height:270px;margin-top:12px;border-radius:12px;border:1px solid #ccc}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #ccc;padding:8px;text-align:center;vertical-align:middle}
+th{background:#f5f7fa;color:#0B2A44}
+.smallbtn{background:#e6eef8;color:#0B2A44;border:1px solid #cfd9e6;font-weight:bold;padding:8px;border-radius:8px;width:auto}
+.smallbtn:hover{opacity:.92}
+.badges{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.badge{background:#0B2A44;color:#fff;padding:8px 12px;border-radius:999px;font-size:14px}
+.badge strong{font-size:15px}
+.pricebox{margin-top:16px;padding:14px;border:1px solid #e6e6e6;border-radius:12px;background:#fbfcfe}
+.pricegrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center}
+@media(max-width:820px){.pricegrid{grid-template-columns:1fr}}
+.big{font-size:22px}
+.note{font-size:13px;color:#555;text-align:center;margin-top:10px}
+.warn{color:#b00020;font-weight:bold;text-align:center;margin-top:10px}
 </style>
 
-<!-- Google Maps avec callback -->
+<!-- ✅ Google Maps (garde TA clé qui marche) -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1XwMisUcFm6UwQseU1sUU-n_55uI9AWQ&callback=initMap" async defer></script>
-
 </head>
+
 <body>
 
-<form action="https://script.google.com/macros/s/AKfycbzvPN6yV5wVT7mJGQgo6-YMGHlBdD_mveHTwmbFaKSpsIpbQ52gmaCk5m0zogtmKVZn/exec"
-      method="POST"
-      target="_blank">
+<form id="formDemande"
+  action="https://script.google.com/macros/s/AKfycbzvPN6yV5wVT7mJGQgo6-YMGHlBdD_mveHTwmbFaKSpsIpbQ52gmaCk5m0zogtmKVZn/exec"
+  method="POST"
+  target="_blank">
 
 <div class="card">
+  <h2>🚚 Estimation Léman Courses</h2>
+  <p class="sub">Calcul automatique (km réels Google Maps) · TVA 8.1 % · Prix minimum 25 CHF</p>
 
-<h2>🚚 Estimation Léman Courses</h2>
-
-<div class="section">
-  <div class="label">👤 Coordonnées client</div>
-  <input name="client" id="client_nom" placeholder="Nom / Entreprise" required>
-  <input name="email" id="client_email" placeholder="E-mail" required>
-  <input name="tel" id="client_tel" placeholder="Téléphone">
-</div>
-
-<div class="section">
-  <div class="label">📍 Prise en charge</div>
-  <div class="grid-2">
-    <input id="pc_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'pc_ville')">
-    <input id="pc_ville" name="ville_pc" placeholder="Ville">
-    <input id="pc_rue" placeholder="Rue">
-    <input id="pc_no" placeholder="N°">
+  <div class="section">
+    <div class="label">👤 Coordonnées client</div>
+    <div class="grid-3">
+      <input name="client" id="client_nom" placeholder="Nom / Entreprise" required>
+      <input name="tel" id="client_tel" placeholder="Téléphone">
+      <input name="email" id="client_email" placeholder="E-mail" required>
+    </div>
   </div>
-</div>
 
-<div class="section">
-  <div class="label">🚚 Livraison</div>
-  <div class="grid-2">
-    <input id="lv_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'lv_ville')">
-    <input id="lv_ville" name="ville_lv" placeholder="Ville">
-    <input id="lv_rue" placeholder="Rue">
-    <input id="lv_no" placeholder="N°">
+  <div class="section">
+    <div class="label">🕒 Heure souhaitée</div>
+    <input name="heure_souhaitee" id="heure_souhaitee" type="datetime-local">
   </div>
-</div>
 
-<button type="button" onclick="calculerDistance()">Calculer la distance</button>
+  <div class="section">
+    <div class="label">📍 Prise en charge</div>
+    <div class="grid-2">
+      <input id="pc_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'pc_ville')">
+      <input id="pc_ville" placeholder="Ville">
+      <input id="pc_rue" placeholder="Rue">
+      <input id="pc_no" placeholder="N°">
+    </div>
+  </div>
 
-<div id="map"></div>
+  <div class="section">
+    <div class="label">🚚 Livraison</div>
+    <div class="grid-2">
+      <input id="lv_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'lv_ville')">
+      <input id="lv_ville" placeholder="Ville">
+      <input id="lv_rue" placeholder="Rue">
+      <input id="lv_no" placeholder="N°">
+    </div>
+  </div>
 
-<div class="price">
-  Distance : <span id="distance_txt">–</span> km<br>
-  Durée : <span id="duree_txt">–</span> min
-</div>
+  <button type="button" onclick="calculerDistance()">Calculer la distance</button>
+  <div id="map"></div>
 
-<!-- Champs cachés envoyés au script -->
-<input type="hidden" name="depart" id="f_depart">
-<input type="hidden" name="arrivee" id="f_arrivee">
-<input type="hidden" name="km" id="f_km">
-<input type="hidden" name="duree" id="f_duree">
+  <div class="badges">
+    <div class="badge">Distance: <strong><span id="distance_txt">–</span> km</strong></div>
+    <div class="badge">Durée: <strong><span id="duree_txt">–</span> min</strong></div>
+  </div>
 
-<button type="submit" onclick="remplirForm()">Envoyer la demande</button>
+  <div class="section">
+    <div class="label">🚀 Type de livraison</div>
+    <select id="service" name="service" onchange="recalculer()">
+      <option value="">— Choisir —</option>
+      <option value="urgent">Urgente 4h</option>
+      <option value="express">Express 12h</option>
+      <option value="priority">Priority 24h</option>
+      <option value="eco">Eco 48h</option>
+    </select>
+  </div>
 
+  <div class="section">
+    <div class="label">📦 Colis (max 5 – même destination)</div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Poids (kg)</th>
+          <th>Dimensions (L×l×H cm)</th>
+          <th>Type</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="colis_table"></tbody>
+    </table>
+    <button class="smallbtn" type="button" onclick="ajouterColis()">➕ Ajouter un colis (+5 CHF dès le 2e)</button>
+    <div class="note">Surcharge poids par colis: 15–25 kg +2 CHF/kg · >25 kg +5 CHF/kg</div>
+  </div>
+
+  <div class="pricebox">
+    <div class="label">💰 Prix estimé</div>
+    <div class="pricegrid">
+      <div>HT<br><span class="big">CHF <span id="prix_ht">–</span></span></div>
+      <div>TVA 8.1 %<br><span class="big">CHF <span id="prix_tva">–</span></span></div>
+      <div><strong>TTC</strong><br><span class="big"><strong>CHF <span id="prix_ttc">–</span></strong></span></div>
+    </div>
+    <div class="note">Base: 1.20 CHF/km · Minimum: 25 CHF · Majoration selon service</div>
+    <div id="warn" class="warn" style="display:none;"></div>
+  </div>
+
+  <div class="note">Prix indicatif – confirmé après validation</div>
+
+  <!-- ✅ Champs cachés envoyés au script -->
+  <input type="hidden" name="depart" id="f_depart">
+  <input type="hidden" name="arrivee" id="f_arrivee">
+  <input type="hidden" name="km" id="f_km">
+  <input type="hidden" name="duree" id="f_duree">
+  <input type="hidden" name="prix_ht" id="f_prix_ht">
+  <input type="hidden" name="prix_tva" id="f_prix_tva">
+  <input type="hidden" name="prix_ttc" id="f_prix_ttc">
+  <input type="hidden" name="colis_json" id="f_colis_json">
+
+  <button type="submit" onclick="avantEnvoi()">Envoyer la demande</button>
 </div>
 </form>
 
 <script>
-// === CONFIG MAP ===
-let map, ds, dr, km = 0, duree = 0;
+/* ====== CONFIG PRIX ====== */
+const TVA = 0.081;
+const PRIX_KM = 1.20;
+const PRIX_MIN = 25;
+const MAX_COLIS = 5;
+const SUPPL_COLIS = 5;
 
+// Majoration service (modifiable)
+const MULTI_SERVICE = {
+  urgent: 1.25,    // +25%
+  express: 1.10,   // +10%
+  priority: 1.00,  // base
+  eco: 0.90        // -10%
+};
+
+const serviceEl = document.getElementById("service");
+
+/* ====== MAP ====== */
+let map, ds, dr, km = 0, duree = 0;
 function initMap(){
-  map = new google.maps.Map(document.getElementById("map"), {
-    center:{lat:46.8,lng:8.3},
-    zoom:7
-  });
+  map = new google.maps.Map(document.getElementById("map"), {center:{lat:46.8,lng:8.3}, zoom:7});
   ds = new google.maps.DirectionsService();
-  dr = new google.maps.DirectionsRenderer({ map });
+  dr = new google.maps.DirectionsRenderer({map});
 }
 
 function autoVilleGoogle(npa, villeId){
   if(!/^\d{4}$/.test(npa)) return;
-  new google.maps.Geocoder().geocode({
-    address:npa,
-    componentRestrictions:{country:"CH"}
-  }, (res, status) => {
-    if(status === "OK" && res[0]){
-      res[0].address_components.forEach(c => {
-        if(c.types.includes("locality") || c.types.includes("postal_town")){
-          document.getElementById(villeId).value = c.long_name;
-        }
+  new google.maps.Geocoder().geocode({address:npa, componentRestrictions:{country:"CH"}}, (res,status)=>{
+    if(status==="OK" && res[0]){
+      let v="";
+      res[0].address_components.forEach(c=>{
+        if(c.types.includes("locality") || c.types.includes("postal_town")) v=c.long_name;
       });
+      if(v) document.getElementById(villeId).value=v;
     }
   });
 }
 
 function adresse(p){
-  return `${document.getElementById(p+"_rue").value} ${document.getElementById(p+"_no").value}, ${document.getElementById(p+"_npa").value} ${document.getElementById(p+"_ville").value}, Suisse`;
+  const rue = document.getElementById(p+"_rue").value.trim();
+  const no = document.getElementById(p+"_no").value.trim();
+  const npa = document.getElementById(p+"_npa").value.trim();
+  const ville = document.getElementById(p+"_ville").value.trim();
+  if(!npa || !ville) return "";
+  return `${rue} ${no}, ${npa} ${ville}, Suisse`.replace(/\s+/g," ").trim();
 }
 
 function calculerDistance(){
   const d = adresse("pc");
   const a = adresse("lv");
-  if(!d || !a){
-    alert("Adresse incomplète");
-    return;
-  }
+  if(!d || !a){ alert("Adresse incomplète (au minimum NPA + Ville)"); return; }
+  if(!ds){ alert("Google Maps n'est pas prêt. Recharge la page."); return; }
 
-  ds.route({
-    origin: d,
-    destination: a,
-    travelMode:"DRIVING"
-  }, (r, s) => {
-    if(s === "OK"){
+  ds.route({origin:d, destination:a, travelMode:"DRIVING"}, (r,s)=>{
+    if(s==="OK"){
       dr.setDirections(r);
       const leg = r.routes[0].legs[0];
-      km = leg.distance.value / 1000;
-      duree = Math.max(15, Math.ceil(leg.duration.value / 60));
+      km = leg.distance.value/1000;
+      duree = Math.max(15, Math.ceil(leg.duration.value/60));
       document.getElementById("distance_txt").innerText = km.toFixed(1);
       document.getElementById("duree_txt").innerText = duree;
+      recalculer();
+    } else {
+      alert("Impossible de calculer le trajet. Vérifie les adresses.");
     }
   });
 }
 
-function remplirForm(){
+/* ====== COLIS ====== */
+let colis = [];
+
+function ajouterColis(){
+  if(colis.length >= MAX_COLIS){ alert("Maximum 5 colis"); return; }
+  colis.push({ id: Date.now(), poids: 1, L: 30, l: 20, h: 10, type: "Colis standard" });
+  renderColis(); recalculer();
+}
+
+function supprimerColis(id){
+  colis = colis.filter(c => c.id !== id);
+  renderColis(); recalculer();
+}
+
+function majColis(id, champ, val){
+  const c = colis.find(x => x.id === id);
+  if(!c) return;
+  c[champ] = val;
+  recalculer();
+}
+
+function renderColis(){
+  const tb = document.getElementById("colis_table");
+  tb.innerHTML = "";
+  colis.forEach((c,i)=>{
+    tb.innerHTML += `
+      <tr>
+        <td>${i+1}</td>
+        <td><input type="number" min="0" step="0.1" value="${c.poids}" oninput="majColis(${c.id},'poids',this.value)"></td>
+        <td style="white-space:nowrap">
+          <input style="width:70px" type="number" min="0" value="${c.L}" oninput="majColis(${c.id},'L',this.value)"> ×
+          <input style="width:70px" type="number" min="0" value="${c.l}" oninput="majColis(${c.id},'l',this.value)"> ×
+          <input style="width:70px" type="number" min="0" value="${c.h}" oninput="majColis(${c.id},'h',this.value)">
+        </td>
+        <td>
+          <select onchange="majColis(${c.id},'type',this.value)">
+            ${optionType(c.type)}
+          </select>
+        </td>
+        <td>
+          ${i===0 ? "—" : `<button class="smallbtn" type="button" onclick="supprimerColis(${c.id})">❌</button>`}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function optionType(selected){
+  const types = ["Documents","Colis standard","Matériel médical","Alimentaire","Fragile","Autre"];
+  return types.map(t => `<option ${t===selected?"selected":""}>${t}</option>`).join("");
+}
+
+function surchargePoids(poids){
+  const p = Number(poids) || 0;
+  if(p <= 15) return 0;
+  if(p <= 25) return (p - 15) * 2;
+  return 20 + (p - 25) * 5;
+}
+
+/* ====== PRIX ====== */
+function recalculer(){
+  const warn = document.getElementById("warn");
+  warn.style.display = "none";
+  warn.textContent = "";
+
+  if(colis.length === 0) ajouterColis();
+  if(!serviceEl.value){ return; }
+  if(!km || km <= 0){ return; }
+
+  // Base km
+  let ht = Math.max(PRIX_MIN, km * PRIX_KM);
+
+  // Majoration service
+  const m = MULTI_SERVICE[serviceEl.value] ?? 1.0;
+  ht = ht * m;
+
+  // Surcharges colis + supplément colis 2..n
+  colis.forEach((c, i) => {
+    ht += surchargePoids(c.poids);
+    if(i > 0) ht += SUPPL_COLIS;
+  });
+
+  const tva = ht * TVA;
+  const ttc = ht + tva;
+
+  document.getElementById("prix_ht").innerText = ht.toFixed(2);
+  document.getElementById("prix_tva").innerText = tva.toFixed(2);
+  document.getElementById("prix_ttc").innerText = ttc.toFixed(2);
+
+  // Petites alertes utiles
+  if(!adresse("pc") || !adresse("lv")){
+    warn.style.display = "block";
+    warn.textContent = "⚠️ Adresses incomplètes (au minimum NPA + Ville).";
+  }
+}
+
+function avantEnvoi(){
+  // Bloque si distance non calculée
+  if(!km || km <= 0){
+    alert("Veuillez d'abord calculer la distance (Google Maps).");
+    event.preventDefault();
+    return;
+  }
+  if(!serviceEl.value){
+    alert("Veuillez choisir un type de livraison.");
+    event.preventDefault();
+    return;
+  }
+
+  // Remplit champs cachés
   document.getElementById("f_depart").value = adresse("pc");
   document.getElementById("f_arrivee").value = adresse("lv");
-  document.getElementById("f_km").value = km;
-  document.getElementById("f_duree").value = duree;
+  document.getElementById("f_km").value = km.toFixed(1);
+  document.getElementById("f_duree").value = String(duree);
+
+  document.getElementById("f_prix_ht").value = document.getElementById("prix_ht").innerText;
+  document.getElementById("f_prix_tva").value = document.getElementById("prix_tva").innerText;
+  document.getElementById("f_prix_ttc").value = document.getElementById("prix_ttc").innerText;
+
+  // Colis JSON
+  const clean = colis.map(c => ({
+    poids: Number(c.poids)||0,
+    L: Number(c.L)||0,
+    l: Number(c.l)||0,
+    h: Number(c.h)||0,
+    type: c.type || "—"
+  }));
+  document.getElementById("f_colis_json").value = JSON.stringify(clean);
 }
+
+// Init 1 colis par défaut
+ajouterColis();
 </script>
 
 </body>
