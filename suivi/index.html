@@ -17,6 +17,25 @@ button:hover{opacity:.9}
 #map{width:100%;height:260px;margin-top:12px;border-radius:12px;border:1px solid #ccc}
 .price{text-align:center;font-size:22px;font-weight:bold;color:#0B2A44;margin-top:20px}
 .note{text-align:center;font-size:13px;color:#666}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.grid-2{grid-template-columns:1fr}}
+
+.badge{
+  background:#f5f7fa;
+  border:1px solid #ccc;
+  border-radius:12px;
+  padding:12px;
+  text-align:center;
+  font-size:14px;
+  color:#0B2A44
+}
+.badge strong{display:block;margin-top:6px;font-size:17px}
+.badge span{display:block;font-size:13px;color:#555}
+.badge.active{
+  border:2px solid #FDB913;
+  background:#fffbe6
+}
 </style>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1XwMisUcFm6UwQseU1sUU-n_55uI9AWQ"></script>
@@ -35,53 +54,73 @@ button:hover{opacity:.9}
 </div>
 
 <div class="section">
-  <div class="label">🕒 Heure souhaitée de prise en charge</div>
+  <div class="label">🕒 Heure souhaitée</div>
   <input type="datetime-local" id="heure_souhaitee">
 </div>
 
 <div class="section">
   <div class="label">📍 Prise en charge</div>
-  <input id="pc_npa" placeholder="NPA">
-  <input id="pc_ville" placeholder="Ville">
-  <input id="pc_rue" placeholder="Rue">
-  <input id="pc_no" placeholder="N°">
+  <div class="grid-2">
+    <input id="pc_npa" placeholder="NPA">
+    <input id="pc_ville" placeholder="Ville">
+    <input id="pc_rue" placeholder="Rue">
+    <input id="pc_no" placeholder="N°">
+  </div>
 </div>
 
 <div class="section">
   <div class="label">🚚 Livraison</div>
-  <input id="lv_npa" placeholder="NPA">
-  <input id="lv_ville" placeholder="Ville">
-  <input id="lv_rue" placeholder="Rue">
-  <input id="lv_no" placeholder="N°">
+  <div class="grid-2">
+    <input id="lv_npa" placeholder="NPA">
+    <input id="lv_ville" placeholder="Ville">
+    <input id="lv_rue" placeholder="Rue">
+    <input id="lv_no" placeholder="N°">
+  </div>
 </div>
 
 <button onclick="calculerDistance()">Calculer la distance</button>
 <div id="map"></div>
 
 <div class="section">
-  <div class="label">Poids du colis (kg)</div>
-  <input type="number" id="poids" value="2" min="0">
-
-  <div class="label">Urgence</div>
-  <select id="urgence">
-    <option value="0">Standard</option>
-    <option value="15">Express (&lt; 2h)</option>
-    <option value="30">Immédiat (&lt; 60 min)</option>
+  <div class="label">🚀 Type de livraison</div>
+  <select id="service" onchange="choisirService()">
+    <option value="">— Choisir —</option>
+    <option value="urgent">Urgente – 4h</option>
+    <option value="express">Express – 12h</option>
+    <option value="priority">Priority – 24h</option>
+    <option value="eco">Eco – 48h</option>
   </select>
 </div>
 
 <div class="section">
-  <label><input type="checkbox" id="nuit"> Nuit / week-end (+25 %)</label><br>
-  <label><input type="checkbox" id="ue"> Passage frontière UE (+40 CHF)</label>
+  <div class="label">💰 Estimation par service</div>
+  <div class="grid-2">
+    <div class="badge" id="b_urgent">Urgente 4h
+      <strong>—</strong>
+      <span id="d_urgent">—</span>
+    </div>
+    <div class="badge" id="b_express">Express 12h
+      <strong>—</strong>
+      <span id="d_express">—</span>
+    </div>
+    <div class="badge" id="b_priority">Priority 24h
+      <strong>—</strong>
+      <span id="d_priority">—</span>
+    </div>
+    <div class="badge" id="b_eco">Eco 48h
+      <strong>—</strong>
+      <span id="d_eco">—</span>
+    </div>
+  </div>
 </div>
 
 <div class="price">
   Distance : <span id="distance_txt">–</span> km<br>
-  Durée : <span id="duree_txt">–</span><br><br>
+  Durée réelle : <span id="duree_reelle">–</span><br><br>
   Prix estimé : CHF <span id="prix">25.00</span>
 </div>
 
-<div class="note">Prix indicatif, confirmé après validation</div>
+<div class="note">Prix et délais indicatifs</div>
 
 <button onclick="envoyerServeur()">Envoyer la demande</button>
 </div>
@@ -89,7 +128,7 @@ button:hover{opacity:.9}
 <script>
 let map, directionsService, directionsRenderer;
 let kmReels = 0;
-let dureeMinutes = 0;
+let dureeReelleMin = 0;
 
 function initMap(){
   map = new google.maps.Map(document.getElementById("map"), {
@@ -110,56 +149,74 @@ function adresse(p){
 
 function calculerDistance(){
   const d=adresse("pc"), a=adresse("lv");
-  if(!d||!a){alert("NPA et ville requis");return;}
+  if(!d||!a){alert("NPA + Ville requis");return;}
+
   directionsService.route({origin:d,destination:a,travelMode:"DRIVING"},(r,s)=>{
     if(s==="OK"){
       directionsRenderer.setDirections(r);
       const leg=r.routes[0].legs[0];
       kmReels=leg.distance.value/1000;
-      dureeMinutes=Math.max(15,Math.ceil(leg.duration.value/60));
-      document.getElementById("distance_txt").innerText=kmReels.toFixed(1);
-      document.getElementById("duree_txt").innerText=dureeMinutes+" min";
-      calculerPrix();
+      dureeReelleMin=Math.max(15,Math.ceil(leg.duration.value/60));
+
+      distance_txt.innerText=kmReels.toFixed(1);
+      duree_reelle.innerText=dureeReelleMin+" min";
+
+      majBadges();
     }
   });
 }
 
-function calculerPrix(){
-  let prix=25;
-  const p=+poids.value,u=+urgence.value;
-  if(p>5&&p<=20)prix+=10;
-  if(p>20)prix+=20;
-  prix+=kmReels*2.2+u;
-  if(nuit.checked)prix*=1.25;
-  if(ue.checked)prix+=40;
-  prix=Math.max(25,prix);
-  document.getElementById("prix").innerText=prix.toFixed(2);
+function prixService(type){
+  let base=Math.max(25,kmReels*1.20);
+  if(type==="urgent")return base+30;
+  if(type==="express")return base+15;
+  if(type==="priority")return base;
+  if(type==="eco")return Math.max(25,base*0.9);
+}
+
+function dureeService(type){
+  if(type==="urgent")return "≤ 4 h";
+  if(type==="express")return "≤ 12 h";
+  if(type==="priority")return "≤ 24 h";
+  if(type==="eco")return "≤ 48 h";
+}
+
+function majBadges(){
+  ["urgent","express","priority","eco"].forEach(t=>{
+    document.querySelector("#b_"+t+" strong").innerText =
+      "CHF "+prixService(t).toFixed(2);
+    document.getElementById("d_"+t).innerText =
+      "Délai : "+dureeService(t);
+  });
+}
+
+function choisirService(){
+  const s=service.value;
+  if(!s)return;
+
+  document.querySelectorAll(".badge").forEach(b=>b.classList.remove("active"));
+  document.getElementById("b_"+s).classList.add("active");
+
+  prix.innerText=prixService(s).toFixed(2);
 }
 
 function envoyerServeur(){
-  const data={
-    nom:client_nom.value,
-    tel:client_tel.value,
-    email:client_email.value,
-    heure:heure_souhaitee.value,
-    depart:adresse("pc"),
-    arrivee:adresse("lv"),
-    distance:kmReels,
-    duree:dureeMinutes,
-    poids:poids.value,
-    urgence:urgence.options[urgence.selectedIndex].text,
-    nuit:nuit.checked,
-    ue:ue.checked,
-    prix:prix.innerText
-  };
-
   fetch("URL_SCRIPT_GOOGLE_APPS",{
     method:"POST",
-    body:JSON.stringify(data),
+    body:JSON.stringify({
+      nom:client_nom.value,
+      tel:client_tel.value,
+      email:client_email.value,
+      heure:heure_souhaitee.value,
+      depart:adresse("pc"),
+      arrivee:adresse("lv"),
+      distance:kmReels,
+      duree:dureeReelleMin,
+      service:service.value,
+      prix:prix.innerText
+    }),
     headers:{"Content-Type":"application/json"}
-  })
-  .then(()=>alert("Demande envoyée"))
-  .catch(()=>alert("Erreur d’envoi"));
+  }).then(()=>alert("Demande envoyée"));
 }
 
 window.onload=initMap;
