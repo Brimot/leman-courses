@@ -19,58 +19,29 @@ body{
   padding:25px;
   border-radius:16px;
   box-shadow:0 10px 30px rgba(0,0,0,.25);
-  transition: border 0.3s;
+  transition:border .3s;
 }
-.card.error{
-  border:3px solid #c62828;
-}
-h2{
-  text-align:center;
-  color:#0B2A44;
-}
+.card.error{ border:3px solid #c62828; }
+h2{ text-align:center; color:#0B2A44; }
 input,button{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  font-size:16px;
+  width:100%; padding:14px; margin-top:10px;
+  border-radius:10px; border:1px solid #ccc; font-size:16px;
 }
 button{
-  background:#FDB913;
-  color:#000;
-  font-weight:bold;
-  border:none;
-  cursor:pointer;
+  background:#FDB913; color:#000; font-weight:bold;
+  border:none; cursor:pointer;
 }
-.section{
-  margin-top:18px;
-  padding-top:10px;
-  border-top:1px solid #ddd;
-}
-.label{
-  font-weight:bold;
-  color:#0B2A44;
-}
-#error{
-  color:#c62828;
-  font-weight:bold;
-  text-align:center;
-  margin-top:12px;
-}
-#result{
-  display:none;
-}
-.value{
-  margin:4px 0 10px 0;
-}
+.section{ margin-top:18px; padding-top:10px; border-top:1px solid #ddd; }
+.label{ font-weight:bold; color:#0B2A44; }
+#error{ color:#c62828; font-weight:bold; text-align:center; margin-top:12px; }
+#result{ display:none; }
+.value{ margin:4px 0 10px 0; }
 </style>
 </head>
 
 <body>
 
 <div class="card" id="card">
-
   <h2>📦 Suivi Léman-Courses</h2>
 
   <input id="code" placeholder="Ex : LC-2026-000123">
@@ -79,7 +50,6 @@ button{
   <div id="error"></div>
 
   <div id="result">
-
     <div class="section">
       <div class="label">Numéro de suivi</div>
       <div class="value" id="f_id">—</div>
@@ -120,6 +90,11 @@ button{
       <div class="value" id="f_update">—</div>
     </div>
 
+    <!-- Optionnel si tu ajoutes le prix dans le JSON -->
+    <div class="section">
+      <div class="label">Prix</div>
+      <div class="value" id="f_prix">—</div>
+    </div>
   </div>
 </div>
 
@@ -130,23 +105,30 @@ button{
 const API_URL = "https://script.google.com/macros/s/AKfycbyd0bruIwHFeQkRlh9eOP_w9ch7F3UXmuFLY6VLEwpRQDflvcDabYNR7tDYCqgCd2c/exec";
 
 /* =========================
-   UTILS
+   UTILS FORMAT
 ========================= */
 function qs(name){
   return new URLSearchParams(window.location.search).get(name);
 }
-
 function setText(id, value){
   const el = document.getElementById(id);
   if(el) el.textContent = value || "—";
 }
-
+function formatDateFR(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("fr-CH") + " – " +
+         d.toLocaleTimeString("fr-CH",{hour:"2-digit",minute:"2-digit"});
+}
+function formatCHF(n){
+  if(n===undefined || n===null || n==="") return "—";
+  return "CHF " + Number(n).toFixed(2);
+}
 function showError(msg){
   document.getElementById("error").textContent = msg;
   document.getElementById("result").style.display = "none";
   document.getElementById("card").classList.add("error");
 }
-
 function clearError(){
   document.getElementById("error").textContent = "";
   document.getElementById("card").classList.remove("error");
@@ -154,7 +136,6 @@ function clearError(){
 
 /* =========================
    AUTO-REMPLISSAGE URL
-   suivi.html?id=LC-...
 ========================= */
 window.addEventListener("DOMContentLoaded", () => {
   const id = qs("id");
@@ -190,11 +171,21 @@ async function rechercher(){
     setText("f_service", data.service);
     setText("f_depart", data.depart);
     setText("f_arrivee", data.arrivee);
-    setText("f_km", data.km ? data.km + " km" : "");
-    setText("f_duree", data.duree ? data.duree + " min" : "");
+
+    // Formatage km / durée
+    setText("f_km", data.km ? Number(data.km).toFixed(1) + " km" : "—");
+    setText("f_duree", data.duree ? Math.round(data.duree) + " min" : "—");
+
     setText("f_statut", data.statut);
     setText("f_etape", data.etape);
-    setText("f_update", data.updated);
+
+    // Formatage date/heure
+    setText("f_update", formatDateFR(data.updated));
+
+    // Optionnel prix si présent dans le JSON
+    if(data.prixTTC !== undefined){
+      setText("f_prix", formatCHF(data.prixTTC));
+    }
 
     document.getElementById("result").style.display = "block";
 
