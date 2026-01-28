@@ -49,8 +49,8 @@ button:hover{opacity:.9}
 }
 #map{
   width:100%;
-  height:250px;
-  margin-top:10px;
+  height:260px;
+  margin-top:12px;
   border-radius:12px;
   border:1px solid #ccc
 }
@@ -68,7 +68,7 @@ button:hover{opacity:.9}
 }
 </style>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=TA_CLE_API_ICI"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1XwMisUcFm6UwQseU1sUU-n_55uI9AWQ"></script>
 </head>
 
 <body>
@@ -77,16 +77,24 @@ button:hover{opacity:.9}
 <h2>🚚 Estimation Léman Courses</h2>
 
 <div class="section">
-  <div class="label">Adresse de départ</div>
-  <input id="depart" placeholder="Rue, NPA, ville">
-
-  <div class="label">Adresse de livraison</div>
-  <input id="arrivee" placeholder="Rue, NPA, ville">
-
-  <button onclick="calculerDistance()">Calculer la distance</button>
-
-  <div id="map"></div>
+  <div class="label">📍 Prise en charge</div>
+  <input id="pc_npa" placeholder="NPA (ex: 1462)">
+  <input id="pc_ville" placeholder="Ville (ex: Yvonand)">
+  <input id="pc_rue" placeholder="Rue / adresse">
+  <input id="pc_no" placeholder="N° de voie">
 </div>
+
+<div class="section">
+  <div class="label">🚚 Livraison</div>
+  <input id="lv_npa" placeholder="NPA (ex: 1003)">
+  <input id="lv_ville" placeholder="Ville (ex: Lausanne)">
+  <input id="lv_rue" placeholder="Rue / adresse">
+  <input id="lv_no" placeholder="N° de voie">
+</div>
+
+<button onclick="calculerDistance()">Calculer la distance</button>
+
+<div id="map"></div>
 
 <div class="section">
   <div class="label">Poids du colis (kg)</div>
@@ -126,13 +134,29 @@ function initMap(){
     zoom:7
   });
   directionsService = new google.maps.DirectionsService();
-  directionsRenderer = new google.maps.DirectionsRenderer({map:map});
+  directionsRenderer = new google.maps.DirectionsRenderer({map});
+}
+
+function adresse(prefix){
+  const npa   = document.getElementById(prefix+"_npa").value.trim();
+  const ville = document.getElementById(prefix+"_ville").value.trim();
+  const rue   = document.getElementById(prefix+"_rue").value.trim();
+  const no    = document.getElementById(prefix+"_no").value.trim();
+
+  if(!/^\d{4}$/.test(npa) || !ville) return null;
+
+  const rueNo = (rue+" "+no).trim();
+  return `${rueNo}, ${npa} ${ville}, Suisse`.replace(/\s+/g," ").trim();
 }
 
 function calculerDistance(){
-  const depart = document.getElementById("depart").value;
-  const arrivee = document.getElementById("arrivee").value;
-  if(!depart || !arrivee){alert("Veuillez entrer les deux adresses");return;}
+  const depart = adresse("pc");
+  const arrivee = adresse("lv");
+
+  if(!depart || !arrivee){
+    alert("Merci de renseigner au minimum NPA (4 chiffres) et Ville.");
+    return;
+  }
 
   directionsService.route({
     origin:depart,
@@ -141,10 +165,10 @@ function calculerDistance(){
   },(result,status)=>{
     if(status==="OK"){
       directionsRenderer.setDirections(result);
-      kmReels = result.routes[0].legs[0].distance.value/1000;
+      kmReels = result.routes[0].legs[0].distance.value / 1000;
       calculerPrix();
     }else{
-      alert("Erreur de calcul du trajet");
+      alert("Impossible de calculer l’itinéraire");
     }
   });
 }
@@ -158,7 +182,6 @@ function calculerPrix(){
 
   prix += kmReels * 2.2;
   prix += urgence;
-
   if(poids>5 && poids<=20) prix+=10;
   if(poids>20) prix+=20;
   if(ue) prix+=40;
@@ -169,12 +192,17 @@ function calculerPrix(){
 }
 
 function envoyerWhatsApp(){
-  const msg = `Bonjour, je souhaite une course Léman Courses.%0A
-Départ : ${depart.value}%0A
-Arrivée : ${arrivee.value}%0A
-Distance : ${kmReels.toFixed(1)} km%0A
+  const msg =
+`Bonjour, je souhaite une course Léman Courses.
+Prise en charge : ${adresse("pc")}
+Livraison : ${adresse("lv")}
+Distance : ${kmReels.toFixed(1)} km
 Prix estimé : CHF ${prix.innerText}`;
-  window.open("https://wa.me/41798700488?text="+msg,"_blank");
+
+  window.open(
+    "https://wa.me/41798700488?text="+encodeURIComponent(msg),
+    "_blank"
+  );
 }
 
 window.onload = initMap;
