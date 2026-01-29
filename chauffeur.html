@@ -1,1 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Mise à jour chauffeur</h2>
+
+<input id="id" placeholder="LC-2026-000123"><br>
+<select id="statut">
+  <option>Pris en charge</option>
+  <option>En livraison</option>
+  <option>Livré</option>
+</select><br>
+<input id="comment" placeholder="Commentaire"><br>
+
+<button onclick="send()">Valider</button>
+
+<script>
+const API = "https://script.google.com/macros/s/TON_SCRIPT/exec";
+
+function send(){
+  const params = new URLSearchParams({
+    action:"update",
+    id: id.value,
+    statut: statut.value,
+    comment: comment.value
+  });
+
+  fetch(API + "?" + params.toString());
+  alert("Statut envoyé");
+}
+</script>
+</body>
+</html>
 
