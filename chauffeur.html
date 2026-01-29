@@ -87,6 +87,7 @@ function envoyer(){
   const id = document.getElementById("id").value.trim();
   const statut = document.getElementById("statut").value;
   const comment = document.getElementById("comment").value.trim();
+  const driver = document.getElementById("driver").value;
 
   if(!id || !statut){
     msg.textContent = "❌ ID et statut obligatoires";
