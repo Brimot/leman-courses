@@ -1,102 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Estimation – Léman Courses</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ===== STYLE ===== -->
+<style>
+body{
+  font-family:Arial;
+  background:radial-gradient(circle at top,#123B5A,#0B2A44);
+  margin:0;
+  padding:30px;
+}
+
+.card{
+  max-width:980px;
+  margin:auto;
+  background:#fff;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 15px 40px rgba(0,0,0,.3);
+  border-top:6px solid #FDB913;
+}
+
+h2{text-align:center;color:#0B2A44;margin:0}
+.sub{text-align:center;color:#38556e;margin-bottom:15px}
+
+.section{
+  margin-top:20px;
+  padding:15px;
+  border-radius:12px;
+  background:#f8fbff;
+}
+
+.label{font-weight:bold;color:#0B2A44;margin-bottom:6px}
+
+input,select,button{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:15px;
+}
+
+input:focus,select:focus{
+  border-color:#FDB913;
+  box-shadow:0 0 0 2px rgba(253,185,19,.25);
+}
+
+button{
+  background:#FDB913;
+  color:#000;
+  font-weight:bold;
+  border:none;
+  cursor:pointer;
+  margin-top:15px;
+}
+
+button:hover{transform:translateY(-2px)}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:820px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+#map{
+  width:100%;
+  height:260px;
+  margin-top:12px;
+  border-radius:12px;
+  border:1px solid #ccc;
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
+}
+
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #ccc;padding:8px;text-align:center}
+th{background:#f5f7fa}
+
+.smallbtn{
+  background:#e6eef8;
+  border:1px solid #cfd9e6;
+  padding:6px 10px;
+  border-radius:6px;
+}
+
+.badges{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.badge{
+  background:linear-gradient(135deg,#0B2A44,#1a4b73);
+  color:#fff;
+  padding:8px 14px;
+  border-radius:999px;
+}
+
+.pricebox{
+  margin-top:20px;
+  padding:15px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#fff,#f1f6fb);
+}
+
+.pricegrid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+  text-align:center;
+}
+
+.big{font-size:22px;font-weight:bold}
+.note{text-align:center;font-size:13px;color:#555;margin-top:10px}
+.warn{color:#b00020;font-weight:bold;text-align:center}
+</style>
+
+<!-- Google Maps -->
+<script src="https://maps.googleapis.com/maps/api/js?key=TA_CLE_ICI&callback=initMap" async defer></script>
+</head>
+
+<body>
+
+<form id="formDemande" method="POST" target="_blank">
+
+<div class="card">
+<h2>🚚 Estimation Léman Courses</h2>
+<p class="sub">Calcul réel Google Maps · TVA 8.1 % · Minimum 25 CHF</p>
+
+<div class="section">
+<div class="label">👤 Client</div>
+<div class="grid-3">
+<input id="client_nom" placeholder="Nom / Entreprise" required>
+<input id="client_tel" placeholder="Téléphone">
+<input id="client_email" placeholder="E-mail" required>
+</div>
+</div>
+
+<div class="section">
+<div class="label">📍 Prise en charge</div>
+<div class="grid-2">
+<input id="pc_npa" placeholder="NPA">
+<input id="pc_ville" placeholder="Ville">
+<input id="pc_rue" placeholder="Rue">
+<input id="pc_no" placeholder="N°">
+</div>
+</div>
+
+<div class="section">
+<div class="label">🚚 Livraison</div>
+<div class="grid-2">
+<input id="lv_npa" placeholder="NPA">
+<input id="lv_ville" placeholder="Ville">
+<input id="lv_rue" placeholder="Rue">
+<input id="lv_no" placeholder="N°">
+</div>
+</div>
+
+<button type="button" onclick="calculerDistance()">Calculer la distance</button>
+<div id="map"></div>
+
+<div class="badges">
+<div class="badge">Distance: <strong><span id="distance_txt">–</span> km</strong></div>
+<div class="badge">Durée: <strong><span id="duree_txt">–</span> min</strong></div>
+</div>
+
+<div class="section">
+<div class="label">📦 Colis</div>
+<table>
+<thead><tr><th>#</th><th>Poids</th><th>Dimensions</th><th>Action</th></tr></thead>
+<tbody id="colis_table"></tbody>
+</table>
+<button class="smallbtn" type="button" onclick="ajouterColis()">+ Ajouter un colis</button>
+</div>
+
+<div class="pricebox">
+<div class="label">💰 Prix</div>
+<div class="pricegrid">
+<div>HT<br><span class="big">CHF <span id="prix_ht">–</span></span></div>
+<div>TVA<br><span class="big">CHF <span id="prix_tva">–</span></span></div>
+<div>TTC<br><span class="big">CHF <span id="prix_ttc">–</span></span></div>
+</div>
+<div id="warn" class="warn"></div>
+</div>
+
+<div class="note">Prix indicatif – confirmé après validation</div>
+</div>
+</form>
+
+<!-- ===== SCRIPT ===== -->
 <script>
-let kmReels = 0;
-let map;
-let directionsService;
-let directionsRenderer;
+const TVA = 0.081;
+const PRIX_KM = 1.20;
+let km=0,duree=0;
+let map,ds,dr;
+let colis=[];
 
-function initMap() {
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 46.8, lng: 8.3 }, // Suisse
-    zoom: 7,
-    disableDefaultUI: true,
-    zoomControl: true
-  });
-
-  directionsService = new google.maps.DirectionsService();
-  directionsRenderer = new google.maps.DirectionsRenderer({
-    map: map,
-    suppressMarkers: false
-  });
+function initMap(){
+ map=new google.maps.Map(document.getElementById("map"),{center:{lat:46.8,lng:8.3},zoom:7});
+ ds=new google.maps.DirectionsService();
+ dr=new google.maps.DirectionsRenderer({map});
 }
 
-function calculerDistance() {
-  const depart = document.getElementById("depart").value;
-  const arrivee = document.getElementById("arrivee").value;
+function adresse(p){
+ return `${document.getElementById(p+"_rue").value} ${document.getElementById(p+"_no").value}, ${document.getElementById(p+"_npa").value} ${document.getElementById(p+"_ville").value}, Suisse`;
+}
 
-  if (!depart || !arrivee) {
-    alert("Merci de renseigner les deux adresses");
-    return;
+function calculerDistance(){
+ ds.route({origin:adresse("pc"),destination:adresse("lv"),travelMode:"DRIVING"},(r,s)=>{
+  if(s==="OK"){
+   dr.setDirections(r);
+   const leg=r.routes[0].legs[0];
+   km=leg.distance.value/1000;
+   duree=Math.ceil(leg.duration.value/60);
+   distance_txt.innerText=km.toFixed(1);
+   duree_txt.innerText=duree;
+   recalculer();
   }
-
-  directionsService.route(
-    {
-      origin: depart,
-      destination: arrivee,
-      travelMode: google.maps.TravelMode.DRIVING
-    },
-    function (result, status) {
-      if (status === "OK") {
-        directionsRenderer.setDirections(result);
-
-        const distanceMetres =
-          result.routes[0].legs[0].distance.value;
-
-        kmReels = distanceMetres / 1000;
-
-        document.getElementById("distance").innerText =
-          kmReels.toFixed(1);
-
-        calculerPrix();
-      } else {
-        alert("Impossible de calculer l’itinéraire");
-      }
-    }
-  );
+ });
 }
 
-function calculerPrix() {
-  let prix = 25;
-  let poids = parseFloat(document.getElementById("poids").value) || 0;
-  let urgence = parseFloat(document.getElementById("urgence").value);
-  let nuit = document.getElementById("nuit").checked;
-  let ue = document.getElementById("ue").checked;
-
-  prix += kmReels * 2.20;
-  prix += urgence;
-
-  if (poids > 5 && poids <= 20) prix += 10;
-  if (poids > 20) prix += 20;
-
-  if (ue) prix += 40;
-  if (nuit) prix *= 1.25;
-
-  if (prix < 25) prix = 25;
-
-  document.getElementById("prix").innerText = prix.toFixed(2);
+function ajouterColis(){
+ colis.push({id:Date.now(),poids:1});
+ renderColis(); recalculer();
 }
 
-function envoyerWhatsApp() {
-  const msg =
-    `Bonjour,%0AJe souhaite une course Léman-Courses.%0A%0A` +
-    `Départ : ${depart.value}%0A` +
-    `Arrivée : ${arrivee.value}%0A` +
-    `Distance : ${kmReels.toFixed(1)} km%0A` +
-    `Prix estimé : CHF ${prix.innerText}`;
-
-  window.open(`https://wa.me/41798700488?text=${msg}`, "_blank");
+function supprimerColis(id){
+ colis=colis.filter(c=>c.id!==id);
+ renderColis(); recalculer();
 }
 
-function envoyerEmail() {
-  const sujet = "Demande de course – Léman-Courses";
-  const corps =
-    `Départ : ${depart.value}\n` +
-    `Arrivée : ${arrivee.value}\n` +
-    `Distance : ${kmReels.toFixed(1)} km\n` +
-    `Prix estimé : CHF ${prix.innerText}`;
-
-  window.location.href =
-    `mailto:info@leman-courses.ch?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+function renderColis(){
+ colis_table.innerHTML="";
+ colis.forEach((c,i)=>{
+  colis_table.innerHTML+=`
+  <tr>
+   <td>${i+1}</td>
+   <td><input type="number" value="${c.poids}" oninput="c=colis[${i}];c.poids=this.value;recalculer()"></td>
+   <td>Standard</td>
+   <td>${i==0?"—":`<button onclick="supprimerColis(${c.id})">❌</button>`}</td>
+  </tr>`;
+ });
 }
 
-window.onload = initMap;
+function recalculer(){
+ let ht=Math.max(25,km*PRIX_KM);
+ let tva=ht*TVA;
+ let ttc=ht+tva;
+ prix_ht.innerText=ht.toFixed(2);
+ prix_tva.innerText=tva.toFixed(2);
+ prix_ttc.innerText=ttc.toFixed(2);
+}
+
+ajouterColis();
 </script>
+
+</body>
+</html>
