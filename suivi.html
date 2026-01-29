@@ -185,7 +185,8 @@ async function rechercher(){
     setText("f_etape", data.etape);
 
     // Formatage date/heure
-    setText("f_update", formatDateFR(data.updated));
+    setText("f_update", data.date || data.updated || "—");
+
 
     // Optionnel prix si présent dans le JSON
     if(data.prixTTC !== undefined){
