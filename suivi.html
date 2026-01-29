@@ -5,7 +5,6 @@
 <title>Suivi Léman-Courses</title>
 
 <style>
-/* ====== TON CSS ICI ====== */
 body{
   font-family:Arial, sans-serif;
   background:linear-gradient(135deg,#0B2A44,#123B5A);
@@ -13,40 +12,68 @@ body{
   padding:30px;
 }
 
-.card{
-  max-width:900px;
-  margin:auto;
-  background:#fff;
-  padding:30px;
-  border-radius:18px;
-  box-shadow:0 15px 40px rgba(0,0,0,.3);
-  border-top:6px solid #FDB913;
+.header{
+  text-align:center;
+  color:white;
+  margin-bottom:20px;
 }
 
-/* tout ton reste de CSS */
+.logo{font-size:28px;font-weight:bold;}
+.slogan{font-size:14px;opacity:.8;}
+
+.app{max-width:700px;margin:auto;}
+
+.card{
+  background:#fff;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 15px 40px rgba(0,0,0,.3);
+  margin-top:20px;
+}
+
+input,button{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
+
+button{
+  background:#FDB913;
+  border:none;
+  font-weight:bold;
+  margin-top:10px;
+  cursor:pointer;
+}
+
+.error{color:#ff6b6b;text-align:center;margin-top:10px;}
+
+.row{margin:8px 0;}
+
+.badge{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:20px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.badge.livre{background:#4caf50;color:white;}
+.badge.livraison{background:#2196f3;color:white;}
+.badge.prise{background:#ff9800;color:white;}
+.badge.attente{background:#999;color:white;}
+
+.timeline .step{margin:6px 0;}
+.dot{
+  width:10px;height:10px;border-radius:50%;
+  background:#FDB913;display:inline-block;margin-right:8px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- ====== TON HTML ICI ====== -->
-<div class="header">
-  <div class="logo">🚚 Léman-Courses</div>
-  <div class="slogan">Transport express – Suisse romande</div>
-</div>
-
-<div class="app">
-  ...
-</div>
-
-<script>
-/* ton JS */
-</script>
-
-</body>
-</html>
-
-
 <div class="header">
   <div class="logo">🚚 Léman-Courses</div>
   <div class="slogan">Transport express – Suisse romande</div>
@@ -54,10 +81,8 @@ body{
 
 <div class="app">
 
-  <input id="code" placeholder="Numéro de suivi" style="width:100%;padding:12px;border-radius:10px;border:1px solid #ccc">
-  <button onclick="loadSuivi()" style="margin-top:10px;width:100%;padding:12px;border-radius:10px;background:#5B6CFF;color:#fff;border:none;font-weight:700">
-    Suivre mon colis
-  </button>
+  <input id="code" placeholder="Numéro de suivi">
+  <button onclick="loadSuivi()">Suivre mon colis</button>
 
   <div id="error" class="error"></div>
 
@@ -91,12 +116,12 @@ function loadSuivi(){
     .then(r => r.json())
     .then(d => {
       if(d.error){
-        document.getElementById("error").textContent = d.error;
+        error.textContent = d.error;
         return;
       }
 
-      document.getElementById("result").style.display="block";
-      document.getElementById("error").textContent="";
+      result.style.display="block";
+      error.textContent="";
 
       f_client.textContent = d.client;
       f_depart.textContent = d.depart;
@@ -105,7 +130,6 @@ function loadSuivi(){
       f_duree.textContent = d.duree;
       f_update.textContent = d.date;
 
-      // badge
       const b = document.getElementById("badge");
       b.textContent = d.statut;
       b.className = "badge " + (
@@ -114,22 +138,21 @@ function loadSuivi(){
         d.statut=="Pris en charge" ? "prise" : "attente"
       );
 
-      // timeline
       timeline.innerHTML="";
       d.history.forEach(h=>{
         timeline.innerHTML += `
           <div class="step">
-            <div class="dot active"></div>
-            <div>${h.date} – ${h.statut} ${h.comment||""}</div>
+            <span class="dot"></span>
+            ${h.date} – ${h.statut} ${h.comment||""}
           </div>
-          <div class="line"></div>
         `;
       });
     })
     .catch(()=>{
-      document.getElementById("error").textContent="Erreur de connexion";
+      error.textContent="Erreur de connexion";
     });
 }
 </script>
+
 </body>
 </html>
