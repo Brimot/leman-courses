@@ -1,33 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Chauffeur – Léman Courses</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#0B2A44;
+  margin:0;
+  padding:20px;
+}
+.card{
+  max-width:400px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 5px 20px rgba(0,0,0,.3);
+}
+h2{
+  text-align:center;
+  color:#0B2A44;
+  margin-bottom:20px;
+}
+input, select, textarea, button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
+textarea{ resize:none; }
+button{
+  background:#FDB913;
+  color:#000;
+  font-weight:bold;
+  border:none;
+  margin-top:20px;
+}
+#msg{
+  text-align:center;
+  font-weight:bold;
+  margin-top:15px;
+}
+</style>
+</head>
+
 <body>
-<h2>Mise à jour chauffeur</h2>
 
-<input id="id" placeholder="LC-2026-000123"><br>
-<select id="statut">
-  <option>Pris en charge</option>
-  <option>En livraison</option>
-  <option>Livré</option>
-</select><br>
-<input id="comment" placeholder="Commentaire"><br>
+<div class="card">
+  <h2>🚚 Chauffeur</h2>
 
-<button onclick="send()">Valider</button>
+  <input id="id" placeholder="Numéro (LC-2026-000123)">
+
+  <select id="statut">
+    <option value="">Choisir statut</option>
+    <option>Pris en charge</option>
+    <option>En livraison</option>
+    <option>Livré</option>
+    <option>Problème</option>
+  </select>
+
+  <textarea id="comment" rows="3" placeholder="Commentaire (optionnel)"></textarea>
+
+  <button onclick="envoyer()">Valider</button>
+
+  <div id="msg"></div>
+</div>
 
 <script>
 const API = "https://script.google.com/macros/s/TON_SCRIPT/exec";
 
-function send(){
+function envoyer(){
+  const id = document.getElementById("id").value.trim();
+  const statut = document.getElementById("statut").value;
+  const comment = document.getElementById("comment").value.trim();
+
+  if(!id || !statut){
+    msg.textContent = "❌ ID et statut obligatoires";
+    msg.style.color = "red";
+    return;
+  }
+
   const params = new URLSearchParams({
     action:"update",
-    id: id.value,
-    statut: statut.value,
-    comment: comment.value
+    id:id,
+    statut:statut,
+    comment:comment
   });
 
   fetch(API + "?" + params.toString());
-  alert("Statut envoyé");
+
+  msg.textContent = "✅ Statut envoyé";
+  msg.style.color = "green";
+
+  document.getElementById("comment").value = "";
 }
 </script>
+
 </body>
 </html>
-
