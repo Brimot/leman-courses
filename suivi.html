@@ -2,204 +2,75 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Suivi – Léman Courses</title>
+<title>Suivi Léman-Courses</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-body{
-  font-family:Arial, sans-serif;
-  background:#0B2A44;
-  margin:0;
-  padding:30px;
-}
-.card{
-  max-width:700px;
-  margin:auto;
-  background:#fff;
-  padding:25px;
-  border-radius:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);
-  transition:border .3s;
-}
-.card.error{ border:3px solid #c62828; }
-h2{ text-align:center; color:#0B2A44; }
-input,button{
-  width:100%; padding:14px; margin-top:10px;
-  border-radius:10px; border:1px solid #ccc; font-size:16px;
-}
-button{
-  background:#FDB913; color:#000; font-weight:bold;
-  border:none; cursor:pointer;
-}
-.section{ margin-top:18px; padding-top:10px; border-top:1px solid #ddd; }
-.label{ font-weight:bold; color:#0B2A44; }
-#error{ color:#c62828; font-weight:bold; text-align:center; margin-top:12px; }
-#result{ display:none; }
-.value{ margin:4px 0 10px 0; }
+body{font-family:Arial;background:#0B2A44;padding:30px}
+.card{max-width:700px;margin:auto;background:#fff;padding:25px;border-radius:16px}
+input,button{width:100%;padding:12px;margin-top:10px}
+.section{margin-top:15px;border-top:1px solid #ddd;padding-top:10px}
+.label{font-weight:bold}
+#error{color:red;margin-top:10px}
 </style>
 </head>
-
 <body>
 
-<div class="card" id="card">
-  <h2>📦 Suivi Léman-Courses</h2>
+<div class="card">
+<h2>📦 Suivi Léman-Courses</h2>
+<input id="code" placeholder="LC-2026-000123">
+<button onclick="load()">Suivre</button>
+<div id="error"></div>
 
-  <input id="code" placeholder="Ex : LC-2026-000123">
-  <button onclick="rechercher()">Suivre mon envoi</button>
-
-  <div id="error"></div>
-
-  <div id="result">
-    <div class="section">
-      <div class="label">Numéro de suivi</div>
-      <div class="value" id="f_id">—</div>
-    </div>
-
-    <div class="section">
-      <div class="label">Client</div>
-      <div class="value" id="f_client">—</div>
-    </div>
-
-    <div class="section">
-      <div class="label">Service</div>
-      <div class="value" id="f_service">—</div>
-    </div>
-
-    <div class="section">
-      <div class="label">Trajet</div>
-      <div class="value">
-        <span id="f_depart">—</span> → <span id="f_arrivee">—</span>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="label">Distance / Durée</div>
-      <div class="value">
-        <span id="f_km">—</span> · <span id="f_duree">—</span>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="label">Statut</div>
-      <div class="value" id="f_statut">—</div>
-      <div class="value" id="f_etape"></div>
-    </div>
-
-    <div class="section">
-      <div class="label">Dernière mise à jour</div>
-      <div class="value" id="f_update">—</div>
-    </div>
-
-    <!-- Optionnel si tu ajoutes le prix dans le JSON -->
-    <div class="section">
-      <div class="label">Prix</div>
-      <div class="value" id="f_prix">—</div>
-    </div>
-  </div>
+<div id="res" style="display:none">
+<div class="section"><div class="label">Client</div><div id="c"></div></div>
+<div class="section"><div class="label">Trajet</div><div id="t"></div></div>
+<div class="section"><div class="label">Distance / Durée</div><div id="d"></div></div>
+<div class="section"><div class="label">Statut</div><div id="s"></div></div>
+<div class="section"><div class="label">Dernière mise à jour</div><div id="u"></div></div>
+<div class="section"><div class="label">Prix</div><div id="p"></div></div>
+<div class="section"><div class="label">Historique</div><div id="h"></div></div>
+</div>
 </div>
 
 <script>
-/* =========================
-   CONFIG
-========================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbynTVAtuOu27o_W2S4ZEPL6aYNkH1tVp4SfmtVmeCtCKCDoM5QsDvXLUz5qlXkA6g9h/exec";
+const API = "https://script.google.com/macros/s/TON_ID/exec";
 
-
-
-
-
-/* =========================
-   UTILS FORMAT
-========================= */
-function qs(name){
-  return new URLSearchParams(window.location.search).get(name);
-}
-function setText(id, value){
-  const el = document.getElementById(id);
-  if(el) el.textContent = value || "—";
-}
-function formatDateFR(iso){
-  if(!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleDateString("fr-CH") + " – " +
-         d.toLocaleTimeString("fr-CH",{hour:"2-digit",minute:"2-digit"});
-}
-function formatCHF(n){
-  if(n===undefined || n===null || n==="") return "—";
-  return "CHF " + Number(n).toFixed(2);
-}
-function showError(msg){
-  document.getElementById("error").textContent = msg;
-  document.getElementById("result").style.display = "none";
-  document.getElementById("card").classList.add("error");
-}
-function clearError(){
-  document.getElementById("error").textContent = "";
-  document.getElementById("card").classList.remove("error");
-}
-
-/* =========================
-   AUTO-REMPLISSAGE URL
-========================= */
-window.addEventListener("DOMContentLoaded", () => {
-  const id = qs("id");
-  if(id){
-    document.getElementById("code").value = id;
-    rechercher();
-  }
-});
-
-/* =========================
-   FETCH SUIVI
-========================= */
-async function rechercher(){
-  clearError();
-
-  const code = document.getElementById("code").value.trim();
-  if(!code){
-    showError("Veuillez entrer un numéro de suivi.");
-    return;
-  }
+async function load(){
+  const id = code.value.trim();
+  if(!id){ error.innerText="Code manquant"; return; }
 
   try{
-    const res = await fetch(API_URL + "?id=" + encodeURIComponent(code));
-    const data = await res.json();
+    const r = await fetch(API+"?id="+id);
+    const d = await r.json();
 
-    if(data.error){
-      showError(data.error);
-      return;
-    }
+    if(d.error){ error.innerText=d.error; return; }
 
-    setText("f_id", data.id);
-    setText("f_client", data.client);
-    setText("f_service", data.service);
-    setText("f_depart", data.depart);
-    setText("f_arrivee", data.arrivee);
+    error.innerText="";
+    res.style.display="block";
 
-    // Formatage km / durée
-    setText("f_km", data.km ? Number(data.km).toFixed(1) + " km" : "—");
-    setText("f_duree", data.duree || "—");
+    c.innerText = d.client;
+    t.innerText = d.depart+" → "+d.arrivee;
+    d1 = (d.km||"-")+" km · "+(d.duree||"-");
+    d2 = d1;
+    d.innerText = d1;
+    s.innerText = d.statut+" ("+d.etape+")";
+    u.innerText = d.date;
+    p.innerText = "CHF "+d.prix;
 
-
-    setText("f_statut", data.statut);
-    setText("f_etape", data.etape);
-
-    // Formatage date/heure
-    setText("f_update", data.date || data.updated || "—");
-
-
-    // Optionnel prix si présent dans le JSON
-    if(data.prixTTC !== undefined){
-      setText("f_prix", formatCHF(data.prixTTC));
-    }
-
-    document.getElementById("result").style.display = "block";
+    if(d.history.length){
+      let html="";
+      d.history.forEach(x=>{
+        html += x.date+" – "+x.statut;
+        if(x.comment) html+=" ("+x.comment+")";
+        html+="<br>";
+      });
+      h.innerHTML = html;
+    } else h.innerText="Aucun historique";
 
   }catch(e){
-    showError("Erreur de connexion au service de suivi.");
+    error.innerText="Erreur de connexion";
   }
 }
 </script>
-
 </body>
 </html>
