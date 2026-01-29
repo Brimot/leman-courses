@@ -35,6 +35,101 @@ th{background:#f5f7fa;color:#0B2A44}
 .note{font-size:13px;color:#555;text-align:center;margin-top:10px}
 .warn{color:#b00020;font-weight:bold;text-align:center;margin-top:10px}
 </style>
+/* ====== AMÉLIORATION VISUELLE ====== */
+
+body{
+  background:
+    radial-gradient(circle at top, #123B5A 0%, #0B2A44 60%);
+}
+
+.card{
+  position:relative;
+  overflow:hidden;
+}
+
+.card::before{
+  content:"";
+  position:absolute;
+  top:0; left:0; right:0;
+  height:120px;
+  background:linear-gradient(135deg,#FDB913,#FFCE4B);
+  opacity:.15;
+  z-index:0;
+}
+
+.card > *{
+  position:relative;
+  z-index:1;
+}
+
+h2{
+  font-size:28px;
+  letter-spacing:.5px;
+}
+
+.sub{
+  font-size:14px;
+  opacity:.8;
+}
+
+.section{
+  background:#f8fbff;
+  padding:15px;
+  border-radius:12px;
+}
+
+.section .label{
+  font-size:16px;
+}
+
+input,select{
+  background:#fff;
+}
+
+input:focus,select:focus{
+  border-color:#FDB913;
+  box-shadow:0 0 0 2px rgba(253,185,19,.25);
+}
+
+button{
+  font-size:17px;
+  letter-spacing:.5px;
+  box-shadow:0 6px 14px rgba(0,0,0,.25);
+}
+
+button:hover{
+  transform:translateY(-2px);
+}
+
+.badges{
+  margin-top:18px;
+}
+
+.badge{
+  background:linear-gradient(135deg,#0B2A44,#1a4b73);
+  box-shadow:0 4px 10px rgba(0,0,0,.3);
+}
+
+.pricebox{
+  background:
+    linear-gradient(135deg,#ffffff,#f1f6fb);
+}
+
+.pricegrid .big{
+  font-weight:700;
+}
+
+.pricegrid strong{
+  color:#0B2A44;
+}
+
+.note{
+  font-style:italic;
+}
+
+#map{
+  box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
 
 <!-- ✅ Google Maps (garde TA clé qui marche) -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1XwMisUcFm6UwQseU1sUU-n_55uI9AWQ&callback=initMap" async defer></script>
