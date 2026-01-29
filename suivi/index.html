@@ -5,11 +5,10 @@
 <title>Estimation – Léman Courses</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- ===== STYLE ===== -->
 <style>
 body{
   font-family:Arial;
-  background:radial-gradient(circle at top,#123B5A,#0B2A44);
+  background:linear-gradient(135deg,#0B2A44,#123B5A);
   margin:0;
   padding:30px;
 }
@@ -21,33 +20,28 @@ body{
   padding:25px;
   border-radius:18px;
   box-shadow:0 15px 40px rgba(0,0,0,.3);
-  border-top:6px solid #FDB913;
 }
 
 h2{text-align:center;color:#0B2A44;margin:0}
-.sub{text-align:center;color:#38556e;margin-bottom:15px}
+.sub{text-align:center;color:#38556e;margin-top:4px}
 
-.section{
-  margin-top:20px;
-  padding:15px;
-  border-radius:12px;
-  background:#f8fbff;
+.trustbar{
+  text-align:center;
+  font-size:13px;
+  color:#0B2A44;
+  background:#f2f7fb;
+  padding:8px;
+  border-radius:8px;
+  margin:12px 0;
 }
-
-.label{font-weight:bold;color:#0B2A44;margin-bottom:6px}
 
 input,select,button{
   width:100%;
   padding:12px;
   margin-top:8px;
-  border-radius:8px;
+  border-radius:10px;
   border:1px solid #ccc;
   font-size:15px;
-}
-
-input:focus,select:focus{
-  border-color:#FDB913;
-  box-shadow:0 0 0 2px rgba(253,185,19,.25);
 }
 
 button{
@@ -56,10 +50,16 @@ button{
   font-weight:bold;
   border:none;
   cursor:pointer;
-  margin-top:15px;
+  box-shadow:0 6px 14px rgba(0,0,0,.25);
 }
 
-button:hover{transform:translateY(-2px)}
+.section{
+  margin-top:22px;
+  padding-top:12px;
+  border-top:1px solid #eee;
+}
+
+.label{font-weight:bold;color:#0B2A44}
 
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
@@ -67,69 +67,103 @@ button:hover{transform:translateY(-2px)}
 
 #map{
   width:100%;
-  height:260px;
+  height:280px;
   margin-top:12px;
   border-radius:12px;
-  border:1px solid #ccc;
-  box-shadow:0 6px 18px rgba(0,0,0,.25);
+  border:1px solid #ddd;
 }
 
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #ccc;padding:8px;text-align:center}
-th{background:#f5f7fa}
-
-.smallbtn{
-  background:#e6eef8;
-  border:1px solid #cfd9e6;
-  padding:6px 10px;
-  border-radius:6px;
+.badges{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:12px;
 }
 
-.badges{display:flex;gap:10px;justify-content:center;margin-top:12px}
 .badge{
-  background:linear-gradient(135deg,#0B2A44,#1a4b73);
+  background:#0B2A44;
   color:#fff;
   padding:8px 14px;
   border-radius:999px;
+  font-size:14px;
+}
+
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #ddd;padding:8px;text-align:center}
+th{background:#f5f7fa;color:#0B2A44}
+
+.smallbtn{
+  background:#e6eef8;
+  color:#0B2A44;
+  border:1px solid #cfd9e6;
+  font-weight:bold;
+  padding:8px;
+  border-radius:8px;
 }
 
 .pricebox{
-  margin-top:20px;
-  padding:15px;
+  margin-top:16px;
+  padding:14px;
+  border:1px solid #e6e6e6;
   border-radius:12px;
-  background:linear-gradient(135deg,#fff,#f1f6fb);
+  background:#fbfcfe;
 }
 
 .pricegrid{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
-  gap:10px;
   text-align:center;
 }
 
 .big{font-size:22px;font-weight:bold}
-.note{text-align:center;font-size:13px;color:#555;margin-top:10px}
-.warn{color:#b00020;font-weight:bold;text-align:center}
+
+.testimonials{
+  margin-top:20px;
+  font-size:13px;
+  color:#444;
+  text-align:center;
+}
+
+.whatsapp{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#25D366;
+  color:#fff;
+  padding:12px 16px;
+  border-radius:999px;
+  font-weight:bold;
+  text-decoration:none;
+  box-shadow:0 6px 14px rgba(0,0,0,.3);
+}
 </style>
 
-<!-- Google Maps -->
-<script src="https://maps.googleapis.com/maps/api/js?key=TA_CLE_ICI&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1XwMisUcFm6UwQseU1sUU-n_55uI9AWQ" async defer></script>
 </head>
 
 <body>
 
-<form id="formDemande" method="POST" target="_blank">
+<form action="https://script.google.com/macros/s/TON_SCRIPT/exec" method="POST" target="_blank">
 
 <div class="card">
+
+<div style="text-align:center">
+<img src="logo.png" height="48">
+</div>
+
 <h2>🚚 Estimation Léman Courses</h2>
-<p class="sub">Calcul réel Google Maps · TVA 8.1 % · Minimum 25 CHF</p>
+<p class="sub">Calcul automatique Google Maps · TVA 8.1 % · Min 25 CHF</p>
+
+<div class="trustbar">
+⭐ Service suisse · 📞 Support humain · 🔒 Données sécurisées
+</div>
 
 <div class="section">
-<div class="label">👤 Client</div>
+<div class="label">👤 Coordonnées client</div>
 <div class="grid-3">
-<input id="client_nom" placeholder="Nom / Entreprise" required>
-<input id="client_tel" placeholder="Téléphone">
-<input id="client_email" placeholder="E-mail" required>
+<input name="client" placeholder="Nom / Entreprise" required>
+<input name="tel" placeholder="Téléphone">
+<input name="email" placeholder="E-mail" required>
 </div>
 </div>
 
@@ -157,95 +191,121 @@ th{background:#f5f7fa}
 <div id="map"></div>
 
 <div class="badges">
-<div class="badge">Distance: <strong><span id="distance_txt">–</span> km</strong></div>
-<div class="badge">Durée: <strong><span id="duree_txt">–</span> min</strong></div>
+<div class="badge">Distance: <span id="distance_txt">–</span> km</div>
+<div class="badge">Durée: <span id="duree_txt">–</span> min</div>
+</div>
+
+<div class="section">
+<div class="label">🚀 Type de livraison</div>
+<select id="service" onchange="recalculer()">
+<option value="">— Choisir —</option>
+<option value="urgent">Urgente 4h</option>
+<option value="express">Express 12h</option>
+<option value="eco">Eco 48h</option>
+</select>
 </div>
 
 <div class="section">
 <div class="label">📦 Colis</div>
 <table>
-<thead><tr><th>#</th><th>Poids</th><th>Dimensions</th><th>Action</th></tr></thead>
+<thead>
+<tr><th>#</th><th>Poids</th><th>Dimensions</th><th>Type</th><th></th></tr>
+</thead>
 <tbody id="colis_table"></tbody>
 </table>
-<button class="smallbtn" type="button" onclick="ajouterColis()">+ Ajouter un colis</button>
+<button type="button" class="smallbtn" onclick="ajouterColis()">+ Ajouter colis</button>
 </div>
 
 <div class="pricebox">
-<div class="label">💰 Prix</div>
 <div class="pricegrid">
 <div>HT<br><span class="big">CHF <span id="prix_ht">–</span></span></div>
 <div>TVA<br><span class="big">CHF <span id="prix_tva">–</span></span></div>
-<div>TTC<br><span class="big">CHF <span id="prix_ttc">–</span></span></div>
+<div><strong>TTC</strong><br><span class="big">CHF <span id="prix_ttc">–</span></span></div>
 </div>
-<div id="warn" class="warn"></div>
 </div>
 
-<div class="note">Prix indicatif – confirmé après validation</div>
+<div class="testimonials">
+⭐️⭐️⭐️⭐️⭐️ “Rapide et fiable” – Pharmacie VD  
+<br>
+⭐️⭐️⭐️⭐️⭐️ “Parfait pour nos urgences” – Cabinet médical
+</div>
+
+<button type="submit">Envoyer la demande</button>
+
 </div>
 </form>
 
-<!-- ===== SCRIPT ===== -->
+<a href="https://wa.me/41798700488" target="_blank" class="whatsapp">
+💬 Besoin d’aide ?
+</a>
+
 <script>
-const TVA = 0.081;
-const PRIX_KM = 1.20;
-let km=0,duree=0;
-let map,ds,dr;
+let map, ds, dr, km=0, duree=0;
 let colis=[];
 
 function initMap(){
- map=new google.maps.Map(document.getElementById("map"),{center:{lat:46.8,lng:8.3},zoom:7});
- ds=new google.maps.DirectionsService();
- dr=new google.maps.DirectionsRenderer({map});
+  map = new google.maps.Map(document.getElementById("map"), {
+    center:{lat:46.8,lng:8.3}, zoom:7
+  });
+  ds = new google.maps.DirectionsService();
+  dr = new google.maps.DirectionsRenderer({map});
 }
 
 function adresse(p){
- return `${document.getElementById(p+"_rue").value} ${document.getElementById(p+"_no").value}, ${document.getElementById(p+"_npa").value} ${document.getElementById(p+"_ville").value}, Suisse`;
+  return document.getElementById(p+"_rue").value+" "+
+         document.getElementById(p+"_no").value+", "+
+         document.getElementById(p+"_npa").value+" "+
+         document.getElementById(p+"_ville").value;
 }
 
 function calculerDistance(){
- ds.route({origin:adresse("pc"),destination:adresse("lv"),travelMode:"DRIVING"},(r,s)=>{
-  if(s==="OK"){
-   dr.setDirections(r);
-   const leg=r.routes[0].legs[0];
-   km=leg.distance.value/1000;
-   duree=Math.ceil(leg.duration.value/60);
-   distance_txt.innerText=km.toFixed(1);
-   duree_txt.innerText=duree;
-   recalculer();
-  }
- });
+  ds.route({
+    origin: adresse("pc"),
+    destination: adresse("lv"),
+    travelMode:"DRIVING"
+  },(r,s)=>{
+    if(s=="OK"){
+      dr.setDirections(r);
+      km = r.routes[0].legs[0].distance.value/1000;
+      duree = Math.ceil(r.routes[0].legs[0].duration.value/60);
+      distance_txt.innerText = km.toFixed(1);
+      duree_txt.innerText = duree;
+      recalculer();
+    }
+  });
 }
 
 function ajouterColis(){
- colis.push({id:Date.now(),poids:1});
- renderColis(); recalculer();
-}
-
-function supprimerColis(id){
- colis=colis.filter(c=>c.id!==id);
- renderColis(); recalculer();
+  colis.push({id:Date.now(), poids:1});
+  renderColis();
 }
 
 function renderColis(){
- colis_table.innerHTML="";
- colis.forEach((c,i)=>{
-  colis_table.innerHTML+=`
-  <tr>
-   <td>${i+1}</td>
-   <td><input type="number" value="${c.poids}" oninput="c=colis[${i}];c.poids=this.value;recalculer()"></td>
-   <td>Standard</td>
-   <td>${i==0?"—":`<button onclick="supprimerColis(${c.id})">❌</button>`}</td>
-  </tr>`;
- });
+  colis_table.innerHTML="";
+  colis.forEach((c,i)=>{
+    colis_table.innerHTML += `
+<tr>
+<td>${i+1}</td>
+<td><input type="number" value="${c.poids}"></td>
+<td>30x20x10</td>
+<td>Standard</td>
+<td>${i?'<button onclick="supprimerColis('+c.id+')">❌</button>':'—'}</td>
+</tr>`;
+  });
+}
+
+function supprimerColis(id){
+  colis = colis.filter(c=>c.id!==id);
+  renderColis();
 }
 
 function recalculer(){
- let ht=Math.max(25,km*PRIX_KM);
- let tva=ht*TVA;
- let ttc=ht+tva;
- prix_ht.innerText=ht.toFixed(2);
- prix_tva.innerText=tva.toFixed(2);
- prix_ttc.innerText=ttc.toFixed(2);
+  let ht = Math.max(25, km*1.2);
+  let tva = ht*0.081;
+  let ttc = ht+tva;
+  prix_ht.innerText = ht.toFixed(2);
+  prix_tva.innerText = tva.toFixed(2);
+  prix_ttc.innerText = ttc.toFixed(2);
 }
 
 ajouterColis();
