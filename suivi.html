@@ -1,76 +1,97 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Suivi Léman-Courses</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{font-family:Arial;background:#0B2A44;padding:30px}
-.card{max-width:700px;margin:auto;background:#fff;padding:25px;border-radius:16px}
-input,button{width:100%;padding:12px;margin-top:10px}
-.section{margin-top:15px;border-top:1px solid #ddd;padding-top:10px}
-.label{font-weight:bold}
-#error{color:red;margin-top:10px}
-</style>
-</head>
-<body>
+/**************************************************
+ * CONFIG
+ **************************************************/
+const SHEET_ID = "10S5UM7VcFgNwN6Q6nZw4PCAvRBIyscAX667X6HTzcC8";
+const SUIVI_SHEET = "suivi_colis-leman_cours";
+const HISTORY_SHEET = "historique_statuts";
 
-<div class="card">
-<h2>📦 Suivi Léman-Courses</h2>
-<input id="code" placeholder="LC-2026-000123">
-<button onclick="load()">Suivre</button>
-<div id="error"></div>
+/**************************************************
+ * API SUIVI CLIENT
+ * URL : /exec?id=LC-2026-000123
+ **************************************************/
+function doGet(e) {
+  try {
+    if (!e || !e.parameter || !e.parameter.id) {
+      return jsonOut({ error: "ID manquant" });
+    }
 
-<div id="res" style="display:none">
-<div class="section"><div class="label">Client</div><div id="c"></div></div>
-<div class="section"><div class="label">Trajet</div><div id="t"></div></div>
-<div class="section"><div class="label">Distance / Durée</div><div id="d"></div></div>
-<div class="section"><div class="label">Statut</div><div id="s"></div></div>
-<div class="section"><div class="label">Dernière mise à jour</div><div id="u"></div></div>
-<div class="section"><div class="label">Prix</div><div id="p"></div></div>
-<div class="section"><div class="label">Historique</div><div id="h"></div></div>
-</div>
-</div>
+    const id = String(e.parameter.id).trim();
+    const sh = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SUIVI_SHEET);
+    const data = sh.getDataRange().getValues();
 
-<script>
-const API = "https://script.google.com/macros/s/AKfycbx36tgNQov5-pGYe9sYJ3Fj_baKXLpilhtQS-HLWPNMjdLO-F8YiEvl4uGou99Y4kkt/exec";
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === id) {
 
-async function load(){
-  const id = code.value.trim();
-  if(!id){ error.innerText="Code manquant"; return; }
+        return jsonOut({
+          id: data[i][0],
+          client: data[i][2],
+          service: data[i][5],
+          depart: data[i][6],
+          arrivee: data[i][7],
+          km: toNumber(data[i][8]),
+          duree: data[i][9],
+          statut: data[i][10],
+          etape: data[i][11],
+          updated: formatDate(data[i][1]),
+          prixTTC: formatPrice(data[i][12]),
+          history: getHistory(id)
+        });
+      }
+    }
 
-  try{
-    const r = await fetch(API+"?id="+id);
-    const d = await r.json();
+    return jsonOut({ error: "Numéro de suivi inconnu" });
 
-    if(d.error){ error.innerText=d.error; return; }
-
-    error.innerText="";
-    res.style.display="block";
-
-    c.innerText = d.client;
-    t.innerText = d.depart+" → "+d.arrivee;
-    d1 = (d.km||"-")+" km · "+(d.duree||"-");
-    d2 = d1;
-    d.innerText = d1;
-    s.innerText = d.statut+" ("+d.etape+")";
-    u.innerText = d.date;
-    p.innerText = "CHF "+d.prix;
-
-    if(d.history.length){
-      let html="";
-      d.history.forEach(x=>{
-        html += x.date+" – "+x.statut;
-        if(x.comment) html+=" ("+x.comment+")";
-        html+="<br>";
-      });
-      h.innerHTML = html;
-    } else h.innerText="Aucun historique";
-
-  }catch(e){
-    error.innerText="Erreur de connexion";
+  } catch (err) {
+    return jsonOut({ error: err.message });
   }
 }
-</script>
-</body>
-</html>
+
+/**************************************************
+ * HISTORIQUE
+ **************************************************/
+function getHistory(id){
+  const sh = SpreadsheetApp
+    .openById(SHEET_ID)
+    .getSheetByName(HISTORY_SHEET);
+
+  const data = sh.getDataRange().getValues();
+  const out = [];
+
+  for(let i=1;i<data.length;i++){
+    if(String(data[i][0]).trim() === id){
+      out.push({
+        date: formatDate(data[i][1]),
+        statut: data[i][2],
+        comment: data[i][3]
+      });
+    }
+  }
+
+  return out;
+}
+
+/**************************************************
+ * UTILS
+ **************************************************/
+function jsonOut(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function toNumber(v) {
+  if (!v) return "";
+  const n = Number(String(v).replace(",", "."));
+  return isNaN(n) ? "" : n;
+}
+
+function formatPrice(v) {
+  if (!v) return "";
+  return String(v).replace("CHF","").replace(",",".").trim();
+}
+
+function formatDate(d){
+  if (!d) return "";
+  const date = new Date(d);
+  return Utilities.formatDate(date, "Europe/Zurich", "dd.MM.yyyy HH:mm");
+}
