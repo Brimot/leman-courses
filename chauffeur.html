@@ -7,73 +7,66 @@
 
 <style>
 body{
-  font-family: Arial, sans-serif;
+  font-family:Arial, sans-serif;
   background:#0B2A44;
   margin:0;
-  padding:20px;
+  padding:30px;
 }
 .card{
-  max-width:400px;
+  max-width:500px;
   margin:auto;
   background:#fff;
-  padding:20px;
+  padding:25px;
   border-radius:14px;
-  box-shadow:0 5px 20px rgba(0,0,0,.3);
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
 }
-h2{
-  text-align:center;
-  color:#0B2A44;
-  margin-bottom:20px;
-}
-input, select, textarea, button{
+h2{text-align:center;color:#0B2A44}
+label{font-weight:bold;display:block;margin-top:15px}
+input,select,textarea,button{
   width:100%;
-  padding:14px;
-  margin-top:10px;
-  border-radius:10px;
+  padding:12px;
+  margin-top:6px;
+  border-radius:8px;
   border:1px solid #ccc;
   font-size:16px;
 }
-textarea{ resize:none; }
+textarea{resize:none;height:70px}
 button{
+  margin-top:20px;
   background:#FDB913;
   color:#000;
   font-weight:bold;
   border:none;
-  margin-top:20px;
+  cursor:pointer;
 }
-#msg{
-  text-align:center;
-  font-weight:bold;
-  margin-top:15px;
-}
+#msg{text-align:center;margin-top:15px;font-weight:bold}
+.ok{color:green}
+.err{color:red}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h2>🚚 Chauffeur</h2>
-  <div class="section">
-  <div class="label">Code chauffeur</div>
-  <input id="driver" placeholder="Code chauffeur">
-</div>
+  <h2>🚚 Mise à jour livraison</h2>
 
+  <label>ID livraison</label>
+  <input id="id" placeholder="LC-2026-000123">
 
-  <input id="id" placeholder="Numéro (LC-2026-000123)">
-  <input id="driver" placeholder="Code chauffeur (ex: CH-01)">
-  <input id="driver" placeholder="Code chauffeur" required>
-
-
-
+  <label>Statut</label>
   <select id="statut">
-    <option value="">Choisir statut</option>
+    <option value="">— Choisir —</option>
     <option>Pris en charge</option>
     <option>En livraison</option>
+    <option>Client absent</option>
     <option>Livré</option>
-    <option>Problème</option>
   </select>
 
-  <textarea id="comment" rows="3" placeholder="Commentaire (optionnel)"></textarea>
+  <label>Commentaire (optionnel)</label>
+  <textarea id="comment" placeholder="Ex : Déposé à la réception"></textarea>
+
+  <label>Code chauffeur</label>
+  <input id="driver" placeholder="CH001">
 
   <button onclick="envoyer()">Valider</button>
 
@@ -81,33 +74,51 @@ button{
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxyrSTQETLmwE94AQWwQ3HZ82dOOssy4a72CxBIFS9pdSjWFOMapogQG2j61FPHkdn1/exec";
+const API_URL = "https://script.google.com/macros/s/TON_DEPLOY/exec";
+
+// mémorisation chauffeur
+driver.value = localStorage.getItem("driver") || "";
 
 function envoyer(){
-  const id = document.getElementById("id").value.trim();
-  const statut = document.getElementById("statut").value;
-  const comment = document.getElementById("comment").value.trim();
-  const driver = document.getElementById("driver").value;
+  const idv = id.value.trim();
+  const stat = statut.value;
+  const com = comment.value.trim();
+  const drv = driver.value.trim();
 
-  if(!id || !statut){
-    msg.textContent = "❌ ID et statut obligatoires";
-    msg.style.color = "red";
+  if(!idv || !stat || !drv){
+    showMsg("Tous les champs obligatoires", true);
     return;
   }
 
-  const params = new URLSearchParams({
-    action:"update",
-    id:id,
-    statut:statut,
-    comment:comment
-  });
+  localStorage.setItem("driver", drv);
 
-  fetch(API + "?" + params.toString());
+  const url = API_URL +
+    "?action=update" +
+    "&id=" + encodeURIComponent(idv) +
+    "&statut=" + encodeURIComponent(stat) +
+    "&comment=" + encodeURIComponent(com) +
+    "&driver=" + encodeURIComponent(drv);
 
-  msg.textContent = "✅ Statut envoyé";
-  msg.style.color = "green";
+  showMsg("Envoi...", false);
 
-  document.getElementById("comment").value = "";
+  fetch(url)
+    .then(r => r.text())
+    .then(t => {
+      if(t.includes("OK")){
+        showMsg("Mise à jour enregistrée ✅", false);
+        comment.value="";
+      }else{
+        showMsg(t, true);
+      }
+    })
+    .catch(()=>{
+      showMsg("Erreur serveur", true);
+    });
+}
+
+function showMsg(txt, error){
+  msg.innerText = txt;
+  msg.className = error ? "err" : "ok";
 }
 </script>
 
