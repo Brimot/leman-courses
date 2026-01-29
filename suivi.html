@@ -6,99 +6,177 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{font-family:Arial;background:#0B2A44;margin:0;padding:30px}
-.card{max-width:700px;margin:auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-h2{text-align:center;color:#0B2A44}
-input,button{width:100%;padding:14px;margin-top:10px;border-radius:10px;border:1px solid #ccc;font-size:16px}
-button{background:#FDB913;color:#000;font-weight:bold;border:none}
-.section{margin-top:18px;padding-top:10px;border-top:1px solid #ddd}
-.label{font-weight:bold;color:#0B2A44}
-#error{color:red;text-align:center;font-weight:bold}
-.value{margin:5px 0}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg,#0B2A44,#5B6CFF);
+  min-height:100vh;
+  color:#111;
+}
 
-/* Timeline */
-.timeline-item{display:flex;gap:10px;margin:10px 0}
-.dot{width:12px;height:12px;background:#0B2A44;border-radius:50%;margin-top:4px}
-.dot.last{background:#2e7d32}
-.line{width:2px;background:#ccc;margin-left:5px}
+.app{
+  max-width:600px;
+  margin:40px auto;
+  background:#fff;
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 20px 40px rgba(0,0,0,.25);
+}
+
+.header{
+  text-align:center;
+  color:#fff;
+  margin-bottom:20px;
+}
+.logo{
+  font-size:28px;
+  font-weight:800;
+}
+.slogan{
+  font-size:14px;
+  opacity:.9;
+}
+
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:16px;
+  margin-top:12px;
+  box-shadow:0 6px 12px rgba(0,0,0,.08);
+}
+
+.badge{
+  display:inline-block;
+  padding:8px 14px;
+  border-radius:999px;
+  font-weight:700;
+  color:#fff;
+  margin-bottom:10px;
+}
+.badge.attente{ background:#777; }
+.badge.prise{ background:#3b82f6; }
+.badge.livraison{ background:#f59e0b; }
+.badge.livre{ background:#22c55e; }
+
+.row{
+  margin:6px 0;
+  font-size:15px;
+}
+
+.timeline{
+  margin-top:10px;
+}
+.step{
+  display:flex;
+  align-items:center;
+}
+.dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#ccc;
+  margin-right:10px;
+}
+.dot.active{ background:#22c55e; }
+.line{
+  width:2px;
+  height:20px;
+  background:#ccc;
+  margin:0 0 0 6px;
+}
+.error{
+  color:#c62828;
+  text-align:center;
+  font-weight:700;
+}
 </style>
 </head>
 
 <body>
 
-<div class="card">
-<h2>📦 Suivi Léman-Courses</h2>
-
-<input id="code" placeholder="LC-2026-000123">
-<button onclick="rechercher()">Suivre</button>
-
-<div id="error"></div>
-
-<div id="result" style="display:none">
-
-<div class="section"><div class="label">Client</div><div id="f_client"></div></div>
-<div class="section"><div class="label">Service</div><div id="f_service"></div></div>
-<div class="section"><div class="label">Trajet</div><div><span id="f_depart"></span> → <span id="f_arrivee"></span></div></div>
-<div class="section"><div class="label">Distance / Durée</div><div><span id="f_km"></span> · <span id="f_duree"></span></div></div>
-<div class="section"><div class="label">Statut</div><div id="f_statut"></div></div>
-<div class="section"><div class="label">Dernière mise à jour</div><div id="f_update"></div></div>
-<div class="section"><div class="label">Prix</div><div id="f_prix"></div></div>
-
-<div class="section">
-  <div class="label">Historique</div>
-  <div id="timeline"></div>
+<div class="header">
+  <div class="logo">🚚 Léman-Courses</div>
+  <div class="slogan">Transport express – Suisse romande</div>
 </div>
 
-</div>
+<div class="app">
+
+  <input id="code" placeholder="Numéro de suivi" style="width:100%;padding:12px;border-radius:10px;border:1px solid #ccc">
+  <button onclick="loadSuivi()" style="margin-top:10px;width:100%;padding:12px;border-radius:10px;background:#5B6CFF;color:#fff;border:none;font-weight:700">
+    Suivre mon colis
+  </button>
+
+  <div id="error" class="error"></div>
+
+  <div id="result" style="display:none">
+
+    <div class="card">
+      <div id="badge" class="badge"></div>
+      <div class="row"><strong>Client :</strong> <span id="f_client"></span></div>
+      <div class="row"><strong>Trajet :</strong> <span id="f_depart"></span> → <span id="f_arrivee"></span></div>
+      <div class="row"><strong>Distance :</strong> <span id="f_km"></span></div>
+      <div class="row"><strong>Durée :</strong> <span id="f_duree"></span></div>
+      <div class="row"><strong>Dernière mise à jour :</strong> <span id="f_update"></span></div>
+    </div>
+
+    <div class="card">
+      <strong>Historique</strong>
+      <div id="timeline" class="timeline"></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxyrSTQETLmwE94AQWwQ3HZ82dOOssy4a72CxBIFS9pdSjWFOMapogQG2j61FPHkdn1/exec";
+const API_URL = "TON_URL_APPS_SCRIPT_ICI";
 
-function rechercher(){
-  error.textContent="";
-  const code = document.getElementById("code").value.trim();
-  if(!code){ error.textContent="Code manquant"; return; }
+function loadSuivi(){
+  const id = document.getElementById("code").value.trim();
+  if(!id) return;
 
-  fetch(API_URL + "?id=" + encodeURIComponent(code))
-    .then(r=>r.json())
-    .then(d=>{
-      if(d.error){ error.textContent=d.error; return; }
+  fetch(API_URL + "?id=" + encodeURIComponent(id))
+    .then(r => r.json())
+    .then(d => {
+      if(d.error){
+        document.getElementById("error").textContent = d.error;
+        return;
+      }
+
+      document.getElementById("result").style.display="block";
+      document.getElementById("error").textContent="";
 
       f_client.textContent = d.client;
-      f_service.textContent = d.service;
       f_depart.textContent = d.depart;
       f_arrivee.textContent = d.arrivee;
       f_km.textContent = d.km + " km";
       f_duree.textContent = d.duree;
-      f_statut.textContent = d.statut;
-      f_update.textContent = d.updated;
-      f_prix.textContent = "CHF " + d.prixTTC;
+      f_update.textContent = d.date;
 
-      // Timeline
+      // badge
+      const b = document.getElementById("badge");
+      b.textContent = d.statut;
+      b.className = "badge " + (
+        d.statut=="Livré" ? "livre" :
+        d.statut=="En livraison" ? "livraison" :
+        d.statut=="Pris en charge" ? "prise" : "attente"
+      );
+
+      // timeline
       timeline.innerHTML="";
-      d.history.forEach((h,i)=>{
-        const last = i === d.history.length-1;
+      d.history.forEach(h=>{
         timeline.innerHTML += `
-          <div class="timeline-item">
-            <div>
-              <div class="dot ${last?"last":""}"></div>
-              ${last?"":"<div class='line' style='height:30px'></div>"}
-            </div>
-            <div>
-              <strong>${h.statut}</strong><br>
-              ${h.date}<br>
-              <small>${h.comment||""}</small>
-            </div>
+          <div class="step">
+            <div class="dot active"></div>
+            <div>${h.date} – ${h.statut} ${h.comment||""}</div>
           </div>
+          <div class="line"></div>
         `;
       });
-
-      result.style.display="block";
     })
-    .catch(()=> error.textContent="Erreur connexion API");
+    .catch(()=>{
+      document.getElementById("error").textContent="Erreur de connexion";
+    });
 }
 </script>
-
 </body>
 </html>
