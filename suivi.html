@@ -1,97 +1,104 @@
-/**************************************************
- * CONFIG
- **************************************************/
-const SHEET_ID = "10S5UM7VcFgNwN6Q6nZw4PCAvRBIyscAX667X6HTzcC8";
-const SUIVI_SHEET = "suivi_colis-leman_cours";
-const HISTORY_SHEET = "historique_statuts";
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Suivi – Léman Courses</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-/**************************************************
- * API SUIVI CLIENT
- * URL : /exec?id=LC-2026-000123
- **************************************************/
-function doGet(e) {
-  try {
-    if (!e || !e.parameter || !e.parameter.id) {
-      return jsonOut({ error: "ID manquant" });
-    }
+<style>
+body{font-family:Arial;background:#0B2A44;margin:0;padding:30px}
+.card{max-width:700px;margin:auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+h2{text-align:center;color:#0B2A44}
+input,button{width:100%;padding:14px;margin-top:10px;border-radius:10px;border:1px solid #ccc;font-size:16px}
+button{background:#FDB913;color:#000;font-weight:bold;border:none}
+.section{margin-top:18px;padding-top:10px;border-top:1px solid #ddd}
+.label{font-weight:bold;color:#0B2A44}
+#error{color:red;text-align:center;font-weight:bold}
+.value{margin:5px 0}
 
-    const id = String(e.parameter.id).trim();
-    const sh = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SUIVI_SHEET);
-    const data = sh.getDataRange().getValues();
+/* Timeline */
+.timeline-item{display:flex;gap:10px;margin:10px 0}
+.dot{width:12px;height:12px;background:#0B2A44;border-radius:50%;margin-top:4px}
+.dot.last{background:#2e7d32}
+.line{width:2px;background:#ccc;margin-left:5px}
+</style>
+</head>
 
-    for (let i = 1; i < data.length; i++) {
-      if (String(data[i][0]).trim() === id) {
+<body>
 
-        return jsonOut({
-          id: data[i][0],
-          client: data[i][2],
-          service: data[i][5],
-          depart: data[i][6],
-          arrivee: data[i][7],
-          km: toNumber(data[i][8]),
-          duree: data[i][9],
-          statut: data[i][10],
-          etape: data[i][11],
-          updated: formatDate(data[i][1]),
-          prixTTC: formatPrice(data[i][12]),
-          history: getHistory(id)
-        });
-      }
-    }
+<div class="card">
+<h2>📦 Suivi Léman-Courses</h2>
 
-    return jsonOut({ error: "Numéro de suivi inconnu" });
+<input id="code" placeholder="LC-2026-000123">
+<button onclick="rechercher()">Suivre</button>
 
-  } catch (err) {
-    return jsonOut({ error: err.message });
-  }
-}
+<div id="error"></div>
 
-/**************************************************
- * HISTORIQUE
- **************************************************/
-function getHistory(id){
-  const sh = SpreadsheetApp
-    .openById(SHEET_ID)
-    .getSheetByName(HISTORY_SHEET);
+<div id="result" style="display:none">
 
-  const data = sh.getDataRange().getValues();
-  const out = [];
+<div class="section"><div class="label">Client</div><div id="f_client"></div></div>
+<div class="section"><div class="label">Service</div><div id="f_service"></div></div>
+<div class="section"><div class="label">Trajet</div><div><span id="f_depart"></span> → <span id="f_arrivee"></span></div></div>
+<div class="section"><div class="label">Distance / Durée</div><div><span id="f_km"></span> · <span id="f_duree"></span></div></div>
+<div class="section"><div class="label">Statut</div><div id="f_statut"></div></div>
+<div class="section"><div class="label">Dernière mise à jour</div><div id="f_update"></div></div>
+<div class="section"><div class="label">Prix</div><div id="f_prix"></div></div>
 
-  for(let i=1;i<data.length;i++){
-    if(String(data[i][0]).trim() === id){
-      out.push({
-        date: formatDate(data[i][1]),
-        statut: data[i][2],
-        comment: data[i][3]
+<div class="section">
+  <div class="label">Historique</div>
+  <div id="timeline"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/TON_SCRIPT/exec";
+
+function rechercher(){
+  error.textContent="";
+  const code = document.getElementById("code").value.trim();
+  if(!code){ error.textContent="Code manquant"; return; }
+
+  fetch(API_URL + "?id=" + encodeURIComponent(code))
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.error){ error.textContent=d.error; return; }
+
+      f_client.textContent = d.client;
+      f_service.textContent = d.service;
+      f_depart.textContent = d.depart;
+      f_arrivee.textContent = d.arrivee;
+      f_km.textContent = d.km + " km";
+      f_duree.textContent = d.duree;
+      f_statut.textContent = d.statut;
+      f_update.textContent = d.updated;
+      f_prix.textContent = "CHF " + d.prixTTC;
+
+      // Timeline
+      timeline.innerHTML="";
+      d.history.forEach((h,i)=>{
+        const last = i === d.history.length-1;
+        timeline.innerHTML += `
+          <div class="timeline-item">
+            <div>
+              <div class="dot ${last?"last":""}"></div>
+              ${last?"":"<div class='line' style='height:30px'></div>"}
+            </div>
+            <div>
+              <strong>${h.statut}</strong><br>
+              ${h.date}<br>
+              <small>${h.comment||""}</small>
+            </div>
+          </div>
+        `;
       });
-    }
-  }
 
-  return out;
+      result.style.display="block";
+    })
+    .catch(()=> error.textContent="Erreur connexion API");
 }
+</script>
 
-/**************************************************
- * UTILS
- **************************************************/
-function jsonOut(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function toNumber(v) {
-  if (!v) return "";
-  const n = Number(String(v).replace(",", "."));
-  return isNaN(n) ? "" : n;
-}
-
-function formatPrice(v) {
-  if (!v) return "";
-  return String(v).replace("CHF","").replace(",",".").trim();
-}
-
-function formatDate(d){
-  if (!d) return "";
-  const date = new Date(d);
-  return Utilities.formatDate(date, "Europe/Zurich", "dd.MM.yyyy HH:mm");
-}
+</body>
+</html>
