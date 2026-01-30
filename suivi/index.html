@@ -47,7 +47,8 @@ table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{border:1px solid #ddd;padding:8px;text-align:center}
 </style>
 
-<script src="https://script.google.com/macros/s/AKfycbzudJA0NMrb6UQgZr4aq9Zc5x0SQAko55APvVbC0d_UxL8YPagm15c3e_0oHpGnqWsz/exec" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1XwMisUcFm6UwQseU1sUU-n_55uI9AWQ&callback=initMap" async defer></script>
+
 
 </head>
 
@@ -186,7 +187,7 @@ function recalculer(){
 function envoyerFormulaire(){
   const data=new FormData(formDemande);
 
-  fetch("https://script.google.com/macros/s/AKfycbyCfwZqNlHmcVOBHbXofZz2xM0Biw_c-PKNp4saaZBrh8lKIHnVJU1fKCvpC6Fp-jIt/execT",{method:"POST",body:data});
+  fetch("https://script.google.com/macros/s/AKfycbzudJA0NMrb6UQgZr4aq9Zc5x0SQAko55APvVbC0d_UxL8YPagm15c3e_0oHpGnqWsz/exec",{method:"POST",body:data});
 
   popup.style.display="block";
   formDemande.reset();
