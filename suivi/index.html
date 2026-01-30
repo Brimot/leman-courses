@@ -185,7 +185,7 @@ function recalculer(){
 function envoyerFormulaire(){
   const data=new FormData(formDemande);
 
-  fetch("URL_APPS_SCRIPT",{method:"POST",body:data});
+  fetch("https://script.google.com/macros/s/AKfycbyCfwZqNlHmcVOBHbXofZz2xM0Biw_c-PKNp4saaZBrh8lKIHnVJU1fKCvpC6Fp-jIt/execT",{method:"POST",body:data});
 
   popup.style.display="block";
   formDemande.reset();
