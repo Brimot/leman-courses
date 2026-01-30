@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -48,29 +47,12 @@ table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{border:1px solid #ddd;padding:8px;text-align:center}
 </style>
 
-<div id="map" style="width:100%;height:280px"></div>
-
-<script>
-let map, ds, dr;
-
-function initMap(){
-  map = new google.maps.Map(document.getElementById("map"), {
-    center:{lat:46.8, lng:8.3},
-    zoom:7
-  });
-  ds = new google.maps.DirectionsService();
-  dr = new google.maps.DirectionsRenderer({map});
-}
-</script>
-
 <script src="https://maps.googleapis.com/maps/api/js?key=TA_CLE_API&callback=initMap" async defer></script>
-
-
 </head>
 
 <body>
 
-<form id="formDemande" onsubmit="return envoyerFormulaire();">
+<form id="formDemande" onsubmit="return envoyerFormulaire()">
 
 <div class="card">
 <h2>🚚 Estimation Léman Courses</h2>
@@ -84,21 +66,18 @@ function initMap(){
 
 <h3>📍 Prise en charge</h3>
 <div class="grid-2">
-  <input id="pc_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'pc_ville')">
+  <input id="pc_npa" placeholder="NPA">
   <input id="pc_ville" placeholder="Ville">
-  <input id="pc_rue" placeholder="Rue">
-  <input id="pc_no" placeholder="N°">
 </div>
 
 <h3>🚚 Livraison</h3>
 <div class="grid-2">
-  <input id="lv_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'lv_ville')">
+  <input id="lv_npa" placeholder="NPA">
   <input id="lv_ville" placeholder="Ville">
-  <input id="lv_rue" placeholder="Rue">
-  <input id="lv_no" placeholder="N°">
 </div>
 
 <button type="button" onclick="calculerDistance()">Calculer distance</button>
+
 <div id="map"></div>
 
 <div class="badges">
@@ -115,9 +94,6 @@ function initMap(){
 
 <h3>📦 Colis</h3>
 <table>
-<thead>
-<tr><th>#</th><th>Poids</th><th></th></tr>
-</thead>
 <tbody id="colis_table"></tbody>
 </table>
 <button type="button" onclick="ajouterColis()">+ Ajouter colis</button>
@@ -127,15 +103,6 @@ function initMap(){
   <div>TVA<br><span class="big">CHF <span id="prix_tva">–</span></span></div>
   <div>TTC<br><span class="big">CHF <span id="prix_ttc">–</span></span></div>
 </div>
-
-<input type="hidden" name="depart" id="f_depart">
-<input type="hidden" name="arrivee" id="f_arrivee">
-<input type="hidden" name="km" id="f_km">
-<input type="hidden" name="duree" id="f_duree">
-<input type="hidden" name="prix_ht" id="f_prix_ht">
-<input type="hidden" name="prix_tva" id="f_prix_tva">
-<input type="hidden" name="prix_ttc" id="f_prix_ttc">
-<input type="hidden" name="colis_json" id="f_colis_json">
 
 <button type="submit">Envoyer</button>
 </div>
@@ -153,7 +120,7 @@ padding:25px;
 border-radius:12px;
 box-shadow:0 10px 30px rgba(0,0,0,.4);
 text-align:center;">
-✅ Demande envoyée  
+✅ Demande envoyée
 </div>
 
 <script>
@@ -161,16 +128,12 @@ let map, ds, dr, km=0, duree=0;
 let colis=[];
 
 function initMap(){
-  map=new google.maps.Map(document.getElementById("map"),{center:{lat:46.8,lng:8.3},zoom:7});
-  ds=new google.maps.DirectionsService();
-  dr=new google.maps.DirectionsRenderer({map});
-}
-
-function autoVilleGoogle(npa,id){
-  if(npa.length!==4) return;
-  new google.maps.Geocoder().geocode({address:npa,country:"CH"},(r,s)=>{
-    if(s==="OK") document.getElementById(id).value=r[0].address_components[1].long_name;
+  map = new google.maps.Map(document.getElementById("map"), {
+    center:{lat:46.8,lng:8.3},
+    zoom:7
   });
+  ds = new google.maps.DirectionsService();
+  dr = new google.maps.DirectionsRenderer({map});
 }
 
 function adresse(p){
@@ -178,7 +141,11 @@ function adresse(p){
 }
 
 function calculerDistance(){
-  ds.route({origin:adresse("pc"),destination:adresse("lv"),travelMode:"DRIVING"},(r,s)=>{
+  ds.route({
+    origin: adresse("pc"),
+    destination: adresse("lv"),
+    travelMode:"DRIVING"
+  },(r,s)=>{
     if(s==="OK"){
       dr.setDirections(r);
       km=r.routes[0].legs[0].distance.value/1000;
@@ -198,23 +165,17 @@ function ajouterColis(){
 function renderColis(){
   colis_table.innerHTML="";
   colis.forEach((c,i)=>{
-    colis_table.innerHTML+=`<tr>
+    colis_table.innerHTML+=`
+<tr>
 <td>${i+1}</td>
 <td><input type="number" value="${c.poids}" oninput="c.poids=this.value;recalculer()"></td>
-<td>${i?'<button onclick="supprimerColis('+c.id+')">❌</button>':'—'}</td>
 </tr>`;
   });
 }
 
-function supprimerColis(id){
-  colis=colis.filter(c=>c.id!==id);
-  renderColis();
-  recalculer();
-}
-
 function recalculer(){
   if(!km) return;
-  let ht=Math.max(25,km*1.2)+ (colis.length-1)*5;
+  let ht=Math.max(25,km*1.2)+(colis.length-1)*5;
   let tva=ht*0.081;
   prix_ht.innerText=ht.toFixed(2);
   prix_tva.innerText=tva.toFixed(2);
@@ -222,38 +183,20 @@ function recalculer(){
 }
 
 function envoyerFormulaire(){
-  return avantEnvoi(); // true = envoi normal
-}
+  const data=new FormData(formDemande);
 
+  fetch("URL_APPS_SCRIPT",{method:"POST",body:data});
 
-  const form = document.getElementById("formDemande");
-  const data = new FormData(form);
-
- <form id="formDemande"
-  action="https://script.google.com/macros/s/AKfycbyCfwZqNlHmcVOBHbXofZz2xM0Biw_c-PKNp4saaZBrh8lKIHnVJU1fKCvpC6Fp-jIt/exec"
-  method="POST"
-  onsubmit="return envoyerFormulaire();">
-
-  // Popup succès
   popup.style.display="block";
-
-  // Reset visuel
-  form.reset();
-  distance_txt.innerText="–";
-  duree_txt.innerText="–";
-  prix_ht.innerText="–";
-  prix_tva.innerText="–";
-  prix_ttc.innerText="–";
-  colis=[];
-  ajouterColis();
+  formDemande.reset();
+  colis=[]; ajouterColis();
 
   setTimeout(()=>popup.style.display="none",5000);
-
-  return false; // empêche redirection
+  return false;
 }
-
 
 ajouterColis();
 </script>
+
 </body>
 </html>
