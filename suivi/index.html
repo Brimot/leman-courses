@@ -40,11 +40,12 @@ button{background:#FDB913;font-weight:bold;border:none}
 <input id="pc_ville" placeholder="Ville">
 
 <h3>Arrivée</h3>
-<input id="lv_npa" placeholder="NPA">
+<input id="pc_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'pc_ville')">
+<input id="pc_ville" placeholder="Ville">
+
+<input id="lv_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'lv_ville')">
 <input id="lv_ville" placeholder="Ville">
 
-<button type="button" onclick="calculerDistance()">Calculer distance</button>
-<div id="map"></div>
 
 <div class="badges">
   <div class="badge">KM: <span id="distance_txt">–</span></div>
