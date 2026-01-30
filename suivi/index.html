@@ -48,7 +48,23 @@ table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{border:1px solid #ddd;padding:8px;text-align:center}
 </style>
 
+<div id="map" style="width:100%;height:280px"></div>
+
+<script>
+let map, ds, dr;
+
+function initMap(){
+  map = new google.maps.Map(document.getElementById("map"), {
+    center:{lat:46.8, lng:8.3},
+    zoom:7
+  });
+  ds = new google.maps.DirectionsService();
+  dr = new google.maps.DirectionsRenderer({map});
+}
+</script>
+
 <script src="https://maps.googleapis.com/maps/api/js?key=TA_CLE_API&callback=initMap" async defer></script>
+
 
 </head>
 
