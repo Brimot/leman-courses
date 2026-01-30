@@ -109,59 +109,59 @@ button{
 
 <script>
 let map, ds, dr, km=0, duree=0;
-
-function initMap(){
-  map = new google.maps.Map(document.getElementById("map"), {center:{lat:46.8,lng:8.3}, zoom:7});
-  ds = new google.maps.DirectionsService();
-  dr = new google.maps.DirectionsRenderer({map});
-}
-
-function autoVilleGoogle(npa, villeId){
-  npa = npa.replace(/\D/g,"");
-  if(npa.length !== 4) return;
-  new google.maps.Geocoder().geocode(
-    { address: npa, componentRestrictions:{country:"CH"} },
-    (res,status)=>{
-      if(status==="OK" && res[0]){
-        let v="";
-        res[0].address_components.forEach(c=>{
-          if(c.types.includes("locality")) v=c.long_name;
-        });
-        if(v) document.getElementById(villeId).value=v;
-      }
-    }
-  );
-}
+let colis=[];
 
 function adresse(p){
-  return document.getElementById(p+"_rue").value+" "+
-         document.getElementById(p+"_no").value+", "+
-         document.getElementById(p+"_npa").value+" "+
-         document.getElementById(p+"_ville").value;
+  const rue = document.getElementById(p+"_rue").value.trim();
+  const no = document.getElementById(p+"_no").value.trim();
+  const npa = document.getElementById(p+"_npa").value.trim();
+  const ville = document.getElementById(p+"_ville").value.trim();
+  return `${rue} ${no}, ${npa} ${ville}, Suisse`.replace(/\s+/g," ").trim();
 }
 
-function calculerDistance(){
-  ds.route({origin:adresse("pc"), destination:adresse("lv"), travelMode:"DRIVING"},
-  (r,s)=>{
-    if(s==="OK"){
-      dr.setDirections(r);
-      km = r.routes[0].legs[0].distance.value/1000;
-      duree = Math.ceil(r.routes[0].legs[0].duration.value/60);
-      distance_txt.innerText = km.toFixed(1);
-      duree_txt.innerText = duree;
-      recalculer();
-    }
+function ajouterColis(){
+  colis.push({id:Date.now(), poids:1});
+  renderColis();
+  recalculer();
+}
+
+function renderColis(){
+  colis_table.innerHTML="";
+  colis.forEach((c,i)=>{
+    colis_table.innerHTML += `
+<tr>
+<td>${i+1}</td>
+<td><input type="number" value="${c.poids}" oninput="majColis(${c.id}, this.value)"></td>
+<td>30×20×10</td>
+<td>Standard</td>
+<td>${i?'<button onclick="supprimerColis('+c.id+')">❌</button>':'—'}</td>
+</tr>`;
   });
+}
+
+function majColis(id,val){
+  const c = colis.find(x=>x.id===id);
+  if(c){ c.poids = Number(val)||0; recalculer(); }
+}
+
+function supprimerColis(id){
+  colis = colis.filter(c=>c.id!==id);
+  renderColis();
+  recalculer();
 }
 
 function recalculer(){
   if(!km) return;
+
   let ht = Math.max(25, km*1.2);
   let tva = ht*0.081;
+  let ttc = ht+tva;
+
   prix_ht.innerText = ht.toFixed(2);
   prix_tva.innerText = tva.toFixed(2);
-  prix_ttc.innerText = (ht+tva).toFixed(2);
+  prix_ttc.innerText = ttc.toFixed(2);
 }
+
 
 function avantEnvoi(){
   if(!km){ alert("Calcule la distance"); return false; }
