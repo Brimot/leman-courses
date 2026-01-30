@@ -6,6 +6,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+  <div id="popup" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+padding:25px 35px;
+border-radius:12px;
+box-shadow:0 10px 30px rgba(0,0,0,.4);
+text-align:center;
+font-size:16px;
+z-index:9999;">
+  ✅ Demande envoyée avec succès  
+  <br><br>
+  Nous vous recontactons rapidement.
+</div>
+<script>
+function envoyerFormulaire(){
+
+  if(!avantEnvoi()) return false; // tes contrôles existants
+
+  const form = document.getElementById("formDemande");
+  const data = new FormData(form);
+
+  fetch("https://script.google.com/macros/s/XXXX/exec", {
+    method: "POST",
+    body: data
+  });
+
+  // Affiche popup
+  const popup = document.getElementById("popup");
+  popup.style.display = "block";
+
+  // Reset formulaire
+  form.reset();
+  distance_txt.innerText = "–";
+  duree_txt.innerText = "–";
+  prix_ht.innerText = "–";
+  prix_tva.innerText = "–";
+  prix_ttc.innerText = "–";
+  colis = [];
+  ajouterColis();
+
+  // Ferme popup après 5 sec
+  setTimeout(()=>{
+    popup.style.display = "none";
+  },5000);
+
+  return false; // empêche rechargement
+}
+</script>
+
 body{
   font-family:Arial;
   background:linear-gradient(135deg,#0B2A44,#123B5A);
@@ -64,10 +117,10 @@ th{background:#f5f7fa;color:#0B2A44}
 
 <body>
 
-<form id="formDemande"
+<form id="formDemande" onsubmit="return envoyerFormulaire();">
   action="https://script.google.com/macros/s/AKfycbzhptFtIQcfnHMfZuxwUCTmWq2tgp7Ig_f7aXJRnuiugJ_z2yjLxSkw21NuswUH_vf3/exec"
   method="POST"
-  target="_blank"
+  target="_blank">
 >
 
 <div class="card">
