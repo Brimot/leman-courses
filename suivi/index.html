@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -5,158 +6,202 @@
 <title>Estimation – Léman Courses</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-body{font-family:Arial;background:#0B2A44;margin:0;padding:30px}
-.card{max-width:900px;margin:auto;background:#fff;padding:25px;border-radius:18px}
-input,select,button{width:100%;padding:12px;margin-top:8px;border-radius:8px}
-button{background:#FDB913;font-weight:bold;border:none}
-#map{height:280px;margin-top:12px}
-.badges{display:flex;gap:10px;justify-content:center}
-.badge{background:#0B2A44;color:white;padding:8px 12px;border-radius:20px}
-.price{font-size:20px;text-align:center}
-</style>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1XwMisUcFm6UwQseU1sUU-n_55uI9AWQ" async defer></script>
 
-
+<style>
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#0B2A44,#123B5A);
+  margin:0;padding:30px;
+}
+.card{
+  max-width:900px;margin:auto;
+  background:#fff;padding:25px;
+  border-radius:18px;
+  box-shadow:0 15px 40px rgba(0,0,0,.3);
+}
+h2{text-align:center;color:#0B2A44}
+input,select,button{
+  width:100%;padding:12px;margin-top:8px;
+  border-radius:10px;border:1px solid #ccc;font-size:15px;
+}
+button{background:#FDB913;font-weight:bold;border:none;cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+#map{width:100%;height:280px;margin-top:12px;border-radius:12px}
+.badge{background:#0B2A44;color:#fff;padding:8px 14px;border-radius:999px}
+.badges{display:flex;justify-content:center;gap:10px;margin-top:10px}
+.pricegrid{display:grid;grid-template-columns:1fr 1fr 1fr;text-align:center}
+.big{font-size:22px;font-weight:bold}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+td{border:1px solid #ddd;padding:6px;text-align:center}
+.whatsapp{
+position:fixed;bottom:20px;right:20px;
+background:#25D366;color:white;
+padding:14px 18px;border-radius:50px;
+font-weight:bold;text-decoration:none;
+box-shadow:0 5px 15px rgba(0,0,0,.3);
+z-index:9999;
+}
+</style>
 </head>
 
 <body>
 
 <form id="formDemande" onsubmit="return envoyerFormulaire()">
 <div class="card">
-  <div style="text-align:center;margin-bottom:15px">
-  <img src="logo.png" height="48">
-</div>
 
+<h2>🚚 Estimation Léman Courses</h2>
 
-<h2>🚚 Estimation Léman-Courses</h2>
-
+<div class="grid3">
 <input name="client" placeholder="Nom" required>
 <input name="tel" placeholder="Téléphone">
-<input name="email" placeholder="Email" required>
+<input name="email" placeholder="E-mail" required>
+</div>
 
-
-
-<h3>Arrivée</h3>
+<h3>📍 Prise en charge</h3>
+<div class="grid2">
 <input id="pc_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'pc_ville')">
 <input id="pc_ville" placeholder="Ville">
+</div>
 
+<h3>🚚 Livraison</h3>
+<div class="grid2">
 <input id="lv_npa" placeholder="NPA" oninput="autoVilleGoogle(this.value,'lv_ville')">
 <input id="lv_ville" placeholder="Ville">
+</div>
 
+<button type="button" onclick="calculerDistance()">Calculer distance</button>
+<div id="map"></div>
 
 <div class="badges">
-  <div class="badge">KM: <span id="distance_txt">–</span></div>
-  <div class="badge">Min: <span id="duree_txt">–</span></div>
+<div class="badge">Distance: <span id="distance_txt">–</span> km</div>
+<div class="badge">Durée: <span id="duree_txt">–</span> min</div>
 </div>
 
 <select id="service" onchange="recalculer()">
-  <option value="">Service</option>
-  <option value="eco">Eco 48h</option>
-  <option value="express">Express 12h</option>
-  <option value="urgent">Urgent 4h</option>
+<option value="">Type de livraison</option>
+<option value="eco">Eco 24h</option>
+<option value="express">Express 12h</option>
+<option value="urgent">Urgent 4h</option>
 </select>
 
-<h3>Colis</h3>
-<table><tbody id="colis_table"></tbody></table>
+<h3>📦 Colis</h3>
+<table>
+<tbody id="colis_table"></tbody>
+</table>
 <button type="button" onclick="ajouterColis()">+ Ajouter colis</button>
 
-<div class="price">
-HT: <span id="prix_ht">–</span> CHF<br>
-TVA: <span id="prix_tva">–</span> CHF<br>
-<b>TTC: <span id="prix_ttc">–</span> CHF</b>
+<div class="pricegrid">
+<div>HT<br><span class="big">CHF <span id="prix_ht">–</span></span></div>
+<div>TVA<br><span class="big">CHF <span id="prix_tva">–</span></span></div>
+<div>TTC<br><span class="big">CHF <span id="prix_ttc">–</span></span></div>
 </div>
-
-<input type="hidden" name="depart" id="f_depart">
-<input type="hidden" name="arrivee" id="f_arrivee">
-<input type="hidden" name="km" id="f_km">
-<input type="hidden" name="duree" id="f_duree">
-<input type="hidden" name="prix_ht" id="f_prix_ht">
-<input type="hidden" name="prix_tva" id="f_prix_tva">
-<input type="hidden" name="prix_ttc" id="f_prix_ttc">
-<input type="hidden" name="colis_json" id="f_colis_json">
 
 <button type="submit">Envoyer</button>
 </div>
 </form>
 
-<div id="popup" style="https://script.google.com/macros/s/AKfycbzhXJdlhFfEo_62Qy4ptqIvmhJRvNV_vs92u-zQkfgBzN-D0IzV3fc8qPqY2690PXlB/exec">
+<div id="popup" style="display:none;position:fixed;top:50%;left:50%;
+transform:translate(-50%,-50%);background:white;
+padding:25px;border-radius:12px;
+box-shadow:0 10px 30px rgba(0,0,0,.4);">
 ✅ Demande envoyée
 </div>
 
-<script>
-let map, ds, dr, km=0, duree=0;
-let colis=[];
+<a class="whatsapp"
+href="https://script.google.com/macros/s/AKfycbzhXJdlhFfEo_62Qy4ptqIvmhJRvNV_vs92u-zQkfgBzN-D0IzV3fc8qPqY2690PXlB/exec"
+target="_blank">💬 Aide WhatsApp</a>
 
+<script>
+let map,ds,dr,km=0;
+let colis=[];
 const TVA=0.081;
-const PRIX_BASE={eco:25,express:35,urgent:45};
-const MULTI_KM={eco:1,express:1.2,urgent:1.4};
+const BASE={eco:25,express:35,urgent:45};
+const MULTI={eco:1,express:1.2,urgent:1.4};
 
 function initMap(){
-  map=new google.maps.Map(document.getElementById("map"),{center:{lat:46.8,lng:8.3},zoom:7});
-  ds=new google.maps.DirectionsService();
-  dr=new google.maps.DirectionsRenderer({map});
+ map=new google.maps.Map(document.getElementById("map"),{center:{lat:46.8,lng:8.3},zoom:7});
+ ds=new google.maps.DirectionsService();
+ dr=new google.maps.DirectionsRenderer({map});
 }
 
-function adresse(p){
-  return document.getElementById(p+"_npa").value+" "+document.getElementById(p+"_ville").value;
+function autoVilleGoogle(npa,id){
+ if(!/^\d{4}$/.test(npa))return;
+ new google.maps.Geocoder().geocode({address:npa,componentRestrictions:{country:"CH"}},(r,s)=>{
+  if(s==="OK") r[0].address_components.forEach(c=>{
+   if(c.types.includes("locality")) document.getElementById(id).value=c.long_name;
+  });
+ });
 }
+
+function adresse(p){return document.getElementById(p+"_npa").value+" "+document.getElementById(p+"_ville").value;}
 
 function calculerDistance(){
-  ds.route({origin:adresse("pc"),destination:adresse("lv"),travelMode:"DRIVING"},(r,s)=>{
-    if(s==="OK"){
-      dr.setDirections(r);
-      km=r.routes[0].legs[0].distance.value/1000;
-      duree=Math.ceil(r.routes[0].legs[0].duration.value/60);
-      distance_txt.innerText=km.toFixed(1);
-      duree_txt.innerText=duree;
-      recalculer();
-    }
-  });
+ ds.route({origin:adresse("pc"),destination:adresse("lv"),travelMode:"DRIVING"},(r,s)=>{
+  if(s==="OK"){
+   dr.setDirections(r);
+   km=r.routes[0].legs[0].distance.value/1000;
+   distance_txt.innerText=km.toFixed(1);
+   duree_txt.innerText=Math.ceil(r.routes[0].legs[0].duration.value/60);
+   recalculer();
+  }
+ });
 }
 
 function ajouterColis(){
-  colis.push({id:Date.now(),poids:1});
-  renderColis();
+ if(colis.length>=5)return alert("Max 5 colis");
+ colis.push({id:Date.now(),poids:1,type:"Standard"});
+ renderColis();recalculer();
 }
 
 function renderColis(){
-  colis_table.innerHTML="";
-  colis.forEach((c,i)=>{
-    colis_table.innerHTML+=`
+ colis_table.innerHTML="";
+ colis.forEach((c,i)=>{
+  colis_table.innerHTML+=`
 <tr>
 <td>${i+1}</td>
-<td><input type="number" value="${c.poids}" oninput="c.poids=this.value;recalculer()"></td>
+<td><input type="number" min="1" max="30" value="${c.poids}" oninput="c.poids=this.value;recalculer()"></td>
+<td>
+<select onchange="c.type=this.value">
+<option>Standard</option>
+<option>Médical</option>
+<option>Fragile</option>
+<option>Alimentaire</option>
+</select>
+</td>
+<td>${i?`<button onclick="supprimerColis(${c.id})">❌</button>`:"—"}</td>
 </tr>`;
-  });
+ });
+}
+
+function supprimerColis(id){colis=colis.filter(c=>c.id!==id);renderColis();recalculer();}
+
+function surcharge(p){
+ if(p<=15)return 0;
+ if(p<=20)return (p-15)*2;
+ return 10+(p-20)*4;
 }
 
 function recalculer(){
-  if(!km||!service.value) return;
-  let ht=PRIX_BASE[service.value]+km*MULTI_KM[service.value]+(colis.length-1)*5;
-  let tva=ht*TVA;
-  prix_ht.innerText=ht.toFixed(2);
-  prix_tva.innerText=tva.toFixed(2);
-  prix_ttc.innerText=(ht+tva).toFixed(2);
+ const s=service.value;
+ if(!km||!s)return;
+ let ht=BASE[s]+km*MULTI[s];
+ colis.forEach((c,i)=>{ht+=surcharge(c.poids);if(i>0)ht+=5});
+ let tva=ht*TVA;
+ prix_ht.innerText=ht.toFixed(2);
+ prix_tva.innerText=tva.toFixed(2);
+ prix_ttc.innerText=(ht+tva).toFixed(2);
 }
 
 function envoyerFormulaire(){
-  f_depart.value=adresse("pc");
-  f_arrivee.value=adresse("lv");
-  f_km.value=km;
-  f_duree.value=duree;
-  f_prix_ht.value=prix_ht.innerText;
-  f_prix_tva.value=prix_tva.innerText;
-  f_prix_ttc.value=prix_ttc.innerText;
-  f_colis_json.value=JSON.stringify(colis);
-
-  fetch("URL_DE_TON_SCRIPT_GOOGLE",{method:"POST",body:new FormData(formDemande)});
-
-  popup.style.display="block";
-  formDemande.reset();
-  colis=[]; ajouterColis();
-  setTimeout(()=>popup.style.display="none",5000);
-  return false;
+ const data=new FormData(formDemande);
+ fetch("TON_SCRIPT_GOOGLE",{method:"POST",body:data});
+ popup.style.display="block";
+ formDemande.reset();
+ colis=[];ajouterColis();
+ setTimeout(()=>popup.style.display="none",5000);
+ return false;
 }
 
 ajouterColis();
