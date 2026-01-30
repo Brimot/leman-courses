@@ -204,18 +204,36 @@ function recalculer(){
 }
 
 function envoyerFormulaire(){
-  const data=new FormData(formDemande);
+
+  // 👉 Remplit TOUS les champs cachés
+  if(!avantEnvoi()) return false;
+
+  const form = document.getElementById("formDemande");
+  const data = new FormData(form);
 
   fetch("https://script.google.com/macros/s/AKfycbzhptFtIQcfnHMfZuxwUCTmWq2tgp7Ig_f7aXJRnuiugJ_z2yjLxSkw21NuswUH_vf3/exec",{
     method:"POST",
     body:data
   });
 
+  // Popup succès
   popup.style.display="block";
-  formDemande.reset();
+
+  // Reset visuel
+  form.reset();
+  distance_txt.innerText="–";
+  duree_txt.innerText="–";
+  prix_ht.innerText="–";
+  prix_tva.innerText="–";
+  prix_ttc.innerText="–";
+  colis=[];
+  ajouterColis();
+
   setTimeout(()=>popup.style.display="none",5000);
-  return false;
+
+  return false; // empêche redirection
 }
+
 
 ajouterColis();
 </script>
