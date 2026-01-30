@@ -212,10 +212,10 @@ function envoyerFormulaire(){
   const form = document.getElementById("formDemande");
   const data = new FormData(form);
 
-  fetch("https://script.google.com/macros/s/AKfycbzhptFtIQcfnHMfZuxwUCTmWq2tgp7Ig_f7aXJRnuiugJ_z2yjLxSkw21NuswUH_vf3/exec",{
-    method:"POST",
-    body:data
-  });
+ <form id="formDemande"
+  action="https://script.google.com/macros/s/AKfycbzhptFtIQcfnHMfZuxwUCTmWq2tgp7Ig_f7aXJRnuiugJ_z2yjLxSkw21NuswUH_vf3/exec"
+  method="POST"
+  onsubmit="return envoyerFormulaire();">
 
   // Popup succès
   popup.style.display="block";
