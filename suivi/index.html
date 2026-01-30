@@ -205,9 +205,9 @@ function recalculer(){
 }
 
 function envoyerFormulaire(){
+  return avantEnvoi(); // true = envoi normal
+}
 
-  // 👉 Remplit TOUS les champs cachés
-  if(!avantEnvoi()) return false;
 
   const form = document.getElementById("formDemande");
   const data = new FormData(form);
