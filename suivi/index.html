@@ -310,6 +310,31 @@ function recalculer(){
   prix_tva.innerText = tva.toFixed(2);
   prix_ttc.innerText = ttc.toFixed(2);
 }
+<script>
+function autoVilleGoogle(npa, villeId){
+  npa = npa.replace(/\D/g,""); // garde uniquement chiffres
+  if(npa.length !== 4) return;
+
+  new google.maps.Geocoder().geocode(
+    { address: npa, componentRestrictions:{country:"CH"} },
+    (res,status)=>{
+      if(status==="OK" && res[0]){
+        let v="";
+        res[0].address_components.forEach(c=>{
+          if(
+            c.types.includes("locality") ||
+            c.types.includes("postal_town") ||
+            c.types.includes("administrative_area_level_3")
+          ){
+            v = c.long_name;
+          }
+        });
+        if(v) document.getElementById(villeId).value = v;
+      }
+    }
+  );
+}
+</script>
 
 ajouterColis();
 </script>
