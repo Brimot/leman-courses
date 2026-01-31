@@ -220,10 +220,18 @@ let colis = [];
 
 /* ===== PRIX ===== */
 const TVA = 0.081;
-const PRIX_BASE = { eco:25, express:35, urgent:45 };
-const MULTI_KM  = { eco:1, express:1.2, urgent:1.4 };
-const SUPPL_COLIS = 5;
-const MAX_COLIS  = 5;
+const PRIX_BASE = { 
+  eco: 12.5, 
+  express: 17.5, 
+  urgent: 22.5 
+};
+
+const MULTI_KM = { 
+  eco: 0.5, 
+  express: 0.6, 
+  urgent: 0.7 
+};
+
 
 /* ===== BOUTON CALCUL DISTANCE ===== */
 function calculerDistance(){
