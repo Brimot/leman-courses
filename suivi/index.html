@@ -180,15 +180,21 @@ const SUPPL_COLIS=5;
 /* NPA -> Ville (Poste Suisse) */
 function rechercherVilleParNPA(npa, champ){
   npa = npa.trim();
-  if(npa.length!==4) return;
-  fetch("https://service.post.ch/zopa/app/api/address/places?zip="+npa)
-  .then(r=>r.json())
-  .then(data=>{
-    if(data && data.length>0){
-      document.getElementById(champ).value = data[0].placeName;
+  if(npa.length !== 4) return;
+
+  fetch(
+    "https://script.google.com/macros/s/AKfycbyAFs9mMCC7bC1-8w0H1OBVZyBuKScjY0Rbfdxun8tWZ1Fn5kQsILYQlviclTzSWRVL/exec"
+    + "?action=ville&npa=" + npa
+  )
+  .then(r => r.json())
+  .then(res => {
+    if(res.ville){
+      document.getElementById(champ).value = res.ville;
     }
-  });
+  })
+  .catch(()=>{});
 }
+
 
 function adresse(p){
   return document.getElementById(p+"_rue").value+" "+
