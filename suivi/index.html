@@ -10,13 +10,9 @@ body{font-family:Arial;background:#eef2f6;padding:30px}
 .card{max-width:800px;margin:auto;background:white;padding:25px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15)}
 h2{text-align:center;color:#16324f}
 input,select,button{width:100%;padding:12px;margin-top:8px;border-radius:8px;border:1px solid #ccc}
-.btn-main{background:#16324f;color:white;font-weight:bold}
-.btn-eco{background:#2ecc71;color:white}
-.btn-express{background:#f39c12;color:white}
-.btn-urgent{background:#e74c3c;color:white}
+.btn{background:#16324f;color:white;font-weight:bold}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .badge{background:#16324f;color:white;padding:8px 16px;border-radius:20px}
-.price{font-size:22px;font-weight:bold}
 </style>
 </head>
 
@@ -41,48 +37,73 @@ input,select,button{width:100%;padding:12px;margin-top:8px;border-radius:8px;bor
   <option value="urgent">Urgent</option>
 </select>
 
-<div id="colis_zone"></div>
-<button onclick="ajouterColis()">➕ Ajouter colis</button>
-<button onclick="retirerColis()">➖ Retirer colis</button>
-
+<div>
+  Colis : <span id="colis_txt">1</span>
+  <button onclick="ajouterColis()">+</button>
+  <button onclick="retirerColis()">-</button>
 </div>
+
+<div id="colis_zone"></div>
+<div>Poids total : <b><span id="poids_total_txt">0</span> kg</b></div>
 
 <input id="vip_code" placeholder="Code VIP" oninput="recalculer()">
 
-<button class="btn-main" onclick="recalculer()">Calculer</button>
+<button class="btn" onclick="recalculer()">Calculer</button>
 
 <div class="row">
   <div class="badge">Distance: <span id="km">–</span> km</div>
   <div class="badge">Durée: <span id="duree">–</span> min</div>
 </div>
 
-<p class="price">
+<p>
 HT: CHF <span id="ht">–</span><br>
 TVA: CHF <span id="tva">–</span><br>
 TTC: CHF <span id="ttc">–</span>
 </p>
 
-<button class="btn-main" onclick="envoyerMail()">Envoyer par mail</button>
+<button class="btn" onclick="envoyerMail()">Envoyer par mail</button>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGI0aWalXWCU5xPrED4aBA6mtip9bk6sD7-tQ3gcdcnmuOqa3D8sX21hL12jgG6pwe/exec";
-
-let colis=1;
+const SCRIPT_URL = "https://script.google.com/macros/s/TON_ID/exec";
+let colis = 1;
 
 function adresse(p){
   return document.getElementById(p+"_npa").value+" "+
          document.getElementById(p+"_ville").value+", Suisse";
 }
 
+function renderColis(){
+  colis_zone.innerHTML="";
+  for(let i=1;i<=colis;i++){
+    colis_zone.innerHTML += `
+      <input type="number" min="1" max="30"
+        placeholder="Poids colis ${i} (kg)"
+        class="poids_colis"
+        oninput="recalculer()">
+    `;
+  }
+}
+
+function poidsTotal(){
+  let total=0;
+  document.querySelectorAll(".poids_colis").forEach(el=>{
+    total += Number(el.value)||0;
+  });
+  poids_total_txt.innerText = total;
+  return total;
+}
+
 function ajouterColis(){
   if(colis<5) colis++;
   colis_txt.innerText=colis;
+  renderColis();
   recalculer();
 }
 function retirerColis(){
   if(colis>1) colis--;
   colis_txt.innerText=colis;
+  renderColis();
   recalculer();
 }
 
@@ -91,6 +112,7 @@ function recalculer(){
   const to=adresse("lv");
   const s=service.value;
   const vip=vip_code.value.trim();
+  const poids=poidsTotal();
 
   if(!from||!to||!s) return;
 
@@ -99,6 +121,7 @@ function recalculer(){
     +"&to="+encodeURIComponent(to)
     +"&service="+s
     +"&colis="+colis
+    +"&poids="+poids
     +"&vip="+vip)
   .then(r=>r.json())
   .then(res=>{
@@ -120,6 +143,7 @@ function envoyerMail(){
   data.append("service", service.value);
   data.append("vip", vip_code.value);
   data.append("colis", colis);
+  data.append("poids", poids_total_txt.innerText);
   data.append("ht", ht.innerText);
   data.append("tva", tva.innerText);
   data.append("ttc", ttc.innerText);
@@ -127,6 +151,8 @@ function envoyerMail(){
   fetch(SCRIPT_URL,{method:"POST",body:data})
     .then(()=>alert("Demande envoyée"));
 }
+
+window.onload = renderColis;
 </script>
 </body>
 </html>
