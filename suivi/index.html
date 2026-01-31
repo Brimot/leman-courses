@@ -206,7 +206,8 @@ function calculerDistance(){
   const o = adresse("pc");
   const d = adresse("lv");
 
-  fetch("https://script.google.com/macros/s/AKfycbz5qPFPuUaULnx8y6LDscXHuueysSM43i6go3cdXq3OJ3F_KrKYwCttQfHB_CaYxkFv/exec="+encodeURIComponent(o)+"&dest="+encodeURIComponent(d))
+  fetch("https://script.google.com/macros/s/AKfycbz5qPFPuUaULnx8y6LDscXHuueysSM43i6go3cdXq3OJ3F_KrKYwCttQfHB_CaYxkFv/exec?action=distance&from="+encodeURIComponent(o)+"&to="+encodeURIComponent(d))
+
   .then(r=>r.json())
   .then(res=>{
     km=Number(res.km);
