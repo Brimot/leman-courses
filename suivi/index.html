@@ -192,7 +192,7 @@ function calculerDistance(){
   }
 
   fetch(
-    "https://script.google.com/macros/s/AKfycbyAFs9mMCC7bC1-8w0H1OBVZyBuKScjY0Rbfdxun8tWZ1Fn5kQsILYQlviclTzSWRVL/exec"
+    "https://script.google.com/macros/s/AKfycbxSzpQrCBqhNtMylqpu5HMU3fIC4VY9-yY7mKPGTboZYtPK8kmMGMLVS-bW1bnpdu7k/exec"
     + "?action=distance"
     + "&origin=" + encodeURIComponent(o)
     + "&dest=" + encodeURIComponent(d)
@@ -283,7 +283,7 @@ function envoyerFormulaire(){
   f_prix_ttc.value=prix_ttc.innerText;
   f_colis_json.value=JSON.stringify(colis);
 
-  fetch("https://script.google.com/macros/s/AKfycbyAFs9mMCC7bC1-8w0H1OBVZyBuKScjY0Rbfdxun8tWZ1Fn5kQsILYQlviclTzSWRVL/exec",
+  fetch("https://script.google.com/macros/s/AKfycbxSzpQrCBqhNtMylqpu5HMU3fIC4VY9-yY7mKPGTboZYtPK8kmMGMLVS-bW1bnpdu7k/exec",
   {method:"POST",body:new FormData(formDemande)});
 
   popup.style.display="block";
