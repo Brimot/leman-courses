@@ -200,22 +200,16 @@ function calculerDistance(){
   .then(r => r.json())
   .then(res => {
 
-    // 🔒 Sécurité anti-NaN
     if(res.error){
       alert("Erreur distance : " + res.error);
       return;
     }
 
-    if(!res.km || !res.duree){
-      alert("Distance non calculable");
-      return;
-    }
-
-    km = Number(res.km);
-    duree = Number(res.duree);
+    km = parseFloat(res.km);
+    duree = parseInt(res.duree);
 
     if(isNaN(km) || isNaN(duree)){
-      alert("Valeurs distance invalides");
+      alert("Distance non calculable");
       return;
     }
 
@@ -225,23 +219,11 @@ function calculerDistance(){
     recalculer();
   })
   .catch(err=>{
-    alert("Erreur réseau distance");
+    alert("Erreur réseau");
     console.error(err);
   });
 }
 
-  fetch("https://script.google.com/macros/s/AKfycbxREhP0WJ5rUy5hfvjfO8hK6_-6AQrQdk1xGHzwTzza_tCormjGMcagcVG048DL-2q-/exec?action=distance"
-    +"&origin="+encodeURIComponent(o)
-    +"&dest="+encodeURIComponent(d))
-  .then(r=>r.json())
-  .then(res=>{
-    km=parseFloat(res.km);
-    duree=parseInt(res.duree);
-    distance_txt.innerText=km;
-    duree_txt.innerText=duree;
-    recalculer();
-  });
-}
 
 function ajouterColis(){
   colis.push({id:Date.now(),poids:1});
