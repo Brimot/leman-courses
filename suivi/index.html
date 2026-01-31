@@ -2,298 +2,537 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Estimation – Léman Courses</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estimation – Léman Courses</title>
 
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f9;
-  margin:0; padding:30px;
-}
-.card{
-  max-width:900px; margin:auto;
-  background:#fff; padding:25px;
-  border-radius:16px;
-  box-shadow:0 8px 25px rgba(0,0,0,.15);
-}
-h2{text-align:center;color:#1f3b57;margin:0}
-.sub{text-align:center;color:#555;margin:6px 0 20px}
+  :root{
+    --bg:#f6f7fb;
+    --card:#ffffff;
+    --text:#17324d;
+    --muted:#5b6b7a;
+    --line:#e6eaf0;
+    --btn:#2a4b7c;
+    --btn2:#eef3fb;
+    --badge:#ecf2ff;
+    --ok:#1f9d55;
+  }
+  body{
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    margin:0;
+    padding:24px;
+    color:var(--text);
+  }
+  .card{
+    max-width:980px;
+    margin:auto;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:0 10px 30px rgba(10,20,30,.08);
+    padding:22px;
+  }
+  h1{
+    margin:0;
+    font-size:22px;
+    text-align:center;
+    letter-spacing:.2px;
+  }
+  .sub{
+    text-align:center;
+    margin:6px 0 16px;
+    color:var(--muted);
+    font-size:13px;
+  }
+  .section{ margin-top:14px; }
+  .label{ font-weight:700; margin-bottom:6px; }
 
-input,select,button{
-  width:100%;
-  padding:12px;
-  margin-top:8px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:15px;
-}
-button{
-  background:#1f3b57;
-  color:white;
-  font-weight:bold;
-  border:none;
-  cursor:pointer;
-}
-button:hover{opacity:.9}
+  input, select, button{
+    width:100%;
+    padding:12px 12px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    font-size:15px;
+    box-sizing:border-box;
+    outline:none;
+    background:#fff;
+  }
+  input:focus, select:focus{
+    border-color:#b8c7e6;
+    box-shadow:0 0 0 3px rgba(42,75,124,.10);
+  }
 
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-@media(max-width:800px){
-  .grid-2,.grid-3{grid-template-columns:1fr}
-}
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  @media(max-width:860px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
 
-.section{margin-top:18px}
-.label{font-weight:bold;color:#1f3b57}
+  .btn{
+    background:var(--btn);
+    color:#fff;
+    border:none;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .btn:hover{ opacity:.95; }
+  .btn-soft{
+    background:var(--btn2);
+    border:1px solid #d7e3ff;
+    color:var(--btn);
+    font-weight:800;
+    cursor:pointer;
+  }
 
-.badges{display:flex;justify-content:center;gap:15px;margin-top:15px}
-.badge{background:#1f3b57;color:white;padding:8px 14px;border-radius:999px}
+  .badges{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+    justify-content:center;
+  }
+  .badge{
+    background:var(--badge);
+    border:1px solid #d7e3ff;
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:14px;
+  }
 
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #ddd;padding:8px;text-align:center}
-th{background:#f0f3f7}
+  table{ width:100%; border-collapse:collapse; margin-top:10px; }
+  th,td{ border:1px solid var(--line); padding:8px; text-align:center; }
+  th{ background:#f8fafc; color:var(--text); }
 
-.pricegrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;margin-top:15px}
-.big{font-size:22px;font-weight:bold}
+  .pricegrid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+    margin-top:12px;
+    text-align:center;
+  }
+  @media(max-width:860px){ .pricegrid{ grid-template-columns:1fr; } }
+  .big{ font-size:22px; font-weight:900; }
 
-#popup{
-  display:none;
-  position:fixed;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  background:white;
-  padding:25px;
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.4);
-  text-align:center;
-  z-index:9999;
-}
+  .note{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:12px;
+    text-align:center;
+  }
+
+  #popup{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.35);
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+  }
+  #popup .box{
+    background:#fff;
+    padding:18px 18px;
+    border-radius:14px;
+    box-shadow:0 12px 30px rgba(0,0,0,.25);
+    text-align:center;
+    max-width:360px;
+    width:92%;
+  }
+  #popup .ok{
+    color:var(--ok);
+    font-weight:900;
+    font-size:16px;
+  }
+  .whatsapp{
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    background:#25D366;
+    color:#fff;
+    text-decoration:none;
+    padding:12px 14px;
+    border-radius:999px;
+    font-weight:900;
+    box-shadow:0 10px 20px rgba(0,0,0,.15);
+  }
 </style>
 </head>
 
 <body>
 
-<form id="formDemande" onsubmit="return envoyerFormulaire()">
 <div class="card">
+  <h1>🚚 Estimation Léman Courses</h1>
+  <div class="sub">Distance via votre script · TVA 8.1% · Max 30 kg/colis</div>
 
-<h2>🚚 Estimation Léman Courses</h2>
-<div class="sub">Calcul automatique · TVA 8.1% · Max 30 kg/colis</div>
+  <form id="formDemande">
+    <div class="section">
+      <div class="label">👤 Coordonnées</div>
+      <div class="grid-3">
+        <input name="client" id="client" placeholder="Nom / Entreprise" required>
+        <input name="tel" id="tel" placeholder="Téléphone">
+        <input name="email" id="email" placeholder="E-mail" required>
+      </div>
+    </div>
 
-<div class="section">
-<div class="label">Coordonnées</div>
-<div class="grid-3">
-  <input name="client" placeholder="Nom / Entreprise" required>
-  <input name="tel" placeholder="Téléphone">
-  <input name="email" placeholder="E-mail" required>
+    <div class="section">
+      <div class="label">📍 Prise en charge</div>
+      <div class="grid-2">
+        <input id="pc_rue" placeholder="Rue">
+        <input id="pc_no" placeholder="N°">
+        <input id="pc_npa" placeholder="NPA (optionnel)">
+        <input id="pc_ville" placeholder="Ville" required>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="label">🚚 Livraison</div>
+      <div class="grid-2">
+        <input id="lv_rue" placeholder="Rue">
+        <input id="lv_no" placeholder="N°">
+        <input id="lv_npa" placeholder="NPA (optionnel)">
+        <input id="lv_ville" placeholder="Ville" required>
+      </div>
+    </div>
+
+    <button class="btn" type="button" id="btnDistance">Calculer distance</button>
+
+    <div class="badges">
+      <div class="badge">Distance : <strong><span id="distance_txt">–</span> km</strong></div>
+      <div class="badge">Durée : <strong><span id="duree_txt">–</span> min</strong></div>
+    </div>
+
+    <div class="section">
+      <div class="label">🚀 Type de livraison</div>
+      <select id="service" name="service" required>
+        <option value="">— Choisir —</option>
+        <option value="eco">Eco 24h</option>
+        <option value="express">Express 12h</option>
+        <option value="urgent">Urgent 4h</option>
+      </select>
+    </div>
+
+    <div class="section">
+      <div class="label">🏷️ Code client (tarif négocié)</div>
+      <input id="code_client" name="code_client" placeholder="Ex : VIP2026">
+    </div>
+
+    <div class="section">
+      <div class="label">📦 Colis (max 5)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Poids (kg)</th>
+            <th>Contenu</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="colis_table"></tbody>
+      </table>
+      <button class="btn-soft" type="button" id="btnAddColis">➕ Ajouter un colis</button>
+      <div class="note">16–20 kg: +2 CHF/kg · 21–30 kg: +4 CHF/kg · +5 CHF dès le 2e colis</div>
+    </div>
+
+    <div class="section">
+      <div class="label">💰 Prix</div>
+      <div class="pricegrid">
+        <div>HT<br><span class="big">CHF <span id="prix_ht">–</span></span></div>
+        <div>TVA<br><span class="big">CHF <span id="prix_tva">–</span></span></div>
+        <div><strong>TTC</strong><br><span class="big"><strong>CHF <span id="prix_ttc">–</span></strong></span></div>
+      </div>
+    </div>
+
+    <!-- Hidden fields envoyés au script -->
+    <input type="hidden" name="depart" id="f_depart">
+    <input type="hidden" name="arrivee" id="f_arrivee">
+    <input type="hidden" name="km" id="f_km">
+    <input type="hidden" name="duree" id="f_duree">
+    <input type="hidden" name="prix_ht" id="f_prix_ht">
+    <input type="hidden" name="prix_tva" id="f_prix_tva">
+    <input type="hidden" name="prix_ttc" id="f_prix_ttc">
+    <input type="hidden" name="colis_json" id="f_colis_json">
+
+    <button class="btn" type="submit" style="margin-top:14px;">Envoyer la demande</button>
+  </form>
 </div>
+
+<div id="popup">
+  <div class="box">
+    <div class="ok">✅ Demande envoyée</div>
+    <div style="margin-top:6px;color:#3a4a5a;">Merci, on vous recontacte rapidement.</div>
+  </div>
 </div>
 
-<div class="section">
-<div class="label">Prise en charge</div>
-<div class="grid-2">
-  <input id="pc_rue" placeholder="Rue">
-  <input id="pc_no" placeholder="N°">
-  <input id="pc_npa" placeholder="NPA">
-  <input id="pc_ville" placeholder="Ville">
-</div>
-</div>
-
-<div class="section">
-<div class="label">Livraison</div>
-<div class="grid-2">
-  <input id="lv_rue" placeholder="Rue">
-  <input id="lv_no" placeholder="N°">
-  <input id="lv_npa" placeholder="NPA">
-  <input id="lv_ville" placeholder="Ville">
-</div>
-</div>
-
-<button type="button" onclick="calculerDistance()">Calculer distance</button>
-
-<div class="badges">
-  <div class="badge">Distance: <span id="distance_txt">–</span> km</div>
-  <div class="badge">Durée: <span id="duree_txt">–</span> min</div>
-</div>
-
-<div class="section">
-<div class="label">Type de livraison</div>
-<select id="service" onchange="recalculer()">
-  <option value="">Choisir</option>
-  <option value="eco">Eco 24h</option>
-  <option value="express">Express 12h</option>
-  <option value="urgent">Urgent 4h</option>
-</select>
-</div>
-
-<div class="section">
-<div class="label">Code client (optionnel)</div>
-<input id="code_client" placeholder="Ex: VIP2026">
-</div>
-
-<div class="section">
-<div class="label">Colis</div>
-<table>
-<thead>
-<tr><th>#</th><th>Poids kg</th><th>Action</th></tr>
-</thead>
-<tbody id="colis_table"></tbody>
-</table>
-<button type="button" onclick="ajouterColis()">➕ Ajouter colis</button>
-</div>
-
-<div class="section">
-<div class="label">Prix</div>
-<div class="pricegrid">
-  <div>HT<br><span class="big">CHF <span id="prix_ht">–</span></span></div>
-  <div>TVA<br><span class="big">CHF <span id="prix_tva">–</span></span></div>
-  <div><strong>TTC</strong><br><span class="big">CHF <span id="prix_ttc">–</span></span></div>
-</div>
-</div>
-
-<input type="hidden" name="depart" id="f_depart">
-<input type="hidden" name="arrivee" id="f_arrivee">
-<input type="hidden" name="km" id="f_km">
-<input type="hidden" name="duree" id="f_duree">
-<input type="hidden" name="prix_ht" id="f_prix_ht">
-<input type="hidden" name="prix_tva" id="f_prix_tva">
-<input type="hidden" name="prix_ttc" id="f_prix_ttc">
-<input type="hidden" name="colis_json" id="f_colis_json">
-
-<button type="submit">Envoyer</button>
-
-</div>
-</form>
-
-<div id="popup">✅ Demande envoyée</div>
+<!-- WhatsApp (tu peux mettre ton vrai lien wa.me) -->
+<a class="whatsapp" href="https://wa.me/41798700488" target="_blank">💬 Aide WhatsApp</a>
 
 <script>
-let km=0, duree=0;
-let colis=[];
+/* =========================
+   CONFIG
+========================= */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxREhP0WJ5rUy5hfvjfO8hK6_-6AQrQdk1xGHzwTzza_tCormjGMcagcVG048DL-2q-/exec";
 
-const TVA=0.081;
-const PRIX_BASE={eco:12.5,express:17.5,urgent:22.5};
-const MULTI_KM={eco:0.5,express:0.6,urgent:0.7};
-const SUPPL_COLIS=5;
+/* =========================
+   STATE
+========================= */
+let km = 0;
+let duree = 0;
+let colis = [];
 
-function adresse(p){
-  return document.getElementById(p+"_rue").value+" "+
-         document.getElementById(p+"_no").value+", "+
-         document.getElementById(p+"_npa").value+" "+
-         document.getElementById(p+"_ville").value+", Suisse";
+/* PRIX (réduits 50% comme demandé) */
+const TVA = 0.081;
+const PRIX_BASE = { eco: 12.5, express: 17.5, urgent: 22.5 };
+const MULTI_KM  = { eco: 0.5,  express: 0.6,  urgent: 0.7  };
+const SUPPL_COLIS = 5;
+const MAX_COLIS = 5;
+
+/* Codes client (exemple) */
+const CODES_REMISE = {
+  "VIP2026": 0.80,   // -20%
+  "PARTNER": 0.85    // -15%
+};
+
+/* =========================
+   HELPERS DOM
+========================= */
+const $ = (id)=>document.getElementById(id);
+
+/* =========================
+   ADRESSE
+========================= */
+function adresse(prefix){
+  const rue   = $(prefix+"_rue").value.trim();
+  const no    = $(prefix+"_no").value.trim();
+  const npa   = $(prefix+"_npa").value.trim();
+  const ville = $(prefix+"_ville").value.trim();
+
+  // minimum ville
+  if(!ville) return "";
+
+  const partRue = [rue, no].join(" ").trim();
+  const partLoc = [npa, ville].join(" ").trim();
+
+  return [partRue, partLoc, "Suisse"].filter(Boolean).join(", ").replace(/\s+/g," ").trim();
 }
 
-function calculerDistance(){
-  const o = adresse("pc");
-  const d = adresse("lv");
+/* =========================
+   DISTANCE
+========================= */
+async function calculerDistance(){
+  const origin = adresse("pc");
+  const dest   = adresse("lv");
 
-  if(!o || !d){
-    alert("Adresse incomplète");
+  if(!origin || !dest){
+    alert("Merci de renseigner au minimum les villes (départ et arrivée).");
     return;
   }
 
-  fetch(
-    "https://script.google.com/macros/s/AKfycbxSzpQrCBqhNtMylqpu5HMU3fIC4VY9-yY7mKPGTboZYtPK8kmMGMLVS-bW1bnpdu7k/exec"
-    + "?action=distance"
-    + "&origin=" + encodeURIComponent(o)
-    + "&dest=" + encodeURIComponent(d)
-  )
-  .then(r => r.json())
-  .then(res => {
+  const url = SCRIPT_URL + "?action=distance"
+    + "&origin=" + encodeURIComponent(origin)
+    + "&dest="   + encodeURIComponent(dest);
+
+  try{
+    const r = await fetch(url, { method:"GET" });
+    const res = await r.json();
 
     if(res.error){
       alert("Erreur distance : " + res.error);
       return;
     }
 
-    km = parseFloat(res.km);
-    duree = parseInt(res.duree);
+    const k = Number(res.km);
+    const d = Number(res.duree);
 
-    if(isNaN(km) || isNaN(duree)){
-      alert("Distance non calculable");
+    if(!isFinite(k) || !isFinite(d)){
+      alert("Distance non calculable (valeurs invalides).");
       return;
     }
 
-    document.getElementById("distance_txt").innerText = km.toFixed(1);
-    document.getElementById("duree_txt").innerText = duree;
+    km = k;
+    duree = d;
+
+    $("distance_txt").innerText = km.toFixed(1);
+    $("duree_txt").innerText = String(duree);
 
     recalculer();
-  })
-  .catch(err=>{
-    alert("Erreur réseau");
-    console.error(err);
-  });
+
+  }catch(e){
+    console.error(e);
+    alert("Erreur réseau lors du calcul de distance.");
+  }
 }
 
-
+/* =========================
+   COLIS
+========================= */
 function ajouterColis(){
-  colis.push({id:Date.now(),poids:1});
+  if(colis.length >= MAX_COLIS){
+    alert("Maximum 5 colis.");
+    return;
+  }
+  colis.push({
+    id: Date.now() + Math.floor(Math.random()*1000),
+    poids: 1,
+    type: "Standard"
+  });
   renderColis();
   recalculer();
 }
 
 function supprimerColis(id){
-  colis=colis.filter(c=>c.id!==id);
-  renderColis(); recalculer();
+  colis = colis.filter(c => c.id !== id);
+  renderColis();
+  recalculer();
+}
+
+function majColis(id, champ, val){
+  const c = colis.find(x => x.id === id);
+  if(!c) return;
+
+  if(champ === "poids"){
+    let p = Number(val);
+    if(!isFinite(p)) p = 1;
+    if(p < 1) p = 1;
+    if(p > 30) p = 30;
+    c.poids = p;
+  } else if(champ === "type"){
+    c.type = String(val || "Standard");
+  }
+
+  recalculer();
 }
 
 function renderColis(){
-  colis_table.innerHTML="";
+  const tb = $("colis_table");
+  tb.innerHTML = "";
+
   colis.forEach((c,i)=>{
-    colis_table.innerHTML+=`
-<tr>
-<td>${i+1}</td>
-<td><input type="number" value="${c.poids}" min="1" max="30"
- oninput="c.poids=this.value;recalculer()"></td>
-<td>${i?`<button onclick="supprimerColis(${c.id})">❌</button>`:"—"}</td>
-</tr>`;
+    tb.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td>${i+1}</td>
+        <td>
+          <input type="number" min="1" max="30" value="${c.poids}"
+            oninput="majColis(${c.id},'poids',this.value)">
+        </td>
+        <td>
+          <select onchange="majColis(${c.id},'type',this.value)">
+            ${["Standard","Documents","Médical","Fragile","Alimentaire","Autre"].map(t =>
+              `<option ${c.type===t?"selected":""}>${t}</option>`
+            ).join("")}
+          </select>
+        </td>
+        <td>
+          ${i===0 ? "—" : `<button type="button" class="btn-soft" onclick="supprimerColis(${c.id})">❌</button>`}
+        </td>
+      </tr>
+    `);
   });
 }
 
+/* =========================
+   SURCHARGES POIDS
+========================= */
 function surchargePoids(p){
-  if(p<=15) return 0;
-  if(p<=20) return (p-15)*2;
-  if(p<=30) return 10+(p-20)*4;
+  p = Number(p) || 0;
+  if(p <= 15) return 0;
+  if(p <= 20) return (p - 15) * 2;
+  if(p <= 30) return (5 * 2) + (p - 20) * 4;
   return 0;
 }
 
+/* =========================
+   PRIX
+========================= */
 function recalculer(){
-  const s=service.value;
-  if(!s||!km) return;
+  const service = $("service").value;
+  if(!service || !km) return;
 
-  let ht=PRIX_BASE[s]+km*MULTI_KM[s];
+  let ht = PRIX_BASE[service] + km * MULTI_KM[service];
+
   colis.forEach((c,i)=>{
-    ht+=surchargePoids(c.poids);
-    if(i>0) ht+=SUPPL_COLIS;
+    ht += surchargePoids(c.poids);
+    if(i>0) ht += SUPPL_COLIS;
   });
 
-  if(code_client.value==="VIP2026") ht*=0.8;
+  const code = $("code_client").value.trim().toUpperCase();
+  if(code && CODES_REMISE[code]){
+    ht *= CODES_REMISE[code];
+  }
 
-  prix_ht.innerText=ht.toFixed(2);
-  prix_tva.innerText=(ht*TVA).toFixed(2);
-  prix_ttc.innerText=(ht*(1+TVA)).toFixed(2);
+  const tva = ht * TVA;
+  const ttc = ht + tva;
+
+  $("prix_ht").innerText = ht.toFixed(2);
+  $("prix_tva").innerText = tva.toFixed(2);
+  $("prix_ttc").innerText = ttc.toFixed(2);
 }
 
-function envoyerFormulaire(){
-  f_depart.value=adresse("pc");
-  f_arrivee.value=adresse("lv");
-  f_km.value=km;
-  f_duree.value=duree;
-  f_prix_ht.value=prix_ht.innerText;
-  f_prix_tva.value=prix_tva.innerText;
-  f_prix_ttc.value=prix_ttc.innerText;
-  f_colis_json.value=JSON.stringify(colis);
+/* =========================
+   ENVOI FORMULAIRE
+========================= */
+async function envoyerFormulaire(e){
+  e.preventDefault();
 
-  fetch("https://script.google.com/macros/s/AKfycbxSzpQrCBqhNtMylqpu5HMU3fIC4VY9-yY7mKPGTboZYtPK8kmMGMLVS-bW1bnpdu7k/exec",
-  {method:"POST",body:new FormData(formDemande)});
+  if(!km){
+    alert("Calcule d’abord la distance.");
+    return false;
+  }
+  const service = $("service").value;
+  if(!service){
+    alert("Choisis un type de livraison.");
+    return false;
+  }
 
-  popup.style.display="block";
-  formDemande.reset();
-  colis=[]; ajouterColis();
-  setTimeout(()=>popup.style.display="none",4000);
+  // Hidden fields
+  $("f_depart").value = adresse("pc");
+  $("f_arrivee").value = adresse("lv");
+  $("f_km").value = km.toFixed(1);
+  $("f_duree").value = String(duree);
+  $("f_prix_ht").value = $("prix_ht").innerText;
+  $("f_prix_tva").value = $("prix_tva").innerText;
+  $("f_prix_ttc").value = $("prix_ttc").innerText;
+  $("f_colis_json").value = JSON.stringify(colis);
+
+  // Ajoute aussi code_client dans le form (déjà name="code_client" donc OK)
+  const form = $("formDemande");
+  const data = new FormData(form);
+
+  try{
+    await fetch(SCRIPT_URL, { method:"POST", body:data });
+  }catch(err){
+    // même si ça plante côté réseau, on garde l'expérience client OK
+    console.warn("POST error", err);
+  }
+
+  // Popup + reset
+  $("popup").style.display = "flex";
+  form.reset();
+  $("distance_txt").innerText = "–";
+  $("duree_txt").innerText = "–";
+  $("prix_ht").innerText = "–";
+  $("prix_tva").innerText = "–";
+  $("prix_ttc").innerText = "–";
+
+  km = 0; duree = 0;
+  colis = [];
+  ajouterColis();
+
+  setTimeout(()=>{ $("popup").style.display="none"; }, 4000);
   return false;
 }
 
-window.onload=()=>ajouterColis();
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", ()=>{
+  $("btnDistance").addEventListener("click", calculerDistance);
+  $("btnAddColis").addEventListener("click", ajouterColis);
+  $("service").addEventListener("change", recalculer);
+  $("code_client").addEventListener("input", recalculer);
+  $("formDemande").addEventListener("submit", envoyerFormulaire);
+
+  ajouterColis(); // 1er colis
+});
 </script>
+
 </body>
 </html>
