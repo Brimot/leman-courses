@@ -1,37 +1,270 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Test distance</title>
+<title>Estimation – Léman Courses</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f2f5f9;
+  margin:0; padding:30px;
+}
+.card{
+  max-width:900px;
+  margin:auto;
+  background:#fff;
+  padding:25px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+h2{text-align:center;color:#16324f;margin:0}
+.sub{text-align:center;color:#555;margin:8px 0 20px}
+
+input,select,button{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:15px;
+}
+button{
+  background:#16324f;
+  color:white;
+  font-weight:bold;
+  border:none;
+  cursor:pointer;
+}
+button:hover{opacity:.9}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:800px){
+  .grid-2,.grid-3{grid-template-columns:1fr}
+}
+
+.section{margin-top:18px}
+.label{font-weight:bold;color:#16324f}
+
+.badges{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  margin-top:15px;
+}
+.badge{
+  background:#16324f;
+  color:white;
+  padding:8px 16px;
+  border-radius:999px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px
+}
+th,td{
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:center
+}
+th{background:#f0f3f7}
+
+.pricegrid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+  text-align:center;
+  margin-top:15px
+}
+.big{font-size:22px;font-weight:bold}
+
+#popup{
+  display:none;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  text-align:center;
+}
+</style>
 </head>
+
 <body>
 
-<h2>Test calcul distance</h2>
+<form id="formDemande" onsubmit="return envoyerFormulaire()">
+<div class="card">
 
-<input id="o" placeholder="Origine (ex: Lausanne)">
-<input id="d" placeholder="Destination (ex: Genève)">
+<h2>🚚 Estimation Léman Courses</h2>
+<div class="sub">Calcul automatique · TVA 8.1%</div>
 
-<button onclick="calculer()">Calculer</button>
+<div class="section">
+<div class="label">Coordonnées</div>
+<div class="grid-3">
+  <input name="client" placeholder="Nom / Entreprise" required>
+  <input name="tel" placeholder="Téléphone">
+  <input name="email" placeholder="E-mail" required>
+</div>
+</div>
 
-<p>KM: <span id="km">–</span></p>
-<p>Durée: <span id="min">–</span></p>
+<div class="section">
+<div class="label">Départ</div>
+<div class="grid-2">
+  <input id="pc_rue" placeholder="Rue">
+  <input id="pc_no" placeholder="N°">
+  <input id="pc_npa" placeholder="NPA">
+  <input id="pc_ville" placeholder="Ville">
+</div>
+</div>
+
+<div class="section">
+<div class="label">Arrivée</div>
+<div class="grid-2">
+  <input id="lv_rue" placeholder="Rue">
+  <input id="lv_no" placeholder="N°">
+  <input id="lv_npa" placeholder="NPA">
+  <input id="lv_ville" placeholder="Ville">
+</div>
+</div>
+
+<button type="button" onclick="calculerDistance()">Calculer distance</button>
+
+<div class="badges">
+  <div class="badge">Distance: <span id="distance_txt">–</span> km</div>
+  <div class="badge">Durée: <span id="duree_txt">–</span> min</div>
+</div>
+
+<div class="section">
+<div class="label">Type de livraison</div>
+<select id="service" onchange="recalculer()">
+  <option value="">Choisir</option>
+  <option value="eco">Eco</option>
+  <option value="express">Express</option>
+  <option value="urgent">Urgent</option>
+</select>
+</div>
+
+<div class="section">
+<div class="label">Colis</div>
+<table>
+<thead>
+<tr><th>#</th><th>Poids (kg)</th><th></th></tr>
+</thead>
+<tbody id="colis_table"></tbody>
+</table>
+<button type="button" onclick="ajouterColis()">➕ Ajouter colis</button>
+</div>
+
+<div class="section">
+<div class="label">Prix</div>
+<div class="pricegrid">
+  <div>HT<br><span class="big">CHF <span id="prix_ht">–</span></span></div>
+  <div>TVA<br><span class="big">CHF <span id="prix_tva">–</span></span></div>
+  <div>TTC<br><span class="big">CHF <span id="prix_ttc">–</span></span></div>
+</div>
+</div>
+
+<input type="hidden" name="depart" id="f_depart">
+<input type="hidden" name="arrivee" id="f_arrivee">
+<input type="hidden" name="km" id="f_km">
+<input type="hidden" name="duree" id="f_duree">
+<input type="hidden" name="prix_ht" id="f_prix_ht">
+<input type="hidden" name="prix_tva" id="f_prix_tva">
+<input type="hidden" name="prix_ttc" id="f_prix_ttc">
+<input type="hidden" name="colis_json" id="f_colis_json">
+
+<button type="submit">Envoyer la demande</button>
+
+</div>
+</form>
+
+<div id="popup">✅ Demande envoyée</div>
 
 <script>
-function calculer(){
-  const o = document.getElementById("o").value;
-  const d = document.getElementById("d").value;
+let km=0, duree=0;
+let colis=[];
 
-  fetch("https://script.google.com/macros/s/TON_ID/exec?action=distance"
-    + "&origin=" + encodeURIComponent(o)
-    + "&dest=" + encodeURIComponent(d))
-  .then(r => r.json())
-  .then(res => {
-    console.log(res);
-    document.getElementById("km").innerText = res.km;
-    document.getElementById("min").innerText = res.duree;
-  })
-  .catch(err => alert("Erreur: " + err));
+const TVA=0.081;
+const PRIX_BASE={eco:20,express:30,urgent:40};
+const MULTI_KM={eco:1,express:1.3,urgent:1.6};
+
+function adresse(p){
+  return document.getElementById(p+"_rue").value+" "+
+         document.getElementById(p+"_no").value+", "+
+         document.getElementById(p+"_npa").value+" "+
+         document.getElementById(p+"_ville").value+", Suisse";
 }
+
+function calculerDistance(){
+  const o = adresse("pc");
+  const d = adresse("lv");
+
+  fetch("TON_URL_APPS_SCRIPT?action=distance&origin="+encodeURIComponent(o)+"&dest="+encodeURIComponent(d))
+  .then(r=>r.json())
+  .then(res=>{
+    km=Number(res.km);
+    duree=Number(res.duree);
+    distance_txt.innerText=km;
+    duree_txt.innerText=duree;
+    recalculer();
+  });
+}
+
+function ajouterColis(){
+  colis.push({id:Date.now(),poids:1});
+  renderColis();
+  recalculer();
+}
+
+function renderColis(){
+  colis_table.innerHTML="";
+  colis.forEach((c,i)=>{
+    colis_table.innerHTML+=`
+<tr>
+<td>${i+1}</td>
+<td><input type="number" value="${c.poids}" min="1" max="30"
+oninput="c.poids=this.value;recalculer()"></td>
+<td>${i?`<button onclick="supprimerColis(${c.id})">❌</button>`:"—"}</td>
+</tr>`;
+  });
+}
+
+function supprimerColis(id){
+  colis=colis.filter(c=>c.id!==id);
+  renderColis();recalculer();
+}
+
+function recalculer(){
+  if(!service.value||!km) return;
+  let ht=PRIX_BASE[service.value]+km*MULTI_KM[service.value];
+  prix_ht.innerText=ht.toFixed(2);
+  prix_tva.innerText=(ht*TVA).toFixed(2);
+  prix_ttc.innerText=(ht*(1+TVA)).toFixed(2);
+}
+
+function envoyerFormulaire(){
+  f_depart.value=adresse("pc");
+  f_arrivee.value=adresse("lv");
+  f_km.value=km;
+  f_duree.value=duree;
+  f_prix_ht.value=prix_ht.innerText;
+  f_prix_tva.value=prix_tva.innerText;
+  f_prix_ttc.value=prix_ttc.innerText;
+  f_colis_json.value=JSON.stringify(colis);
+
+  fetch("TON_URL_APPS_SCRIPT",{method:"POST",body:new FormData(formDemande)});
+  popup.style.display="block";
+  return false;
+}
+
+window.onload=()=>ajouterColis();
 </script>
 
 </body>
