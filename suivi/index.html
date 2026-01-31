@@ -1,13 +1,38 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Léman Courses – Calcul</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{font-family:Arial;background:#f2f4f7;padding:30px}
-.card{max-width:600px;margin:auto;background:white;padding:20px;border-radius:10px}
-input,button{width:100%;padding:10px;margin-top:10px}
-button{background:#0b3c5d;color:white;border:none;font-weight
+<title>Test distance</title>
+</head>
+<body>
 
-fetch("https://script.google.com/macros/s/AKfycbyAFs9mMCC7bC1-8w0H1OBVZyBuKScjY0Rbfdxun8tWZ1Fn5kQsILYQlviclTzSWRVL/exec",
+<h2>Test calcul distance</h2>
+
+<input id="o" placeholder="Origine (ex: Lausanne)">
+<input id="d" placeholder="Destination (ex: Genève)">
+
+<button onclick="calculer()">Calculer</button>
+
+<p>KM: <span id="km">–</span></p>
+<p>Durée: <span id="min">–</span></p>
+
+<script>
+function calculer(){
+  const o = document.getElementById("o").value;
+  const d = document.getElementById("d").value;
+
+  fetch("https://script.google.com/macros/s/TON_ID/exec?action=distance"
+    + "&origin=" + encodeURIComponent(o)
+    + "&dest=" + encodeURIComponent(d))
+  .then(r => r.json())
+  .then(res => {
+    console.log(res);
+    document.getElementById("km").innerText = res.km;
+    document.getElementById("min").innerText = res.duree;
+  })
+  .catch(err => alert("Erreur: " + err));
+}
+</script>
+
+</body>
+</html>
