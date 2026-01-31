@@ -182,9 +182,12 @@ function recalculer(){
     + "&colis_count=" + encodeURIComponent(colisCount)
     + "&vip=" + encodeURIComponent(vipCode);
 
-  fetch("https://script.google.com/macros/s/AKfycbx9Fj76QqvdNqDY2tk_1bd-W5wmDd0AYcQTDTiW9e8Iz-K7XQ1QXhS-CeGdymu78Mtk/exec")
-    .then(r=>r.json())
-    .then(res=>{
+  fetch("https://script.google.com/macros/s/AKfycbx9Fj76QqvdNqDY2tk_1bd-W5wmDd0AYcQTDTiW9e8Iz-K7XQ1QXhS-CeGdymu78Mtk/exec"
+  + "?action=distance"
+  + "&from=" + encodeURIComponent(from)
+  + "&to=" + encodeURIComponent(to)
+)
+
       if(res.error){ alert(res.error); return; }
 
       distance_txt.innerText=res.km;
