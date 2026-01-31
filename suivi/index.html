@@ -139,9 +139,7 @@ button:hover{opacity:.9}
 </div>
 
 <script>
-const SPREADSHEET_ID = "10S5UM7VcFgNwN6Q6nZw4PCAvRBIyscAX667X6HTzcC8";
-
-";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9Fj76QqvdNqDY2tk_1bd-W5wmDd0AYcQTDTiW9e8Iz-K7XQ1QXhS-CeGdymu78Mtk/exec";
 
 let colisCount = 1;
 let vipCode = "";
@@ -174,7 +172,10 @@ function recalculer(){
   const from=adresse("pc");
   const to=adresse("lv");
   const s=service.value;
-  if(!from||!to||!s){ alert("Champs manquants"); return; }
+  if(!from||!to||!s){
+    alert("Champs manquants");
+    return;
+  }
 
   const url = SCRIPT_URL
     + "?action=quote"
@@ -184,19 +185,19 @@ function recalculer(){
     + "&colis_count=" + encodeURIComponent(colisCount)
     + "&vip=" + encodeURIComponent(vipCode);
 
-  fetch("https://script.google.com/macros/s/AKfycbx9Fj76QqvdNqDY2tk_1bd-W5wmDd0AYcQTDTiW9e8Iz-K7XQ1QXhS-CeGdymu78Mtk/exec"
-  + "?action=distance"
-  + "&from=" + encodeURIComponent(from)
-  + "&to=" + encodeURIComponent(to)
-)
+  fetch(url)
+    .then(r => r.json())
+    .then(res => {
+      if(res.error){
+        alert(res.error);
+        return;
+      }
 
-      if(res.error){ alert(res.error); return; }
-
-      distance_txt.innerText=res.km;
-      duree_txt.innerText=res.duree;
-      prix_ht.innerText=res.prix_ht;
-      prix_tva.innerText=res.prix_tva;
-      prix_ttc.innerText=res.prix_ttc;
+      distance_txt.innerText = res.km;
+      duree_txt.innerText = res.duree;
+      prix_ht.innerText = res.prix_ht;
+      prix_tva.innerText = res.prix_tva;
+      prix_ttc.innerText = res.prix_ttc;
 
       vip_status.innerText = res.vip_ok
         ? "✅ Code VIP accepté"
@@ -204,6 +205,3 @@ function recalculer(){
     });
 }
 </script>
-
-</body>
-</html>
