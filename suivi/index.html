@@ -259,7 +259,7 @@ function envoyerFormulaire(){
   f_prix_ttc.value=prix_ttc.innerText;
   f_colis_json.value=JSON.stringify(colis);
 
-  fetch("TON_URL_APPS_SCRIPT",{method:"POST",body:new FormData(formDemande)});
+  fetch("https://script.google.com/macros/s/AKfycbz5qPFPuUaULnx8y6LDscXHuueysSM43i6go3cdXq3OJ3F_KrKYwCttQfHB_CaYxkFv/exec",{method:"POST",body:new FormData(formDemande)});
   popup.style.display="block";
   return false;
 }
