@@ -251,7 +251,7 @@ function envoyerFormulaire(){
   f_prix_ttc.value=prix_ttc.innerText;
   f_colis_json.value=JSON.stringify(colis);
 
-  fetch("https://script.google.com/macros/s/AKfycbyAFs9mMCC7bC1-8w0H1OBVZyBuKScjY0Rbfdxun8tWZ1Fn5kQsILYQlviclTzSWRVL/exec",
+  fetch("https://script.google.com/macros/s/AKfycbyspkSsoMsa_PhaeLvemAvM7XQrUk8t5fBB_7gU_HsrMgod2JrUZgmEyYB-PSplz2eU/exec",
   {method:"POST",body:new FormData(formDemande)});
 
   popup.style.display="block";
