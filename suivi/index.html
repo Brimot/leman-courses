@@ -2,159 +2,138 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Léman Courses – Simulation</title>
+<title>Estimation – Léman Courses</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
+  font-family: Arial, sans-serif;
+  background:#eef2f6;
   margin:0;
-  font-family: Inter, Arial, sans-serif;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#111;
+  padding:30px;
 }
 
-.app{
-  max-width:420px;
-  margin:40px auto;
-  background:#fff;
-  border-radius:20px;
-  padding:25px;
-  box-shadow:0 20px 50px rgba(0,0,0,.3);
+.card{
+  max-width:900px;
+  margin:auto;
+  background:white;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 15px 40px rgba(0,0,0,.15);
 }
 
-h1{
-  text-align:center;
-  margin:0;
-  color:#203a43;
+h2{text-align:center;color:#16324f;margin-top:0}
+.sub{text-align:center;color:#555;margin-bottom:20px}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px}
+
+@media(max-width:800px){
+  .grid-2,.grid-3{grid-template-columns:1fr}
 }
 
-.subtitle{
-  text-align:center;
-  color:#666;
-  font-size:14px;
-  margin-bottom:20px;
-}
-
-.group{
-  margin-bottom:15px;
-}
-
-label{
-  font-size:13px;
-  color:#555;
-}
-
-input, select{
+input,select,button{
   width:100%;
   padding:12px;
-  border-radius:10px;
-  border:1px solid #ddd;
-  margin-top:5px;
+  border-radius:8px;
+  border:1px solid #ccc;
   font-size:15px;
 }
 
 button{
-  width:100%;
-  padding:14px;
-  background:#203a43;
+  background:#16324f;
   color:white;
+  font-weight:bold;
   border:none;
-  border-radius:12px;
-  font-size:16px;
-  font-weight:600;
   cursor:pointer;
 }
+button:hover{opacity:.9}
 
-button:hover{
-  background:#2c5364;
-}
-
-.result{
-  margin-top:20px;
-  background:#f4f7fa;
-  border-radius:14px;
-  padding:15px;
-  text-align:center;
-}
-
-.big{
-  font-size:28px;
-  font-weight:700;
-  color:#203a43;
-}
-
-.row{
+.badges{
   display:flex;
-  justify-content:space-between;
-  margin-top:10px;
-  font-size:14px;
+  justify-content:center;
+  gap:20px;
+  margin-top:20px;
+}
+.badge{
+  background:#16324f;
+  color:white;
+  padding:10px 20px;
+  border-radius:999px;
 }
 
-.price{
-  margin-top:15px;
-  background:#203a43;
-  color:white;
-  padding:15px;
-  border-radius:14px;
+.pricegrid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:15px;
   text-align:center;
+  margin-top:20px;
 }
+.big{font-size:22px;font-weight:bold}
 
-.price .big{
-  color:white;
-}
+.section{margin-top:20px}
+.label{font-weight:bold;color:#16324f;margin-bottom:5px}
 </style>
 </head>
 
 <body>
 
-<div class="app">
-  <h1>🚚 Léman Courses</h1>
-  <div class="subtitle">Simulation instantanée</div>
+<div class="card">
 
-  <div class="group">
-    <label>Départ</label>
-    <input id="pc_npa" placeholder="NPA">
-    <input id="pc_ville" placeholder="Ville">
-  </div>
+<h2>🚚 Estimation Léman Courses</h2>
+<div class="sub">Calcul automatique – TVA 8.1%</div>
 
-  <div class="group">
-    <label>Arrivée</label>
-    <input id="lv_npa" placeholder="NPA">
-    <input id="lv_ville" placeholder="Ville">
-  </div>
+<div class="section">
+<div class="label">Départ</div>
+<div class="grid-2">
+  <input id="pc_npa" placeholder="NPA">
+  <input id="pc_ville" placeholder="Ville">
+</div>
+</div>
 
-  <div class="group">
-    <label>Service</label>
-    <select id="service">
-      <option value="">Choisir</option>
-      <option value="eco">Eco</option>
-      <option value="express">Express</option>
-      <option value="urgent">Urgent</option>
-    </select>
-  </div>
+<div class="section">
+<div class="label">Arrivée</div>
+<div class="grid-2">
+  <input id="lv_npa" placeholder="NPA">
+  <input id="lv_ville" placeholder="Ville">
+</div>
+</div>
 
-  <button onclick="calculer()">Calculer</button>
+<div class="section">
+<div class="label">Service</div>
+<select id="service">
+  <option value="">Choisir</option>
+  <option value="eco">Eco</option>
+  <option value="express">Express</option>
+  <option value="urgent">Urgent</option>
+</select>
+</div>
 
-  <div class="result">
-    <div class="big"><span id="km">–</span> km</div>
-    <div class="row">
-      <div>Durée</div>
-      <div><span id="duree">–</span> min</div>
-    </div>
-  </div>
+<button onclick="calculerDistance()">Calculer distance</button>
 
-  <div class="price">
-    <div>Total TTC</div>
-    <div class="big">CHF <span id="prix">–</span></div>
-  </div>
+<div class="badges">
+  <div class="badge">Distance : <span id="distance_txt">–</span> km</div>
+  <div class="badge">Durée : <span id="duree_txt">–</span> min</div>
+</div>
+
+<div class="section">
+<div class="label">Prix</div>
+<div class="pricegrid">
+  <div>HT<br><span class="big">CHF <span id="prix_ht">–</span></span></div>
+  <div>TVA<br><span class="big">CHF <span id="prix_tva">–</span></span></div>
+  <div>TTC<br><span class="big">CHF <span id="prix_ttc">–</span></span></div>
+</div>
+</div>
+
 </div>
 
 <script>
 const SCRIPT_URL="https://script.google.com/macros/s/TON_ID/exec";
 
+let km=0,duree=0;
+const TVA=0.081;
 const PRIX_BASE={eco:20,express:30,urgent:40};
 const MULTI_KM={eco:1,express:1.3,urgent:1.6};
-const TVA=0.081;
 
 function adresse(p){
   const npa=document.getElementById(p+"_npa").value.trim();
@@ -163,21 +142,30 @@ function adresse(p){
   return npa+" "+ville+", Suisse";
 }
 
-function calculer(){
+function calculerDistance(){
   const from=adresse("pc");
   const to=adresse("lv");
   const s=service.value;
-  if(!from||!to||!s) return alert("Champs manquants");
+  if(!from||!to||!s){ alert("Veuillez remplir tous les champs"); return; }
 
   fetch(SCRIPT_URL+"?action=distance&from="+encodeURIComponent(from)+"&to="+encodeURIComponent(to))
   .then(r=>r.json())
   .then(res=>{
-    km.innerText=res.km;
-    duree.innerText=res.duree;
-    let ht=PRIX_BASE[s]+res.km*MULTI_KM[s];
-    let ttc=ht*(1+TVA);
-    prix.innerText=ttc.toFixed(2);
+    if(res.error){ alert(res.error); return; }
+    km=Number(res.km);
+    duree=Number(res.duree);
+    distance_txt.innerText=km;
+    duree_txt.innerText=duree;
+    recalculerPrix();
   });
+}
+
+function recalculerPrix(){
+  if(!km||!service.value) return;
+  let ht=PRIX_BASE[service.value]+km*MULTI_KM[service.value];
+  prix_ht.innerText=ht.toFixed(2);
+  prix_tva.innerText=(ht*TVA).toFixed(2);
+  prix_ttc.innerText=(ht*(1+TVA)).toFixed(2);
 }
 </script>
 
