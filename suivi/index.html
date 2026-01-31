@@ -326,7 +326,7 @@ function envoyerFormulaire(){
   if(!km){ alert("Calcule la distance d’abord"); return false; }
   const form = document.getElementById("formDemande");
   const data = new FormData(form);
-  fetch("https://script.google.com/macros/s/AKfycbzp1rNaKsxVuff4qDqBz7QGzPqRxa0Bw2gKpTHub134WTulqrd6sFerTSotNHZwXhMT/exec", {method:"POST",body:data});
+  fetch("https://script.google.com/macros/s/AKfycbwBip8qzm0ZzbKotaIGGD-KV7U6eNUA3pHsZx_T4YjL8PuIte1Mn3LmxrbMLBbY7DhR/exec", {method:"POST",body:data});
   document.getElementById("popup").style.display="block";
   form.reset();
   colis=[]; ajouterColis();
