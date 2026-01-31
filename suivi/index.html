@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Estimation – Léman Courses</title>
+<title>Léman Courses – Simulation</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -12,7 +12,6 @@ body{
   margin:0;
   padding:30px;
 }
-
 .card{
   max-width:900px;
   margin:auto;
@@ -21,16 +20,11 @@ body{
   border-radius:16px;
   box-shadow:0 15px 40px rgba(0,0,0,.15);
 }
-
 h2{text-align:center;color:#16324f;margin-top:0}
 .sub{text-align:center;color:#555;margin-bottom:20px}
 
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px}
-
-@media(max-width:800px){
-  .grid-2,.grid-3{grid-template-columns:1fr}
-}
+@media(max-width:800px){.grid-2{grid-template-columns:1fr}}
 
 input,select,button{
   width:100%;
@@ -39,7 +33,6 @@ input,select,button{
   border:1px solid #ccc;
   font-size:15px;
 }
-
 button{
   background:#16324f;
   color:white;
@@ -48,6 +41,9 @@ button{
   cursor:pointer;
 }
 button:hover{opacity:.9}
+
+.section{margin-top:20px}
+.label{font-weight:bold;color:#16324f;margin-bottom:5px}
 
 .badges{
   display:flex;
@@ -70,9 +66,6 @@ button:hover{opacity:.9}
   margin-top:20px;
 }
 .big{font-size:22px;font-weight:bold}
-
-.section{margin-top:20px}
-.label{font-weight:bold;color:#16324f;margin-bottom:5px}
 </style>
 </head>
 
@@ -81,7 +74,7 @@ button:hover{opacity:.9}
 <div class="card">
 
 <h2>🚚 Estimation Léman Courses</h2>
-<div class="sub">Calcul automatique – TVA 8.1%</div>
+<div class="sub">Tarifs dynamiques · -50% par défaut · VIP via Google Sheets</div>
 
 <div class="section">
 <div class="label">Départ</div>
@@ -109,7 +102,25 @@ button:hover{opacity:.9}
 </select>
 </div>
 
-<button onclick="calculerDistance()">Calculer distance</button>
+<div class="section">
+<div class="label">Colis</div>
+<div class="grid-2">
+  <div>Nombre : <b><span id="colis_count_txt">1</span></b></div>
+  <button type="button" onclick="ajouterColis()">➕ Ajouter colis</button>
+</div>
+<div style="margin-top:5px;color:#555">Dès le 2e colis : +5 CHF / colis (max 5)</div>
+</div>
+
+<div class="section">
+<div class="label">Code VIP</div>
+<div class="grid-2">
+  <input id="vip_code" placeholder="Entrer un code VIP">
+  <button type="button" onclick="appliquerVIP()">Appliquer VIP</button>
+</div>
+<div id="vip_status" style="margin-top:5px;color:#555"></div>
+</div>
+
+<button onclick="recalculer()">Calculer</button>
 
 <div class="badges">
   <div class="badge">Distance : <span id="distance_txt">–</span> km</div>
@@ -128,44 +139,64 @@ button:hover{opacity:.9}
 </div>
 
 <script>
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwY2YskKV_DXT2cxl9Wb2h-jRdCGwfa4oo6rCuea2TmjeJEmpGNCz77VXCDlX5nZMlp/exec";
+const SCRIPT_URL="https://script.google.com/macros/s/TON_ID/exec";
 
-let km=0,duree=0;
-const TVA=0.081;
-const PRIX_BASE={eco:20,express:30,urgent:40};
-const MULTI_KM={eco:1,express:1.3,urgent:1.6};
+let colisCount = 1;
+let vipCode = "";
 
 function adresse(p){
   const npa=document.getElementById(p+"_npa").value.trim();
   const ville=document.getElementById(p+"_ville").value.trim();
-  if(!npa||!ville){ alert("NPA et Ville obligatoires"); return ""; }
+  if(!npa||!ville){
+    alert("NPA et Ville obligatoires");
+    return "";
+  }
   return npa+" "+ville+", Suisse";
 }
 
-function calculerDistance(){
+function ajouterColis(){
+  if(colisCount>=5){
+    alert("Maximum 5 colis");
+    return;
+  }
+  colisCount++;
+  colis_count_txt.innerText=colisCount;
+}
+
+function appliquerVIP(){
+  vipCode = vip_code.value.trim();
+  recalculer();
+}
+
+function recalculer(){
   const from=adresse("pc");
   const to=adresse("lv");
   const s=service.value;
-  if(!from||!to||!s){ alert("Veuillez remplir tous les champs"); return; }
+  if(!from||!to||!s){ alert("Champs manquants"); return; }
 
-  fetch(SCRIPT_URL+"?action=distance&from="+encodeURIComponent(from)+"&to="+encodeURIComponent(to))
-  .then(r=>r.json())
-  .then(res=>{
-    if(res.error){ alert(res.error); return; }
-    km=Number(res.km);
-    duree=Number(res.duree);
-    distance_txt.innerText=km;
-    duree_txt.innerText=duree;
-    recalculerPrix();
-  });
-}
+  const url = SCRIPT_URL
+    + "?action=quote"
+    + "&from=" + encodeURIComponent(from)
+    + "&to=" + encodeURIComponent(to)
+    + "&service=" + encodeURIComponent(s)
+    + "&colis_count=" + encodeURIComponent(colisCount)
+    + "&vip=" + encodeURIComponent(vipCode);
 
-function recalculerPrix(){
-  if(!km||!service.value) return;
-  let ht=PRIX_BASE[service.value]+km*MULTI_KM[service.value];
-  prix_ht.innerText=ht.toFixed(2);
-  prix_tva.innerText=(ht*TVA).toFixed(2);
-  prix_ttc.innerText=(ht*(1+TVA)).toFixed(2);
+  fetch(url)
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.error){ alert(res.error); return; }
+
+      distance_txt.innerText=res.km;
+      duree_txt.innerText=res.duree;
+      prix_ht.innerText=res.prix_ht;
+      prix_tva.innerText=res.prix_tva;
+      prix_ttc.innerText=res.prix_ttc;
+
+      vip_status.innerText = res.vip_ok
+        ? "✅ Code VIP accepté"
+        : (vipCode ? "⚠️ Code VIP invalide" : "");
+    });
 }
 </script>
 
