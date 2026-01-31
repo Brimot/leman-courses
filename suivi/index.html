@@ -41,10 +41,10 @@ input,select,button{width:100%;padding:12px;margin-top:8px;border-radius:8px;bor
   <option value="urgent">Urgent</option>
 </select>
 
-<div class="row">
-  <div>Colis : <span id="colis_txt">1</span></div>
-  <button onclick="ajouterColis()">+</button>
-  <button onclick="retirerColis()">-</button>
+<div id="colis_zone"></div>
+<button onclick="ajouterColis()">➕ Ajouter colis</button>
+<button onclick="retirerColis()">➖ Retirer colis</button>
+
 </div>
 
 <input id="vip_code" placeholder="Code VIP" oninput="recalculer()">
