@@ -182,7 +182,7 @@ function recalculer(){
     + "&colis_count=" + encodeURIComponent(colisCount)
     + "&vip=" + encodeURIComponent(vipCode);
 
-  fetch(url)
+  fetch("https://script.google.com/macros/s/AKfycbx9Fj76QqvdNqDY2tk_1bd-W5wmDd0AYcQTDTiW9e8Iz-K7XQ1QXhS-CeGdymu78Mtk/exec")
     .then(r=>r.json())
     .then(res=>{
       if(res.error){ alert(res.error); return; }
