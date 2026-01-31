@@ -206,7 +206,7 @@ function calculerDistance(){
   const o = adresse("pc");
   const d = adresse("lv");
 
-  fetch("TON_URL_APPS_SCRIPT?action=distance&origin="+encodeURIComponent(o)+"&dest="+encodeURIComponent(d))
+  fetch("https://script.google.com/macros/s/AKfycbz5qPFPuUaULnx8y6LDscXHuueysSM43i6go3cdXq3OJ3F_KrKYwCttQfHB_CaYxkFv/exec="+encodeURIComponent(o)+"&dest="+encodeURIComponent(d))
   .then(r=>r.json())
   .then(res=>{
     km=Number(res.km);
