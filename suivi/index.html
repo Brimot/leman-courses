@@ -2,65 +2,181 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Estimation Léman Courses</title>
+<title>Léman Courses – Simulation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  margin:0;
+  font-family: Inter, Arial, sans-serif;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#111;
+}
+
+.app{
+  max-width:420px;
+  margin:40px auto;
+  background:#fff;
+  border-radius:20px;
+  padding:25px;
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
+}
+
+h1{
+  text-align:center;
+  margin:0;
+  color:#203a43;
+}
+
+.subtitle{
+  text-align:center;
+  color:#666;
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+.group{
+  margin-bottom:15px;
+}
+
+label{
+  font-size:13px;
+  color:#555;
+}
+
+input, select{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  margin-top:5px;
+  font-size:15px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  background:#203a43;
+  color:white;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#2c5364;
+}
+
+.result{
+  margin-top:20px;
+  background:#f4f7fa;
+  border-radius:14px;
+  padding:15px;
+  text-align:center;
+}
+
+.big{
+  font-size:28px;
+  font-weight:700;
+  color:#203a43;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+  font-size:14px;
+}
+
+.price{
+  margin-top:15px;
+  background:#203a43;
+  color:white;
+  padding:15px;
+  border-radius:14px;
+  text-align:center;
+}
+
+.price .big{
+  color:white;
+}
+</style>
 </head>
 
 <body>
 
-<h2>Estimation Léman Courses</h2>
+<div class="app">
+  <h1>🚚 Léman Courses</h1>
+  <div class="subtitle">Simulation instantanée</div>
 
-Départ :  
-<input id="pc_npa" placeholder="NPA">
-<input id="pc_ville" placeholder="Ville">
+  <div class="group">
+    <label>Départ</label>
+    <input id="pc_npa" placeholder="NPA">
+    <input id="pc_ville" placeholder="Ville">
+  </div>
 
-<br><br>
+  <div class="group">
+    <label>Arrivée</label>
+    <input id="lv_npa" placeholder="NPA">
+    <input id="lv_ville" placeholder="Ville">
+  </div>
 
-Arrivée :  
-<input id="lv_npa" placeholder="NPA">
-<input id="lv_ville" placeholder="Ville">
+  <div class="group">
+    <label>Service</label>
+    <select id="service">
+      <option value="">Choisir</option>
+      <option value="eco">Eco</option>
+      <option value="express">Express</option>
+      <option value="urgent">Urgent</option>
+    </select>
+  </div>
 
-<br><br>
+  <button onclick="calculer()">Calculer</button>
 
-<button onclick="calculer()">Calculer distance</button>
+  <div class="result">
+    <div class="big"><span id="km">–</span> km</div>
+    <div class="row">
+      <div>Durée</div>
+      <div><span id="duree">–</span> min</div>
+    </div>
+  </div>
 
-<p>
-Distance : <span id="km">–</span> km  
-Durée : <span id="duree">–</span> min
-</p>
+  <div class="price">
+    <div>Total TTC</div>
+    <div class="big">CHF <span id="prix">–</span></div>
+  </div>
+</div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwY2YskKV_DXT2cxl9Wb2h-jRdCGwfa4oo6rCuea2TmjeJEmpGNCz77VXCDlX5nZMlp/exec";
+const SCRIPT_URL="https://script.google.com/macros/s/TON_ID/exec";
+
+const PRIX_BASE={eco:20,express:30,urgent:40};
+const MULTI_KM={eco:1,express:1.3,urgent:1.6};
+const TVA=0.081;
 
 function adresse(p){
-  const npa = document.getElementById(p+"_npa").value.trim();
-  const ville = document.getElementById(p+"_ville").value.trim();
-
-  if(!npa || !ville){
-    alert("NPA et Ville obligatoires");
-    return "";
-  }
-
-  return npa + " " + ville + ", Suisse";
+  const npa=document.getElementById(p+"_npa").value.trim();
+  const ville=document.getElementById(p+"_ville").value.trim();
+  if(!npa||!ville){ alert("NPA et Ville obligatoires"); return ""; }
+  return npa+" "+ville+", Suisse";
 }
 
 function calculer(){
-  const from = adresse("pc");
-  const to = adresse("lv");
-  if(!from || !to) return;
+  const from=adresse("pc");
+  const to=adresse("lv");
+  const s=service.value;
+  if(!from||!to||!s) return alert("Champs manquants");
 
-  fetch(SCRIPT_URL + "?action=distance&from=" +
-        encodeURIComponent(from) +
-        "&to=" +
-        encodeURIComponent(to))
-  .then(r => r.json())
-  .then(res => {
-    console.log(res);
-    if(res.error){
-      alert(res.error);
-      return;
-    }
-    km.innerText = res.km;
-    duree.innerText = res.duree;
+  fetch(SCRIPT_URL+"?action=distance&from="+encodeURIComponent(from)+"&to="+encodeURIComponent(to))
+  .then(r=>r.json())
+  .then(res=>{
+    km.innerText=res.km;
+    duree.innerText=res.duree;
+    let ht=PRIX_BASE[s]+res.km*MULTI_KM[s];
+    let ttc=ht*(1+TVA);
+    prix.innerText=ttc.toFixed(2);
   });
 }
 </script>
