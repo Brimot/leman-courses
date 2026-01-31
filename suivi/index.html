@@ -324,15 +324,35 @@ function recalculer(){
 /* ===== ENVOI ===== */
 function envoyerFormulaire(){
   if(!km){ alert("Calcule la distance d’abord"); return false; }
+
+  // 1. Remplir les champs cachés
+  document.getElementById("f_depart").value = adresse("pc");
+  document.getElementById("f_arrivee").value = adresse("lv");
+  document.getElementById("f_km").value = km.toFixed(1);
+  document.getElementById("f_duree").value = String(duree);
+  document.getElementById("f_prix_ht").value = document.getElementById("prix_ht").innerText;
+  document.getElementById("f_prix_tva").value = document.getElementById("prix_tva").innerText;
+  document.getElementById("f_prix_ttc").value = document.getElementById("prix_ttc").innerText;
+  document.getElementById("f_colis_json").value = JSON.stringify(colis);
+
+  // 2. PUIS créer le FormData
   const form = document.getElementById("formDemande");
   const data = new FormData(form);
-  fetch("https://script.google.com/macros/s/AKfycbwBip8qzm0ZzbKotaIGGD-KV7U6eNUA3pHsZx_T4YjL8PuIte1Mn3LmxrbMLBbY7DhR/exec", {method:"POST",body:data});
+
+  // 3. Envoi
+  fetch("https://script.google.com/macros/s/AKfycbwBip8qzm0ZzbKotaIGGD-KV7U6eNUA3pHsZx_T4YjL8PuIte1Mn3LmxrbMLBbY7DhR/exec", {
+    method:"POST",
+    body:data
+  });
+
+  // 4. UI
   document.getElementById("popup").style.display="block";
   form.reset();
   colis=[]; ajouterColis();
   setTimeout(()=>document.getElementById("popup").style.display="none",5000);
   return false;
 }
+
 
 /* init */
 ajouterColis();
