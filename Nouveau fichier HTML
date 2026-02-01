@@ -1,1 +1,277 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard – Léman Courses</title>
+  <style>
+    :root{
+      --bg:#eef2f6; --card:#fff; --ink:#16324f; --muted:#6b7a89;
+      --line:#dbe2ea; --ok:#1e9b52; --warn:#c0392b;
+      --b1:#2ecc71; --b2:#f39c12; --b3:#e74c3c; --bmain:#16324f;
+    }
+    body{font-family:Arial,sans-serif;background:var(--bg);margin:0;padding:14px;}
+    .wrap{max-width:980px;margin:0 auto;}
+    .top{background:var(--card);border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.12);padding:16px;}
+    h1{margin:0;color:var(--ink);font-size:18px;}
+    .sub{color:var(--muted);margin-top:6px;font-size:13px;}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+    @media(max-width:860px){.grid{grid-template-columns:1fr;}}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.10);padding:14px;}
+    .title{color:var(--ink);font-weight:800;margin-bottom:10px;}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    @media(max-width:600px){.row{grid-template-columns:1fr;}}
+    input,select,button{width:100%;padding:11px;border-radius:12px;border:1px solid #cfd6de;font-size:14px;box-sizing:border-box;}
+    button{border:none;color:#fff;font-weight:800;cursor:pointer;transition:.15s;}
+    button:active{transform:scale(.98);}
+    .btn-main{background:var(--bmain);}
+    .btn-add{background:var(--b1);}
+    .btn-gen{background:var(--b2);}
+    .btn-refresh{background:#2d3e55;}
+    .btn-del{background:var(--b3);}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--ink);color:#fff;font-weight:800;font-size:12px;}
+    .msg{margin-top:10px;font-weight:800}
+    .ok{color:var(--ok)} .warn{color:var(--warn)}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top;}
+    th{color:var(--muted);font-weight:800;}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+    .small{color:var(--muted);font-size:12px;margin-top:6px;}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>🚚 Léman Courses – Dashboard</h1>
+    <div class="sub">En déplacement : charge les colis du jour, génère les tournées, et consulte l’historique.</div>
+    <div class="small">Capacité : <span class="pill">2 véhicules</span> <span class="pill">50 colis / véhicule</span></div>
+  </div>
+
+  <div class="grid">
+    <!-- AJOUT COLIS -->
+    <div class="card">
+      <div class="title">➕ Ajouter un colis (aujourd’hui)</div>
+      <div class="row">
+        <input id="id_colis" placeholder="ID colis (ex: C001)" />
+        <input id="client" placeholder="Client (ex: Pharmacie Yverdon)" />
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <input id="cp" placeholder="CP (ex: 1400)" inputmode="numeric" />
+        <input id="ville" placeholder="Ville (ex: Yverdon)" />
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <input id="nb_colis" placeholder="Nb colis (ex: 12)" inputmode="numeric" />
+        <select id="priorite">
+          <option value="">Priorité (optionnel)</option>
+          <option value="haute">haute</option>
+          <option value="normale">normale</option>
+          <option value="basse">basse</option>
+        </select>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <input id="heure_max" placeholder="Heure max (optionnel) ex: 10:00" />
+        <button class="btn-add" onclick="addColis()">Ajouter</button>
+      </div>
+      <div id="msg_add" class="msg"></div>
+
+      <div class="actions">
+        <button class="btn-refresh" onclick="loadColis()">🔄 Rafraîchir liste</button>
+        <button class="btn-gen" onclick="generate()">⚡ Générer tournées</button>
+      </div>
+      <div id="msg_gen" class="msg"></div>
+    </div>
+
+    <!-- LISTE COLIS JOUR -->
+    <div class="card">
+      <div class="title">📦 Colis du jour</div>
+      <div class="small">Tu peux supprimer une ligne si tu t’es trompé, puis rafraîchir.</div>
+      <div style="overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:12px;">
+        <table id="tbl_colis">
+          <thead></thead><tbody></tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <button class="btn-main" onclick="loadColis()">🔄 Rafraîchir</button>
+      </div>
+      <div id="msg_colis" class="msg"></div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:12px;">
+    <!-- TOURNEE DU JOUR -->
+    <div class="card">
+      <div class="title">🗺️ Tournée du jour</div>
+      <div style="overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:12px;">
+        <table id="tbl_tournee"><thead></thead><tbody></tbody></table>
+      </div>
+      <div class="actions">
+        <button class="btn-main" onclick="loadTournee()">🔄 Rafraîchir tournée</button>
+      </div>
+      <div id="msg_tournee" class="msg"></div>
+    </div>
+
+    <!-- HISTORIQUE -->
+    <div class="card">
+      <div class="title">📚 Historique récent</div>
+      <div class="row">
+        <input id="hist_limit" placeholder="Nb lignes (ex: 100)" value="100" inputmode="numeric" />
+        <button class="btn-main" onclick="loadHist()">🔎 Charger</button>
+      </div>
+      <div style="margin-top:10px;overflow:auto;max-height:320px;border:1px solid var(--line);border-radius:12px;">
+        <table id="tbl_hist"><thead></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setMsg(id, txt, cls){
+  const el = document.getElementById(id);
+  el.className = "msg " + (cls || "");
+  el.textContent = txt || "";
+}
+
+function renderTable(tableId, headers, rows, opts){
+  const tbl = document.getElementById(tableId);
+  const thead = tbl.querySelector("thead");
+  const tbody = tbl.querySelector("tbody");
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+
+  if(!headers || !headers.length){
+    thead.innerHTML = "<tr><th>—</th></tr>";
+    return;
+  }
+
+  const trh = document.createElement("tr");
+  headers.forEach(h=>{
+    const th = document.createElement("th");
+    th.textContent = h;
+    trh.appendChild(th);
+  });
+  if(opts && opts.actions){
+    const th = document.createElement("th"); th.textContent = "Actions";
+    trh.appendChild(th);
+  }
+  thead.appendChild(trh);
+
+  rows.forEach((r, i)=>{
+    const tr = document.createElement("tr");
+    headers.forEach((_, j)=>{
+      const td = document.createElement("td");
+      td.textContent = (r[j] ?? "");
+      tr.appendChild(td);
+    });
+    if(opts && opts.actions){
+      const td = document.createElement("td");
+      td.innerHTML = `<button class="btn-del" style="padding:8px 10px;border-radius:10px" onclick="deleteColis(${r.__rowIndex})">Suppr</button>`;
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+// ===== Actions =====
+function addColis(){
+  const item = {
+    id_colis: document.getElementById("id_colis").value.trim(),
+    client: document.getElementById("client").value.trim(),
+    cp: document.getElementById("cp").value.trim(),
+    ville: document.getElementById("ville").value.trim(),
+    nb_colis: document.getElementById("nb_colis").value.trim(),
+    heure_max: document.getElementById("heure_max").value.trim(),
+    priorite: document.getElementById("priorite").value.trim()
+  };
+
+  if(!item.client || !item.cp || !item.ville || !item.nb_colis){
+    setMsg("msg_add","Client, CP, Ville, Nb colis sont obligatoires.","warn");
+    return;
+  }
+
+  setMsg("msg_add","Ajout…");
+  google.script.run.withSuccessHandler(()=>{
+    setMsg("msg_add","✅ Ajouté","ok");
+    // reset champs rapides
+    document.getElementById("id_colis").value="";
+    document.getElementById("client").value="";
+    document.getElementById("cp").value="";
+    document.getElementById("ville").value="";
+    document.getElementById("nb_colis").value="";
+    document.getElementById("heure_max").value="";
+    document.getElementById("priorite").value="";
+    loadColis();
+  }).withFailureHandler(err=>{
+    setMsg("msg_add",String(err.message || err),"warn");
+  }).apiAddColis(item);
+}
+
+function loadColis(){
+  setMsg("msg_colis","Chargement…");
+  google.script.run.withSuccessHandler(res=>{
+    const headers = res.headers || [];
+    const rows = (res.rows || []).map((r, idx)=>{
+      r.__rowIndex = idx + 2; // index feuille
+      return r;
+    });
+
+    // Si la feuille n’a pas d’en-tête, on met un fallback
+    if(headers.length === 0){
+      setMsg("msg_colis","Feuille vide.","warn");
+      return;
+    }
+    renderTable("tbl_colis", headers, rows, {actions:true});
+    setMsg("msg_colis", rows.length ? `✅ ${rows.length} ligne(s)` : "Aucune ligne");
+  }).withFailureHandler(err=>{
+    setMsg("msg_colis",String(err.message || err),"warn");
+  }).apiGetColisJour();
+}
+
+function deleteColis(rowIndex){
+  if(!confirm("Supprimer cette ligne ?")) return;
+  setMsg("msg_colis","Suppression…");
+  google.script.run.withSuccessHandler(()=>{
+    setMsg("msg_colis","✅ Supprimé","ok");
+    loadColis();
+  }).withFailureHandler(err=>{
+    setMsg("msg_colis",String(err.message || err),"warn");
+  }).apiDeleteColis(rowIndex);
+}
+
+function generate(){
+  setMsg("msg_gen","Génération…");
+  google.script.run.withSuccessHandler(res=>{
+    setMsg("msg_gen", `✅ ${res.message} — V1:${res.recap?.V1||0} colis, V2:${res.recap?.V2||0} colis, surcharge:${res.recap?.surcharge||0}`, "ok");
+    loadTournee();
+    loadHist();
+    loadColis(); // doit être vide après génération
+  }).withFailureHandler(err=>{
+    setMsg("msg_gen",String(err.message || err),"warn");
+  }).apiGenerateTournees();
+}
+
+function loadTournee(){
+  setMsg("msg_tournee","Chargement…");
+  google.script.run.withSuccessHandler(res=>{
+    renderTable("tbl_tournee", res.headers||[], res.rows||[]);
+    setMsg("msg_tournee",(res.rows||[]).length ? "✅ Tournée chargée" : "Aucune tournée");
+  }).withFailureHandler(err=>{
+    setMsg("msg_tournee",String(err.message || err),"warn");
+  }).apiGetTourneeJour();
+}
+
+function loadHist(){
+  const n = document.getElementById("hist_limit").value || 100;
+  google.script.run.withSuccessHandler(res=>{
+    renderTable("tbl_hist", res.headers||[], res.rows||[]);
+  }).withFailureHandler(()=>{}).apiGetHistorique(n);
+}
+
+window.onload = function(){
+  loadColis();
+  loadTournee();
+  loadHist();
+};
+</script>
+</body>
+</html>
